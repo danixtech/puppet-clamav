@@ -1,5 +1,6 @@
 # @summary Set up ClamAV parameters defaults etc.
 class clamav::params {
+
   # Generic defaults for all OSes
   $manage_user                  = false
   $manage_clamd                 = false
@@ -104,10 +105,10 @@ class clamav::params {
     'LogSyslog'    => 'yes',
   }
 
-  # OS specific overrides
+  # OS-specific overrides
   $os_overrides = {
     'RedHat' => {
-      '6' => {
+      '6'  => {
         'user'                          => 'clam',
         'group'                         => 'clam',
         'home'                          => '/var/lib/clamav',
@@ -127,55 +128,56 @@ class clamav::params {
         'freshclam_delay'               => undef,
         'clamav_milter_default_options' => undef,
       },
-      '7' => {
-        'user' => 'clamscan',
-        'group' => 'clamscan',
-        'home' => '/',
-        'shell' => '/sbin/nologin',
-        'clamd_package' => 'clamav-scanner-systemd',
-        'freshclam_package' => 'clamav-update',
-        'clamav_milter_package' => 'clamav-milter-systemd',
-        'clamd_service' => 'clamd@scan',
-        'freshclam_service' => 'clamav-freshclam',
-        'clamav_milter_service' => 'clamav-milter',
-        'clamd_localsocket' => '/var/run/clamd.scan/clamd.sock',
-        'clamd_pidfile' => '/var/run/clamd.scan/clamd.pid',
-        'freshclam_databaseowner'  => 'clamupdate',
-        'freshclam_updatelogfile'  => undef,
-        'freshclam_sysconfig'      => '/etc/sysconfig/freshclam',
-        'freshclam_delay'          => undef,
+      '7'  => {
+        'user'                          => 'clamscan',
+        'group'                         => 'clamscan',
+        'home'                          => '/',
+        'shell'                         => '/sbin/nologin',
+        'clamd_package'                 => 'clamav-scanner-systemd',
+        'freshclam_package'             => 'clamav-update',
+        'clamav_milter_package'         => 'clamav-milter-systemd',
+        'clamd_service'                 => 'clamd@scan',
+        'freshclam_service'             => 'clamav-freshclam',
+        'clamav_milter_service'         => 'clamav-milter',
+        'clamd_localsocket'             => '/var/run/clamd.scan/clamd.sock',
+        'clamd_pidfile'                 => '/var/run/clamd.scan/clamd.pid',
+        'freshclam_databaseowner'       => 'clamupdate',
+        'freshclam_updatelogfile'       => undef,
+        'freshclam_sysconfig'           => '/etc/sysconfig/freshclam',
+        'freshclam_delay'               => undef,
         'clamav_milter_default_options' => $default_clamav_milter_options,
       },
-      '8' => {
+      '8'  => {
         'freshclam_service' => 'clamav-freshclam',
       },
-      '9' => {},
+      '9'  => {},
       '10' => {},
     },
     'Debian' => {
       'default' => {
-        'user' => 'clamav',
-        'group' => 'clamav',
-        'home' => '/var/lib/clamav',
-        'shell' => '/bin/false',
-        'clamd_package' => 'clamav-daemon',
-        'freshclam_package' => 'clamav-freshclam',
-        'clamd_service' => 'clamav-daemon',
-        'freshclam_service' => 'clamav-freshclam',
-        'clamav_milter_package' => undef,
-        'clamav_milter_service' => undef,
-        'clamd_localsocket' => '/var/run/clamav/clamd.ctl',
-        'clamd_logfile' => '/var/log/clamav/clamav.log',
-        'clamd_pidfile' => '/var/run/clamav/clamd.pid',
-        'freshclam_databaseowner'  => 'clamav',
-        'freshclam_updatelogfile'  => '/var/log/clamav/freshclam.log',
-        'freshclam_sysconfig'      => undef,
-        'freshclam_delay'          => undef,
+        'user'                          => 'clamav',
+        'group'                         => 'clamav',
+        'home'                          => '/var/lib/clamav',
+        'shell'                         => '/bin/false',
+        'clamd_package'                 => 'clamav-daemon',
+        'freshclam_package'             => 'clamav-freshclam',
+        'clamd_service'                 => 'clamav-daemon',
+        'freshclam_service'             => 'clamav-freshclam',
+        'clamav_milter_package'         => undef,
+        'clamav_milter_service'         => undef,
+        'clamd_localsocket'             => '/var/run/clamav/clamd.ctl',
+        'clamd_logfile'                 => '/var/log/clamav/clamav.log',
+        'clamd_pidfile'                 => '/var/run/clamav/clamd.pid',
+        'freshclam_databaseowner'       => 'clamav',
+        'freshclam_updatelogfile'       => '/var/log/clamav/freshclam.log',
+        'freshclam_sysconfig'           => undef,
+        'freshclam_delay'               => undef,
         'clamav_milter_default_options' => undef,
       },
     },
     'Ubuntu' => {
-      '12.04' => {}, '14.04' => {}, '16.04' => {}, '18.04' => {}, '20.04' => {}, '22.04' => {}, '24.04' => {},
+      '12.04' => {}, '14.04' => {}, '16.04' => {},
+      '18.04' => {}, '20.04' => {}, '22.04' => {}, '24.04' => {},
     }
   }
 
@@ -218,19 +220,22 @@ class clamav::params {
   $clamav_milter_default_options = $os_config['clamav_milter_default_options']
 
   # Merge OS specific defaults into final options
-  $clamd_default_options   = merge($default_clamd_options, {
+  $clamd_default_options = merge($default_clamd_options, {
     'LocalSocket' => $clamd_localsocket,
     'LogFile'     => $clamd_logfile,
     'PidFile'     => $clamd_pidfile,
     'User'        => $user,
   })
 
+  $freshclam_pidfile_final = $os_config['freshclam_pidfile'] ? {
+    undef   => $default_freshclam_options['PidFile'],
+    default => $os_config['freshclam_pidfile'],
+  }
+
   $freshclam_default_options = merge($default_freshclam_options, {
     'DatabaseOwner' => $freshclam_databaseowner,
-    'PidFile'       => $os_config['freshclam_pidfile'] ? {
-      undef   => $default_freshclam_options['PidFile'],
-      default => $os_config['freshclam_pidfile'],
-    },
+    'PidFile'       => $freshclam_pidfile_final,
     'UpdateLogFile' => $freshclam_updatelogfile,
   })
+
 }
