@@ -13,6 +13,17 @@ class clamav::params {
   $clamav_milter_service_ensure = 'running'
   $clamav_milter_service_enable = true
 
+  # Generic package defaults
+  $clamav_package = 'clamav'
+  $clamav_version = 'latest'
+
+  $clamd_package  = 'clamd'
+  $clamd_version  = 'latest'
+  $freshclam_package = 'clamav-freshclam'
+  $freshclam_version = 'latest'
+  $clamav_milter_package = undef
+  $clamav_milter_version = undef
+
   # Generic defaults for ClamAV options
   $default_clamd_options = {
     'AllowAllMatchScan'        => true,
