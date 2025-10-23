@@ -115,6 +115,16 @@ class clamav::params {
     'LogSyslog'    => 'yes',
   }
 
+  # Determine RHEL freshclam package based on version
+  if $os_family == 'RedHat' {
+    $freshclam_package_rhel = $os_major < 8 ? {
+      true  => 'clamav-update',
+      false => 'clamav-freshclam',
+    }
+  } else {
+    $freshclam_package_rhel = undef
+  }
+
   # OS-specific overrides for packages
   $os_package_defaults = $os_family ? {
     'Debian' => {
@@ -126,7 +136,7 @@ class clamav::params {
     'RedHat' => {
       'clamav_package'        => 'clamav',
       'clamd_package'         => 'clamd',
-      'freshclam_package'     => $os_major < 8 ? 'clamav-update' : 'clamav-freshclam',
+      'freshclam_package'     => $freshclam_package_rhel,
       'clamav_milter_package' => 'clamav-milter',
     },
     default => fail("Unsupported OS family ${os_family}"),
