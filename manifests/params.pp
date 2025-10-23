@@ -14,12 +14,16 @@ class clamav::params {
   $clamav_milter_service_enable = true
 
   # Generic package defaults
-  $clamav_package = 'clamav'
-  $clamav_version = 'latest'
-  $clamd_version  = 'latest'
-  $freshclam_version = 'latest'
-  $clamav_milter_version = undef
-  $clamd_config      = '/etc/clamav/clamd.conf'
+  $clamav_package         = 'clamav'
+  $clamav_version         = 'latest'
+  $clamd_package          = 'clamd'
+  $clamd_version          = 'latest'
+  $freshclam_package      = 'clamav-freshclam'
+  $freshclam_version      = 'latest'
+  $clamav_milter_package  = undef
+  $clamav_milter_version  = undef
+  $clamd_config           = '/etc/clamav/clamd.conf'
+  $freshclam_config       = '/etc/clamav/freshclam.conf'
 
   # Generic defaults for ClamAV options
   $default_clamd_options = {
@@ -207,27 +211,30 @@ class clamav::params {
     $os_config = $default_clamd_options
   }
 
-  # Assign variables
-  $user                          = $os_config['user']
-  $group                         = $os_config['group']
-  $home                          = $os_config['home']
-  $shell                         = $os_config['shell']
-  $clamd_package                 = $os_config['clamd_package']
-  $freshclam_package             = $os_config['freshclam_package']
-  $clamav_milter_package         = $os_config['clamav_milter_package']
-  $clamd_service                 = $os_config['clamd_service']
-  $freshclam_service             = $os_config['freshclam_service']
-  $clamav_milter_service         = $os_config['clamav_milter_service']
-  $clamd_localsocket             = $os_config['clamd_localsocket']
-  $clamd_logfile                 = $os_config['clamd_logfile']
-  $clamd_pidfile                 = $os_config['clamd_pidfile']
-  $freshclam_databaseowner       = $os_config['freshclam_databaseowner']
-  $freshclam_updatelogfile       = $os_config['freshclam_updatelogfile']
-  $freshclam_sysconfig           = $os_config['freshclam_sysconfig']
-  $freshclam_delay               = $os_config['freshclam_delay']
-  $clamav_milter_default_options = $os_config['clamav_milter_default_options']
+  # Assign variables with defaults for safety
+  $user                          = $os_config['user']                          ? {
+    undef   => 'clamav',
+    default => $os_config['user'],
+  }
+  $group                         = $os_config['group']                         ? { undef => 'clamav', default => $os_config['group'] }
+  $home                          = $os_config['home']                          ? { undef => '/var/lib/clamav', default => $os_config['home'] }
+  $shell                         = $os_config['shell']                         ? { undef => '/bin/false', default => $os_config['shell'] }
+  $clamd_package                 = $os_config['clamd_package']                 ? { undef => $clamd_package, default => $os_config['clamd_package'] }
+  $freshclam_package             = $os_config['freshclam_package']             ? { undef => $freshclam_package, default => $os_config['freshclam_package'] }
+  $clamav_milter_package         = $os_config['clamav_milter_package']         ? { undef => $clamav_milter_package, default => $os_config['clamav_milter_package'] }
+  $clamd_service                 = $os_config['clamd_service']                 ? { undef => 'clamd', default => $os_config['clamd_service'] }
+  $freshclam_service             = $os_config['freshclam_service']             ? { undef => 'freshclam', default => $os_config['freshclam_service'] }
+  $clamav_milter_service         = $os_config['clamav_milter_service']         ? { undef => 'clamav-milter', default => $os_config['clamav_milter_service'] }
+  $clamd_localsocket             = $os_config['clamd_localsocket']             ? { undef => '/var/run/clamav/clamd.ctl', default => $os_config['clamd_localsocket'] }
+  $clamd_logfile                 = $os_config['clamd_logfile']                 ? { undef => '/var/log/clamav/clamav.log', default => $os_config['clamd_logfile'] }
+  $clamd_pidfile                 = $os_config['clamd_pidfile']                 ? { undef => '/var/run/clamav/clamd.pid', default => $os_config['clamd_pidfile'] }
+  $freshclam_databaseowner       = $os_config['freshclam_databaseowner']       ? { undef => 'clamav', default => $os_config['freshclam_databaseowner'] }
+  $freshclam_updatelogfile       = $os_config['freshclam_updatelogfile']       ? { undef => '/var/log/clamav/freshclam.log', default => $os_config['freshclam_updatelogfile'] }
+  $freshclam_sysconfig           = $os_config['freshclam_sysconfig']           ? { undef => undef, default => $os_config['freshclam_sysconfig'] }
+  $freshclam_delay               = $os_config['freshclam_delay']               ? { undef => undef, default => $os_config['freshclam_delay'] }
+  $clamav_milter_default_options = $os_config['clamav_milter_default_options'] ? { undef => $default_clamav_milter_options, default => $os_config['clamav_milter_default_options'] }
 
-  # Merge OS specific defaults into final options
+  # Merge OS-specific defaults into final options
   $clamd_default_options = merge($default_clamd_options, {
     'LocalSocket' => $clamd_localsocket,
     'LogFile'     => $clamd_logfile,
@@ -245,5 +252,4 @@ class clamav::params {
     'PidFile'       => $freshclam_pidfile_final,
     'UpdateLogFile' => $freshclam_updatelogfile,
   })
-
 }
