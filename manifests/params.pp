@@ -198,7 +198,7 @@ class clamav::params {
     'shell'   => '/sbin/false',
     'group'   => 'clamav',
     'groups'  => undef,
-  }, $os_service_defaults)
+  }, $os_user_defaults)
 
   # Single assignment variables
   $clamav_package        = $final_packages['clamav_package']
@@ -233,6 +233,7 @@ class clamav::params {
     'UpdateLogFile' => '/var/log/clamav/freshclam.log',
   })
 
-  $clamav_milter_options = merge($default_clamav_milter_options, {})
+  $user_clamav_milter_options = {}
+  $clamav_milter_options = merge($default_clamav_milter_options, $user_clamav_milter_options)
 
 }
