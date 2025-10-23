@@ -115,6 +115,16 @@ class clamav::params {
     'LogSyslog'    => 'yes',
   }
 
+  $user   = 'clamav'
+  $comment = undef
+  $uid    = 496
+  $gid    = 496
+  $home   = '/var/lib/clamav'
+  $shell  = '/bin/false'
+  $group  = 'clamav'
+  $groups = undef
+  $clamav_milter_options = {}
+
   # Define OS facts
   $os_family = $facts['os']['family']
   $os_name   = $facts['os']['name']
