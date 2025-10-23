@@ -115,22 +115,12 @@ class clamav::params {
     'LogSyslog'    => 'yes',
   }
 
-  $user   = 'clamav'
-  $comment = undef
-  $uid    = 496
-  $gid    = 496
-  $home   = '/var/lib/clamav'
-  $shell  = '/bin/false'
-  $group  = 'clamav'
-  $groups = undef
-  $clamav_milter_options = {}
-
   # Define OS facts
   $os_family = $facts['os']['family']
   $os_name   = $facts['os']['name']
   $os_major  = $facts['os']['release']['major']
 
-  # Determine RHEL freshclam package based on version
+  # Determine Version specific vars for  RHEL
   if $os_family == 'RedHat' {
     if Integer($os_major) < 8 {
       $freshclam_package_rhel = 'clamav-update'
@@ -139,9 +129,6 @@ class clamav::params {
       $freshclam_package_rhel = 'clamav-freshclam'
       $freshclam_service_rhel = 'clamav-freshclam'
     }
-  } else {
-    $freshclam_package_rhel = 'clamav-freshclam'
-    $freshclam_service_rhel = 'clamav-freshclam'
   }
 
   # OS-specific overrides for packages
@@ -175,6 +162,19 @@ class clamav::params {
     },
   }
 
+  # OS-specific overrides for users
+  $os_user_defaults = $os_family ? {
+    'Debian' => {
+    },
+    'RedHat' => {
+      'user'    => 'clamscan',
+      'comment' => 'Clamav scanner user',
+      'home'    => '/',
+      'shell'   => '/sbin/nologin',
+      'group'   => 'clamscan',
+    },
+  }
+
   # Merge packages and services into final config
   $final_packages = merge({
     'clamav_package'        => 'clamav',
@@ -189,6 +189,17 @@ class clamav::params {
     'clamav_milter_service' => 'clamav-milter',
   }, $os_service_defaults)
 
+  $final_users = merge({
+    'user'    => 'clamav',
+    'comment' => undef,
+    'uid'     => 496,
+    'gid'     => 496,
+    'home'    => '/var/lib/clamav',
+    'shell'   => '/sbin/false',
+    'group'   => 'clamav',
+    'groups'  => undef,
+  }, $os_service_defaults)
+
   # Single assignment variables
   $clamav_package        = $final_packages['clamav_package']
   $clamd_package         = $final_packages['clamd_package']
@@ -198,6 +209,15 @@ class clamav::params {
   $clamd_service         = $final_services['clamd_service']
   $freshclam_service     = $final_services['freshclam_service']
   $clamav_milter_service = $final_services['clamav_milter_service']
+
+  $user    = $final_users['user']
+  $comment = $final_users['comment']
+  $uid     = $final_users['uid']
+  $gid     = $final_users['gid']
+  $home    = $final_users['home']
+  $shell   = $final_users['shell']
+  $group   = $final_users['group']
+  $groups  = $final_users['groups']
 
   # Final merged options
   $clamd_default_options = merge($default_clamd_options, {
@@ -213,6 +233,6 @@ class clamav::params {
     'UpdateLogFile' => '/var/log/clamav/freshclam.log',
   })
 
-  $clamav_milter_default_options = merge($default_clamav_milter_options, {})
+  $clamav_milter_options = merge($default_clamav_milter_options, {})
 
 }
