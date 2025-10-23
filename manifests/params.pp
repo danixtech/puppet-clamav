@@ -46,9 +46,12 @@ class clamav::params {
     'HeuristicScanPrecedence'  => false,
     'IdleTimeout'              => '30',
     'LeaveTemporaryFiles'      => false,
+    'LocalSocket'              => '/var/run/clamd.scan/clamd.sock',
+    'LocalSocketGroup'         => 'clamav',
     'LocalSocketMode'          => '666',
     'LogClean'                 => false,
     'LogFacility'              => 'LOG_LOCAL6',
+    'LogFile'                  => '/var/log/clamav/clamd.log',
     'LogFileMaxSize'           => '0',
     'LogFileUnlock'            => false,
     'LogRotate'                => true,
@@ -67,6 +70,7 @@ class clamav::params {
     'OfficialDatabaseOnly'     => false,
     'PhishingScanURLs'         => true,
     'PhishingSignatures'       => true,
+    'PidFile'                  => '/var/run/clamav/clamd.pid',
     'ReadTimeout'              => '180',
     'ScanArchive'              => true,
     'ScanELF'                  => true,
@@ -91,6 +95,7 @@ class clamav::params {
     'ConnectTimeout'           => '30',
     'DNSDatabaseInfo'          => 'current.cvd.clamav.net',
     'DatabaseDirectory'        => '/var/lib/clamav',
+    'DatabaseMirror'           => ['db.local.clamav.net', 'database.clamav.net'],
     'DatabaseOwner'            => 'clamav',
     'Debug'                    => false,
     'Foreground'               => false,
@@ -123,12 +128,34 @@ class clamav::params {
   # Determine Version specific vars for  RHEL
   if $os_family == 'RedHat' {
     if Integer($os_major) < 8 {
+      $clamd_localsocket_rhel = '/var/run/clamav/clamd.sock'
+      $clamd_logfile_rhel = '/var/log/clamd.scan'
+      $clamd_pidfile_rhel = '/var/run/clamd.scan/clamd.pid'
       $freshclam_package_rhel = 'clamav-update'
       $freshclam_service_rhel = undef
     } else {
+      $clamd_localsocket_rhel = '/var/run/clamd.scan/clamd.sock'
+      $clamd_logfile_rhel = '/var/log/clamav/clamav.log'
+      $clamd_pidfile_rhel = '/var/run/clamav/clamd.pid'
       $freshclam_package_rhel = 'clamav-freshclam'
       $freshclam_service_rhel = 'clamav-freshclam'
     }
+  }
+
+  # OS-specific overrides for users
+  $os_clamd_options_defaults = $os_family ? {
+    'Debian' => {
+      'clamd_localsocket'     => '/var/run/clamav/clamd.ctl',
+      'clamd_logfile'         => '/var/log/clamav/clamav.log',
+      'clamd_pidfile'         => '/var/run/clamav/clamd.pid',
+      'freshclam_pidfile'     => '/var/run/clamav/freshclam.pid',
+    },
+    'RedHat' => {
+      'clamd_localsocket'     => $clamd_localsocket_rhel,
+      'clamd_logfile'         => $clamd_logfile_rhel,
+      'clamd_pidfile'         => $clamd_pidfile_rhel,
+      'freshclam_pidfile'     => undef,
+    },
   }
 
   # OS-specific overrides for packages
@@ -224,8 +251,7 @@ class clamav::params {
     'LocalSocket' => '/var/run/clamav/clamd.sock',
     'LogFile'     => '/var/log/clamav/clamd.log',
     'PidFile'     => '/var/run/clamav/clamd.pid',
-    'User'        => 'clamav',
-  })
+  }, $os_clamd_options_defaults)
 
   $freshclam_default_options = merge($default_freshclam_options, {
     'DatabaseOwner' => 'clamav',
