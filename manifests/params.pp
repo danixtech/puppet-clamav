@@ -122,7 +122,7 @@ class clamav::params {
 
   # Determine RHEL freshclam package based on version
   if $os_family == 'RedHat' {
-    if Integer($facts['os']['release']['major']) < 8 {
+    if Integer($os_major) < 8 {
       $freshclam_package_rhel = 'clamav-update'
       $freshclam_service_rhel = undef
     } else {
