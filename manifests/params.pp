@@ -116,23 +116,17 @@ class clamav::params {
   }
 
   # Determine RHEL freshclam package based on version
-  case $facts['os']['family'] {
-    'Redhat' => {
-      case $facts['os']['major'] {
-        '< 8': {
-          $freshclam_package_rhel = 'clamav-update'
-          $freshclam_service_rhel = undef
-
-        },
-        default: {
-          $freshclam_package_rhel = 'clamav-freshclam'
-          $freshclam_service_rhel = 'clamav-freshclam'
-        }
-      }
-    default: {
+  if $facts['os']['family'] == 'RedHat' {
+    if Integer($facts['os']['release']['major']) < 8 {
+      $freshclam_package_rhel = 'clamav-update'
+      $freshclam_service_rhel = undef
+    } else {
       $freshclam_package_rhel = 'clamav-freshclam'
       $freshclam_service_rhel = 'clamav-freshclam'
     }
+  } else {
+    $freshclam_package_rhel = 'clamav-freshclam'
+    $freshclam_service_rhel = 'clamav-freshclam'
   }
 
   # OS-specific overrides for packages
