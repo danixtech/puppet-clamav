@@ -19,6 +19,7 @@ class clamav::params {
   $clamd_version  = 'latest'
   $freshclam_version = 'latest'
   $clamav_milter_version = undef
+  $clamd_config      = '/etc/clamav/clamd.conf'
 
   # Generic defaults for ClamAV options
   $default_clamd_options = {
