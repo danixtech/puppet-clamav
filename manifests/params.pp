@@ -142,22 +142,6 @@ class clamav::params {
     }
   }
 
-  # OS-specific overrides for users
-  $os_clamd_options_defaults = $os_family ? {
-    'Debian' => {
-      'clamd_localsocket'     => '/var/run/clamav/clamd.ctl',
-      'clamd_logfile'         => '/var/log/clamav/clamav.log',
-      'clamd_pidfile'         => '/var/run/clamav/clamd.pid',
-      'freshclam_pidfile'     => '/var/run/clamav/freshclam.pid',
-    },
-    'RedHat' => {
-      'clamd_localsocket'     => $clamd_localsocket_rhel,
-      'clamd_logfile'         => $clamd_logfile_rhel,
-      'clamd_pidfile'         => $clamd_pidfile_rhel,
-      'freshclam_pidfile'     => undef,
-    },
-  }
-
   # OS-specific overrides for packages
   $os_package_defaults = $os_family ? {
     'Debian' => {
@@ -199,6 +183,30 @@ class clamav::params {
       'home'    => '/',
       'shell'   => '/sbin/nologin',
       'group'   => 'clamscan',
+    },
+  }
+
+  # OS-specific overrides for clamd
+  $os_clamd_options_defaults = $os_family ? {
+    'Debian' => {
+      'LocalSocket'     => '/var/run/clamav/clamd.ctl',
+      'LogFile'         => '/var/log/clamav/clamav.log',
+      'PidFile'         => '/var/run/clamav/clamd.pid',
+    },
+    'RedHat' => {
+      'LocalSocket' => $clamd_localsocket_rhel,
+      'LogFile'     => $clamd_logfile_rhel,
+      'PidFile'     => $clamd_pidfile_rhel,
+    },
+  }
+
+  # OS-specific overrides for freshclam
+  $os_freshclam_options_defaults = $os_family ? {
+    'Debian' => {
+      'PidFile' => '/var/run/clamav/freshclam.pid',
+    },
+    'RedHat' => {
+      'PidFile' => undef,
     },
   }
 
@@ -257,7 +265,7 @@ class clamav::params {
     'DatabaseOwner' => 'clamav',
     'PidFile'       => '/var/run/clamav/freshclam.pid',
     'UpdateLogFile' => '/var/log/clamav/freshclam.log',
-  })
+  }, $os_freshclam_options_defaults)
 
   $user_clamav_milter_options = {}
   $clamav_milter_options = merge($default_clamav_milter_options, $user_clamav_milter_options)
