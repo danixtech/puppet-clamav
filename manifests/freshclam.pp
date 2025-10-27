@@ -10,65 +10,51 @@
 #   for true, the options are sorted,
 #
 class clamav::freshclam(
-  String  $config_owner = 'root',
-  String  $config_group = 'root',
-  String  $config_mode  = '0644',
-  Boolean $sort_options = true,
-){
+  Hash $options       = $clamav::_freshclam_options,
+  Stdlib::Absolutepath $config_file = $clamav::freshclam_config,
+  Optional[Stdlib::Absolutepath] $sysconfig_file = $clamav::freshclam_sysconfig,
+  String $service_name = $clamav::freshclam_service,
+  String $service_ensure = $clamav::freshclam_service_ensure,
+  Boolean $service_enable = $clamav::freshclam_service_enable,
+) {
 
-  $config_options = $clamav::_freshclam_options
-  $freshclam_delay = $clamav::freshclam_delay
-
-  # NOTE: In RedHat this is part of the base clamav_package
-  # NOTE: In Debian this is a dependency of the base clamav_package
   if $clamav::freshclam_package {
-    package { 'freshclam':
+    package { $clamav::freshclam_package:
       ensure => $clamav::freshclam_version,
-      name   => $clamav::freshclam_package,
-      before => File['freshclam.conf'],
+      before => File[$config_file],
     }
   }
 
-  file { 'freshclam.conf':
+  file { $config_file:
     ensure  => file,
-    path    => $clamav::freshclam_config,
-    mode    => $config_mode,
-    owner   => $config_owner,
-    group   => $config_group,
-    content => template("${module_name}/clamav.conf.erb"),
+    owner   => $options['DatabaseOwner'] ? { undef => $clamav::params::user, default => $options['DatabaseOwner'] },
+    group   => $clamav::params::group,
+    mode    => '0644',
+    content => epp('clamav/freshclam.conf.epp', { 'options' => $options }),
+    notify  => $service_name ? { undef => undef, default => Service[$service_name] },
   }
 
-  if $clamav::freshclam_sysconfig {
-    file { 'freshclam_sysconfig':
+  if $sysconfig_file {
+    file { $sysconfig_file:
       ensure  => file,
-      path    => $clamav::freshclam_sysconfig,
-      mode    => '0644',
       owner   => 'root',
       group   => 'root',
-      content => template("${module_name}/sysconfig/freshclam.erb"),
+      mode    => '0644',
+      content => epp('clamav/sysconfig/freshclam.epp', { 'freshclam_delay' => $clamav::freshclam_delay }),
+      notify  => $service_name ? { undef => undef, default => Service[$service_name] },
     }
-
-    $service_subscribe = [
-      File['freshclam.conf'],
-      File['freshclam_sysconfig'],
-    ]
-  } else {
-    $service_subscribe = File['freshclam.conf']
   }
 
-  # NOTE: RedHat <8 comes with /etc/cron.daily/freshclam instead of a service
-  if $clamav::freshclam_service {
-    service { 'freshclam':
-      ensure     => $clamav::freshclam_service_ensure,
-      name       => $clamav::freshclam_service,
-      enable     => $clamav::freshclam_service_enable,
+  if $service_name {
+    $subscribe_resources = [$config_file]
+    if $sysconfig_file { $subscribe_resources += [$sysconfig_file] }
+
+    service { $service_name:
+      ensure    => $service_ensure,
+      enable    => $service_enable,
       hasrestart => true,
       hasstatus  => true,
-      subscribe  => $service_subscribe,
+      subscribe => $subscribe_resources,
     }
-  }
-
-  if $clamav::freshclam_package and $clamav::freshclam_service {
-    Package['freshclam'] ~> Service['freshclam']
   }
 }

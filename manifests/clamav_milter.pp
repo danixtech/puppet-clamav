@@ -4,32 +4,32 @@
 #   for true, the options are sorted,
 #
 class clamav::clamav_milter(
-  Boolean $sort_options = true,
+  Hash $options       = $clamav::_clamav_milter_options,
+  Stdlib::Absolutepath $config_file = $clamav::clamav_milter_config,
+  String $service_name = $clamav::clamav_milter_service,
+  String $service_ensure = $clamav::clamav_milter_service_ensure,
+  Boolean $service_enable = $clamav::clamav_milter_service_enable,
 ) {
 
-  $config_options = $clamav::_clamav_milter_options
-
-  package { 'clamav_milter':
+  package { $clamav::clamav_milter_package:
     ensure => $clamav::clamav_milter_version,
-    name   => $clamav::clamav_milter_package,
-    before => File['clamav-milter.conf'],
+    before => File[$config_file],
   }
 
-  file { 'clamav-milter.conf':
+  file { $config_file:
     ensure  => file,
-    path    => $clamav::clamav_milter_config,
+    owner   => $clamav::params::user,
+    group   => $clamav::params::group,
     mode    => '0644',
-    owner   => 'root',
-    group   => 'root',
-    content => template("${module_name}/clamav.conf.erb"),
+    content => epp('clamav/clamav-milter.conf.epp', { 'options' => $options }),
+    notify  => Service[$service_name],
   }
 
-  service { 'clamav_milter':
-    ensure     => $clamav::clamav_milter_service_ensure,
-    name       => $clamav::clamav_milter_service,
-    enable     => $clamav::clamav_milter_service_enable,
+  service { $service_name:
+    ensure     => $service_ensure,
+    enable     => $service_enable,
     hasrestart => true,
     hasstatus  => true,
-    subscribe  => [Package['clamav_milter'], File['clamav-milter.conf']],
+    subscribe  => [Package[$clamav::clamav_milter_package], File[$config_file]],
   }
 }

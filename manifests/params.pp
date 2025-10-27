@@ -1,30 +1,23 @@
-# @summary Set up ClamAV parameters defaults etc.
 class clamav::params {
 
-  # Generic defaults for all OSes
-  $manage_user                  = false
-  $manage_clamd                 = false
-  $manage_freshclam             = false
-  $manage_clamav_milter         = false
-  $clamd_service_ensure         = 'running'
-  $clamd_service_enable         = true
-  $freshclam_service_ensure     = 'running'
-  $freshclam_service_enable     = true
-  $clamav_milter_service_ensure = 'running'
-  $clamav_milter_service_enable = true
+  # Generic management flags
+  $manage_user          = false
+  $manage_repo          = false
+  $manage_clamd         = false
+  $manage_freshclam     = false
+  $manage_clamav_milter = false
 
-  # Generic version defaults
   $clamav_version        = 'latest'
   $clamd_version         = 'latest'
   $freshclam_version     = 'latest'
   $clamav_milter_version = undef
 
-  # Generic config paths
-  $clamd_config      = '/etc/clamav/clamd.conf'
-  $freshclam_config  = '/etc/clamav/freshclam.conf'
-  $clamav_milter_config = '/etc/clamav/clamav-milter.conf'
+  # Generic paths
+  $clamd_config          = '/etc/clamav/clamd.conf'
+  $freshclam_config      = '/etc/clamav/freshclam.conf'
+  $clamav_milter_config  = '/etc/clamav/clamav-milter.conf'
 
-  # Generic ClamAV options
+  # Generic ClamAV defaults
   $default_clamd_options = {
     'AllowAllMatchScan'        => true,
     'Bytecode'                 => true,
@@ -86,188 +79,47 @@ class clamav::params {
     'StreamMaxLength'          => '25M',
     'StructuredDataDetection'  => false,
     'TemporaryDirectory'       => '/tmp',
+    'AlgorithmicDetection'     => true,
+    'ArchiveBlockEncrypted'    => false,
+    'OLE2BlockMacros'          => false,
+    'PhishingAlwaysBlockCloak' => false,
+    'PhishingAlwaysBlockSSLMismatch' => false,
   }
 
   $default_freshclam_options = {
-    'Bytecode'                 => true,
-    'Checks'                   => '24',
-    'CompressLocalDatabase'    => 'no',
-    'ConnectTimeout'           => '30',
-    'DNSDatabaseInfo'          => 'current.cvd.clamav.net',
-    'DatabaseDirectory'        => '/var/lib/clamav',
-    'DatabaseMirror'           => ['db.local.clamav.net', 'database.clamav.net'],
-    'DatabaseOwner'            => 'clamav',
-    'Debug'                    => false,
-    'Foreground'               => false,
-    'LogFacility'              => 'LOG_LOCAL6',
-    'LogFileMaxSize'           => '0',
-    'LogRotate'                => true,
-    'LogSyslog'                => false,
-    'LogTime'                  => true,
-    'LogVerbose'               => false,
-    'MaxAttempts'              => '5',
-    'PidFile'                  => '/var/run/clamav/freshclam.pid',
-    'ReceiveTimeout'           => '30',
-    'ScriptedUpdates'          => 'yes',
-    'TestDatabases'            => 'yes',
-    'UpdateLogFile'            => '/var/log/clamav/freshclam.log',
+    'Bytecode'              => true,
+    'Checks'                => '24',
+    'CompressLocalDatabase' => 'no',
+    'ConnectTimeout'        => '30',
+    'DNSDatabaseInfo'       => 'current.cvd.clamav.net',
+    'DatabaseDirectory'     => '/var/lib/clamav',
+    'DatabaseOwner'         => 'clamav',
+    'Debug'                 => false,
+    'Foreground'            => false,
+    'LogFacility'           => 'LOG_LOCAL6',
+    'LogFileMaxSize'        => '0',
+    'LogRotate'             => true,
+    'LogSyslog'             => false,
+    'LogTime'               => true,
+    'LogVerbose'            => false,
+    'MaxAttempts'           => '5',
+    'PidFile'               => '/var/run/clamav/freshclam.pid',
+    'ReceiveTimeout'        => '30',
+    'ScriptedUpdates'       => 'yes',
+    'TestDatabases'         => 'yes',
+    'UpdateLogFile'         => '/var/log/clamav/freshclam.log',
+    'DatabaseMirror'        => ['db.local.clamav.net','database.clamav.net'],
   }
 
   $default_clamav_milter_options = {
-    'User'         => 'clamilt',
-    'MilterSocket' => 'inet:8890@localhost',
-    'ClamdSocket'  => 'tcp:127.0.0.1',
-    'LogSyslog'    => 'yes',
+    'User'        => 'clamilt',
+    'MilterSocket'=> 'inet:8890@localhost',
+    'ClamdSocket' => 'tcp:127.0.0.1',
+    'LogSyslog'   => 'yes',
   }
 
-  # Define OS facts
-  $os_family = $facts['os']['family']
-  $os_name   = $facts['os']['name']
-  $os_major  = $facts['os']['release']['major']
-
-  # Determine Version specific vars for  RHEL
-  if $os_family == 'RedHat' {
-    if Integer($os_major) < 8 {
-      $clamd_localsocket_rhel = '/var/run/clamav/clamd.sock'
-      $clamd_logfile_rhel = '/var/log/clamd.scan'
-      $clamd_pidfile_rhel = '/var/run/clamd.scan/clamd.pid'
-      $freshclam_package_rhel = 'clamav-update'
-      $freshclam_service_rhel = undef
-    } else {
-      $clamd_localsocket_rhel = '/var/run/clamd.scan/clamd.sock'
-      $clamd_logfile_rhel = '/var/log/clamav/clamav.log'
-      $clamd_pidfile_rhel = '/var/run/clamav/clamd.pid'
-      $freshclam_package_rhel = 'clamav-freshclam'
-      $freshclam_service_rhel = 'clamav-freshclam'
-    }
-  }
-
-  # OS-specific overrides for packages
-  $os_package_defaults = $os_family ? {
-    'Debian' => {
-      'clamav_package'        => 'clamav',
-      'clamd_package'         => 'clamav-daemon',
-      'freshclam_package'     => 'clamav-freshclam',
-      'clamav_milter_package' => 'clamav-milter',
-    },
-    'RedHat' => {
-      'clamav_package'        => 'clamav',
-      'clamd_package'         => 'clamd',
-      'freshclam_package'     => $freshclam_package_rhel,
-      'clamav_milter_package' => 'clamav-milter',
-    },
-    default => fail("Unsupported OS family ${os_family}"),
-  }
-
-  # OS-specific overrides for services
-  $os_service_defaults = $os_family ? {
-    'Debian' => {
-      'clamd_service'         => 'clamav-daemon',
-      'freshclam_service'     => 'clamav-freshclam',
-      'clamav_milter_service' => undef,
-    },
-    'RedHat' => {
-      'clamd_service'         => 'clamd',
-      'freshclam_service'     => $freshclam_service_rhel,
-      'clamav_milter_service' => 'clamav-milter',
-    },
-  }
-
-  # OS-specific overrides for users
-  $os_user_defaults = $os_family ? {
-    'Debian' => {
-    },
-    'RedHat' => {
-      'user'    => 'clamscan',
-      'comment' => 'Clamav scanner user',
-      'home'    => '/',
-      'shell'   => '/sbin/nologin',
-      'group'   => 'clamscan',
-    },
-  }
-
-  # OS-specific overrides for clamd
-  $os_clamd_options_defaults = $os_family ? {
-    'Debian' => {
-      'LocalSocket'     => '/var/run/clamav/clamd.ctl',
-      'LogFile'         => '/var/log/clamav/clamav.log',
-      'PidFile'         => '/var/run/clamav/clamd.pid',
-    },
-    'RedHat' => {
-      'LocalSocket' => $clamd_localsocket_rhel,
-      'LogFile'     => $clamd_logfile_rhel,
-      'PidFile'     => $clamd_pidfile_rhel,
-    },
-  }
-
-  # OS-specific overrides for freshclam
-  $os_freshclam_options_defaults = $os_family ? {
-    'Debian' => {
-      'PidFile' => '/var/run/clamav/freshclam.pid',
-    },
-    'RedHat' => {
-      'PidFile' => undef,
-    },
-  }
-
-  # Merge packages and services into final config
-  $final_packages = merge({
-    'clamav_package'        => 'clamav',
-    'clamd_package'         => 'clamd',
-    'freshclam_package'     => 'clamav-freshclam',
-    'clamav_milter_package' => 'clamav-milter',
-  }, $os_package_defaults)
-
-  $final_services = merge({
-    'clamd_service'         => 'clamd',
-    'freshclam_service'     => 'clamav-freshclam',
-    'clamav_milter_service' => 'clamav-milter',
-  }, $os_service_defaults)
-
-  $final_users = merge({
-    'user'    => 'clamav',
-    'comment' => undef,
-    'uid'     => 496,
-    'gid'     => 496,
-    'home'    => '/var/lib/clamav',
-    'shell'   => '/sbin/false',
-    'group'   => 'clamav',
-    'groups'  => undef,
-  }, $os_user_defaults)
-
-  # Single assignment variables
-  $clamav_package        = $final_packages['clamav_package']
-  $clamd_package         = $final_packages['clamd_package']
-  $freshclam_package     = $final_packages['freshclam_package']
-  $clamav_milter_package = $final_packages['clamav_milter_package']
-
-  $clamd_service         = $final_services['clamd_service']
-  $freshclam_service     = $final_services['freshclam_service']
-  $clamav_milter_service = $final_services['clamav_milter_service']
-
-  $user    = $final_users['user']
-  $comment = $final_users['comment']
-  $uid     = $final_users['uid']
-  $gid     = $final_users['gid']
-  $home    = $final_users['home']
-  $shell   = $final_users['shell']
-  $group   = $final_users['group']
-  $groups  = $final_users['groups']
-
-  # Final merged options
-  $clamd_default_options = merge($default_clamd_options, {
-    'LocalSocket' => '/var/run/clamav/clamd.sock',
-    'LogFile'     => '/var/log/clamav/clamd.log',
-    'PidFile'     => '/var/run/clamav/clamd.pid',
-  }, $os_clamd_options_defaults)
-
-  $freshclam_default_options = merge($default_freshclam_options, {
-    'DatabaseOwner' => 'clamav',
-    'PidFile'       => '/var/run/clamav/freshclam.pid',
-    'UpdateLogFile' => '/var/log/clamav/freshclam.log',
-  }, $os_freshclam_options_defaults)
-
-  $user_clamav_milter_options = {}
-  $clamav_milter_options = merge($default_clamav_milter_options, $user_clamav_milter_options)
-
+  # Lookup OS-specific overrides from Hiera
+  $clamd_default_options    = merge($default_clamd_options, lookup('clamav::clamd_default_options', Hash, 'deep', {}))
+  $freshclam_default_options = merge($default_freshclam_options, lookup('clamav::freshclam_default_options', Hash, 'deep', {}))
+  $clamav_milter_options     = merge($default_clamav_milter_options, lookup('clamav::milter_default_options', Hash, 'deep', {}))
 }

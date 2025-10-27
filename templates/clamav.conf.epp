@@ -1,0 +1,21 @@
+<%
+  This is the main ClamAV config template.
+  Variables expected:
+    $config_options : Hash of option => value
+    $sort_options   : Boolean to sort options alphabetically
+%>
+
+### File managed with puppet ###
+## Module: <%= $module_name %>
+
+<%-
+  $co = $sort_options ? $config_options.sort : $config_options
+-%>
+
+<% $co.each |$k, $v| { -%>
+  <% Array($v).each |$av| { -%>
+    <% if $av != undef and $av != '' { -%>
+<%= $k %> <%= $av %>
+    <% } -%>
+  <% } -%>
+<% } -%>

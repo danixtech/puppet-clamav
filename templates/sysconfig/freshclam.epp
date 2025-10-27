@@ -1,0 +1,5 @@
+### File managed with puppet ###
+
+<%- if $freshclam_delay != undef -%>
+FRESHCLAM_DELAY=<%= $freshclam_delay %>
+<%- end -%>

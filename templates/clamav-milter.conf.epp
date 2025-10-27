@@ -1,0 +1,11 @@
+### File managed with puppet ###
+<%- if $options -%>
+<% $options.sort.each |$k, $v| { -%>
+<% Array($v).each |$av| { -%>
+<%- if $av != undef and $av != '' -%>
+<%= $k %> <%= $av %>
+<%- end -%>
+<% } -%>
+<% } -%>
+<%- end -%>
+
