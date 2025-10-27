@@ -41,7 +41,7 @@ class clamav::clamd(
     owner   => $clamav::params::user,
     group   => $clamav::params::group,
     mode    => '0644',
-    content => epp('clamav/clamd.conf.epp', { 'options' => $options }),
+    content => epp('clamav/clamav.conf.epp', { 'options' => $options }),
     notify  => Service[$service_name_real],
   }
 
