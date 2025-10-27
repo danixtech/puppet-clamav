@@ -87,7 +87,7 @@ class clamav (
   $gid_real   = pick($gid,   $clamav::params::gid, 496)
   $home_real  = pick($home,  $clamav::params::home, '/var/lib/clamav')
   $shell_real = pick($shell, $clamav::params::shell, '/sbin/false')
-  $comment_real = pick($comment, $clamav::params::comment, '')
+  $comment_real = pick($comment, $clamav::params::comment, 'ClamAV user')
   $groups_real  = pick($groups, $clamav::params::groups, [])
 
   # Config paths
