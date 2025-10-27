@@ -1,115 +1,132 @@
-# @summary Manage ClamAV installation, configuration, and services
+# manifests/init.pp
+# @summary Manage ClamAV packages, services, and configuration
 class clamav (
-  # Boolean flags
+  # User parameters
+  Optional[String] $user  = undef,
+  Optional[String] $group = undef,
+  Optional[Integer] $uid   = undef,
+  Optional[Integer] $gid   = undef,
+  Optional[Stdlib::Absolutepath] $home  = undef,
+  Optional[Stdlib::Absolutepath] $shell = undef,
+
+  # Package versions (optional)
+  Optional[String] $clamav_package        = undef,
+  Optional[String] $clamav_version        = undef,
+  Optional[String] $clamd_package         = undef,
+  Optional[String] $clamd_version         = undef,
+  Optional[String] $freshclam_package     = undef,
+  Optional[String] $freshclam_version     = undef,
+  Optional[String] $clamav_milter_package = undef,
+  Optional[String] $clamav_milter_version = undef,
+
+  # Service parameters
+  Optional[String]  $clamd_service              = undef,
+  Optional[String]  $clamd_service_ensure       = undef,
+  Optional[Boolean] $clamd_service_enable       = undef,
+  Optional[String]  $freshclam_service          = undef,
+  Optional[String]  $freshclam_service_ensure   = undef,
+  Optional[Boolean] $freshclam_service_enable   = undef,
+  Optional[String]  $clamav_milter_service      = undef,
+  Optional[String]  $clamav_milter_service_ensure = undef,
+  Optional[Boolean] $clamav_milter_service_enable = undef,
+
+  # Config paths
+  Optional[Stdlib::Absolutepath] $clamd_config       = undef,
+  Optional[Stdlib::Absolutepath] $freshclam_config   = undef,
+  Optional[Stdlib::Absolutepath] $clamav_milter_config = undef,
+  Optional[Stdlib::Absolutepath] $freshclam_sysconfig = undef,
+  Optional[String]               $freshclam_delay    = undef,
+
+  # Config options
+  Optional[Hash] $clamd_options        = {},
+  Optional[Hash] $freshclam_options    = {},
+  Optional[Hash] $clamav_milter_options = {},
+
+  # Internal defaults
+  Optional[Hash] $clamd_default_options      = undef,
+  Optional[Hash] $freshclam_default_options  = undef,
+  Optional[Hash] $milter_default_options     = undef,
+
+  # Control flags
   Boolean $manage_user          = $clamav::params::manage_user,
   Boolean $manage_repo          = $clamav::params::manage_repo,
   Boolean $manage_clamd         = $clamav::params::manage_clamd,
   Boolean $manage_freshclam     = $clamav::params::manage_freshclam,
   Boolean $manage_clamav_milter = $clamav::params::manage_clamav_milter,
-
-  # Packages & versions
-  String $clamav_package        = $clamav::params::clamav_package,
-  String $clamav_version        = $clamav::params::clamav_version,
-  String $clamd_package         = $clamav::params::clamd_package,
-  String $clamd_version         = $clamav::params::clamd_version,
-  String $freshclam_package     = $clamav::params::freshclam_package,
-  String $freshclam_version     = $clamav::params::freshclam_version,
-  Optional[String] $clamav_milter_package        = $clamav::params::clamav_milter_package,
-  Optional[String] $clamav_milter_version        = $clamav::params::clamav_milter_version,
-
-  # Users
-  String $user                   = $clamav::params::user,
-  Optional[String] $comment      = $clamav::params::comment,
-  Integer $uid                   = $clamav::params::uid,
-  Integer $gid                   = $clamav::params::gid,
-  Stdlib::Absolutepath $home    = $clamav::params::home,
-  Stdlib::Absolutepath $shell   = $clamav::params::shell,
-  String $group                  = $clamav::params::group,
-  Optional[Array[String]] $groups = $clamav::params::groups,
-
-  # Config paths
-  Stdlib::Absolutepath $clamd_config        = $clamav::params::clamd_config,
-  Stdlib::Absolutepath $freshclam_config    = $clamav::params::freshclam_config,
-  Optional[Stdlib::Absolutepath] $freshclam_sysconfig = $clamav::params::freshclam_sysconfig,
-  Optional[String] $freshclam_delay         = $clamav::params::freshclam_delay,
-  Optional[Stdlib::Absolutepath] $clamav_milter_config = $clamav::params::clamav_milter_config,
-
-  # Services
-  String  $clamd_service                 = $clamav::params::clamd_service,
-  String  $clamd_service_ensure          = $clamav::params::clamd_service_ensure,
-  Boolean $clamd_service_enable          = $clamav::params::clamd_service_enable,
-  String  $freshclam_service             = $clamav::params::freshclam_service,
-  String  $freshclam_service_ensure      = $clamav::params::freshclam_service_ensure,
-  Boolean $freshclam_service_enable      = $clamav::params::freshclam_service_enable,
-  Optional[String] $clamav_milter_service        = $clamav::params::clamav_milter_service,
-  String  $clamav_milter_service_ensure = $clamav::params::clamav_milter_service_ensure,
-  Boolean $clamav_milter_service_enable = $clamav::params::clamav_milter_service_enable,
-
-  # Options
-  Optional[Hash] $clamd_options         = $clamav::params::clamd_options,
-  Optional[Hash] $freshclam_options     = $clamav::params::freshclam_options,
-  Optional[Hash] $clamav_milter_options = $clamav::params::clamav_milter_options,
-  Optional[Hash] $clamd_default_options      = undef,
-  Optional[Hash] $freshclam_default_options  = undef,
-  Optional[Hash] $milter_default_options     = undef,
 ) inherits clamav::params {
 
-  # Determine real values using pick() to avoid undef
+  # Merge real values with params defaults
+  $user_real    = pick($user, $clamav::params::user)
+  $group_real   = pick($group, $clamav::params::group)
+  $uid_real     = pick($uid, $clamav::params::uid)
+  $gid_real     = pick($gid, $clamav::params::gid)
+  $home_real    = pick($home, $clamav::params::home)
+  $shell_real   = pick($shell, $clamav::params::shell)
+
   $clamav_package_real        = pick($clamav_package, $clamav::params::clamav_package)
-  $clamd_package_real          = pick($clamd_package, $clamav::params::clamd_package)
-  $freshclam_package_real      = pick($freshclam_package, $clamav::params::freshclam_package)
-  $clamav_milter_package_real  = pick($clamav_milter_package, $clamav::params::clamav_milter_package)
+  $clamd_package_real         = pick($clamd_package, $clamav::params::clamd_package)
+  $freshclam_package_real     = pick($freshclam_package, $clamav::params::freshclam_package)
+  $clamav_milter_package_real = pick($clamav_milter_package, $clamav::params::clamav_milter_package)
 
-  $uid_real   = pick($uid, $clamav::params::uid)
-  $gid_real   = pick($gid, $clamav::params::gid)
-  $home_real  = pick($home, $clamav::params::home)
-  $shell_real = pick($shell, $clamav::params::shell)
+  $clamd_service_real              = pick($clamd_service, $clamav::params::clamd_service)
+  $clamd_service_ensure_real       = pick($clamd_service_ensure, $clamav::params::clamd_service_ensure)
+  $clamd_service_enable_real       = pick($clamd_service_enable, $clamav::params::clamd_service_enable)
+  $freshclam_service_real          = pick($freshclam_service, $clamav::params::freshclam_service)
+  $freshclam_service_ensure_real   = pick($freshclam_service_ensure, $clamav::params::freshclam_service_ensure)
+  $freshclam_service_enable_real   = pick($freshclam_service_enable, $clamav::params::freshclam_service_enable)
+  $clamav_milter_service_ensure_real = pick($clamav_milter_service_ensure, $clamav::params::clamav_milter_service_ensure)
+  $clamav_milter_service_enable_real = pick($clamav_milter_service_enable, $clamav::params::clamav_milter_service_enable)
 
-  # Merge clamd/freshclam/milter options with defaults
-  $_clamd_defaults = pick($clamd_default_options, $clamav::params::clamd_default_options)
-  $_freshclam_defaults = pick($freshclam_default_options, $clamav::params::freshclam_default_options)
-  $_milter_defaults = pick($milter_default_options, $clamav::params::clamav_milter_default_options)
+  $clamd_config_real       = pick($clamd_config, $clamav::params::clamd_config)
+  $freshclam_config_real   = pick($freshclam_config, $clamav::params::freshclam_config)
+  $clamav_milter_config_real = pick($clamav_milter_config, $clamav::params::clamav_milter_config)
+  $freshclam_sysconfig_real   = pick($freshclam_sysconfig, $clamav::params::freshclam_sysconfig)
+  $freshclam_delay_real       = pick($freshclam_delay, $clamav::params::freshclam_delay)
 
-  $_clamd_options      = merge($_clamd_defaults, $clamd_options)
-  $_freshclam_options  = merge($_freshclam_defaults, $freshclam_options)
-  $_clamav_milter_options = merge($_milter_defaults, $clamav_milter_options)
+  # Merge default and user options
+  $_clamd_options = merge(
+    pick($clamd_default_options, $clamav::params::clamd_default_options),
+    $clamd_options
+  )
+  $_freshclam_options = merge(
+    pick($freshclam_default_options, $clamav::params::freshclam_default_options),
+    $freshclam_options
+  )
+  $_clamav_milter_options = merge(
+    pick($milter_default_options, $clamav::params::clamav_milter_options),
+    $clamav_milter_options
+  )
 
-  # Manage repo if requested
-  if $manage_repo {
-    require 'epel'
-  }
+  # Optional: manage EPEL repo on RedHat
+  if $manage_repo { require 'epel' }
 
-  # Manage user
+  # Optional: manage clamav user
   if $manage_user {
-    anchor { 'clamav::begin': }
-    -> class { 'clamav::user': }
-    -> Class['clamav::install']
+    class { 'clamav::user':
+      user  => $user_real,
+      group => $group_real,
+      uid   => $uid_real,
+      gid   => $gid_real,
+      home  => $home_real,
+      shell => $shell_real,
+    }
   }
 
-  # Manage clamd
+  # Include submodules
   if $manage_clamd {
-    Class['clamav::install']
-    -> class { 'clamav::clamd': }
-    -> anchor { 'clamav::end': }
+    class { 'clamav::clamd':
+      sort_options => true,
+    }
   }
-
-  # Manage freshclam
   if $manage_freshclam {
-    Class['clamav::install']
-    -> class { 'clamav::freshclam': }
-    -> anchor { 'clamav::end': }
+    class { 'clamav::freshclam':
+      sort_options => true,
+    }
   }
-
-  # Manage clamav-milter
   if $manage_clamav_milter {
-    Class['clamav::install']
-    -> class { 'clamav::clamav_milter': }
-    -> anchor { 'clamav::end': }
+    class { 'clamav::clamav_milter':
+      sort_options => true,
+    }
   }
 
-  # Anchors for ordering
-  anchor { 'clamav::begin': }
-  -> class { 'clamav::install': }
-  -> anchor { 'clamav::end': }
 }
-
