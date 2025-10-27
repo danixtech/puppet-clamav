@@ -1,4 +1,4 @@
-<%
+<% 
   This is the main ClamAV config template.
   Variables expected:
     $config_options : Hash of option => value
