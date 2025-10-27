@@ -94,7 +94,7 @@ class clamav (
   $clamd_config_real        = pick($clamd_config, $clamav::params::clamd_config, '/etc/clamav/clamd.conf')
   $freshclam_config_real    = pick($freshclam_config, $clamav::params::freshclam_config, '/etc/clamav/freshclam.conf')
   $clamav_milter_config_real = pick($clamav_milter_config, $clamav::params::clamav_milter_config, '/etc/clamav/clamav-milter.conf')
-  $freshclam_sysconfig_real  = pick($freshclam_sysconfig, $clamav::params::freshclam_sysconfig, undef)
+  $freshclam_sysconfig_real  = pick($freshclam_sysconfig, $clamav::params::freshclam_sysconfig, '/etc/default/freshclam')
   $freshclam_delay_real      = pick($freshclam_delay, $clamav::params::freshclam_delay, undef)
 
   ############################
