@@ -1,11 +1,18 @@
+<%#
+  Freshclam configuration template.
+  Variables expected:
+    $options : Hash of option => value
+%>
 ### File managed with puppet ###
-<%- if $options -%>
-<% $options.sort.each |$k, $v| { -%>
-<% Array($v).each |$av| { -%>
-<%- if $av != undef and $av != '' -%>
+<% if $options { -%>
+<%   $sorted_keys = keys($options).sort -%>
+<%   $sorted_keys.each |$k| { -%>
+<%     $v = $options[$k] -%>
+<%     $values = $v ? { Array => $v, default => [$v] } -%>
+<%     $values.each |$av| { -%>
+<%       if $av != undef and $av != '' { -%>
 <%= $k %> <%= $av %>
-<%- end -%>
+<%       } -%>
+<%     } -%>
+<%   } -%>
 <% } -%>
-<% } -%>
-<%- end -%>
-
