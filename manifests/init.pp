@@ -67,6 +67,12 @@ class clamav (
   $freshclam_package_real     = pick($freshclam_package, $clamav::params::freshclam_package, 'clamav-freshclam')
   $clamav_milter_package_real = pick($clamav_milter_package, $clamav::params::clamav_milter_package, 'clamav-milter')
 
+  # Versions
+  $clamav_version_real        = pick($clamav_version, $clamav::params::clamav_version, 'latest')
+  $clamd_version_real         = pick($clamd_version, $clamav::params::clamd_version, 'latest')
+  $freshclam_version_real     = pick($freshclam_version, $clamav::params::freshclam_version, 'latest')
+  $clamav_milter_version_real = pick($clamav_milter_version, $clamav::params::clamav_milter_version, 'latest')
+
   # Services
   $clamd_service_real             = pick($clamd_service, $clamav::params::clamd_service, 'clamd')
   $clamd_service_ensure_real      = pick($clamd_service_ensure, $clamav::params::clamd_service_ensure, 'running')
@@ -137,10 +143,12 @@ class clamav (
   if $manage_clamd {
     Class['clamav::install']
       -> class { 'clamav::clamd':
-           config_file    => $clamd_config_real,
-           service_name   => $clamd_service_real,
-           service_ensure => $clamd_service_ensure_real,
-           service_enable => $clamd_service_enable_real,
+           config_file     => $clamd_config_real,
+           service_name    => $clamd_service_real,
+           service_ensure  => $clamd_service_ensure_real,
+           service_enable  => $clamd_service_enable_real,
+           package_name    => $clamd_package_real,
+           package_version => $clamd_version_real,
          }
       -> Anchor['clamav::end']
   }
@@ -148,12 +156,14 @@ class clamav (
   if $manage_freshclam {
     Class['clamav::install']
       -> class { 'clamav::freshclam':
-           config_file    => $freshclam_config_real,
-           sysconfig_file => $freshclam_sysconfig_real,
-           delay          => $freshclam_delay_real,
-           service_name   => $freshclam_service_real,
-           service_ensure => $freshclam_service_ensure_real,
-           service_enable => $freshclam_service_enable_real,
+           config_file     => $freshclam_config_real,
+           sysconfig_file  => $freshclam_sysconfig_real,
+           freshclam_delay => $freshclam_delay_real,
+           service_name    => $freshclam_service_real,
+           service_ensure  => $freshclam_service_ensure_real,
+           service_enable  => $freshclam_service_enable_real,
+           package_name    => $freshclam_package_real,
+           package_version => $freshclam_version_real,
          }
       -> Anchor['clamav::end']
   }
@@ -161,10 +171,12 @@ class clamav (
   if $manage_clamav_milter {
     Class['clamav::install']
       -> class { 'clamav::clamav_milter':
-           config_file    => $clamav_milter_config_real,
-           service_name   => $clamav_milter_service_real,
-           service_ensure => $clamav_milter_service_ensure_real,
-           service_enable => $clamav_milter_service_enable_real,
+           config_file     => $clamav_milter_config_real,
+           service_name    => $clamav_milter_service_real,
+           service_ensure  => $clamav_milter_service_ensure_real,
+           service_enable  => $clamav_milter_service_enable_real,
+           package_name    => $clamav_milter_package_real,
+           package_version => $clamav_milter_version_real,
          }
       -> Anchor['clamav::end']
   }
