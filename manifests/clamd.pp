@@ -1,7 +1,19 @@
 # @summary Set up clamd config and service.
 #
-# @param sort_options
-#   for true, the options are sorted,
+# @param options
+#   Hash of clamd configuration options rendered into the config file.
+#
+# @param config_file
+#   Absolute path to the clamd.conf file to manage.
+#
+# @param service_name
+#   Name of the clamd system service.
+#
+# @param service_ensure
+#   Whether the clamd service should be running or stopped.
+#
+# @param service_enable
+#   Whether the clamd service is enabled at boot.
 #
 class clamav::clamd(
   Hash $options       = $clamav::_clamd_options,
