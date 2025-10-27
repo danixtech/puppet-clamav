@@ -16,19 +16,23 @@
 #   Whether the clamd service is enabled at boot.
 #
 class clamav::clamd(
-  Hash $options       = $clamav::_clamd_options,
+  Hash $options            = $clamav::_clamd_options,
   Stdlib::Absolutepath $config_file = $clamav::clamd_config,
-  String $service_name = $clamav::clamd_service,
-  String $service_ensure = $clamav::clamd_service_ensure,
-  Boolean $service_enable = $clamav::clamd_service_enable,
+  String $service_name     = $clamav::clamd_service,
+  String $service_ensure   = $clamav::clamd_service_ensure,
+  Boolean $service_enable  = $clamav::clamd_service_enable,
+  String $package_name     = $clamav::clamd_package,
+  String $package_version  = $clamav::clamd_version,
 ) {
 
-  notify { 'DEBUG clamd_package':
-    message => "clamd_package = '${clamav::clamd_package}'",
-  }
+  $package_real       = pick($package_name,    $clamav::params::clamd_package, 'clamav-daemon')
+  $package_version_real = pick($package_version, $clamav::params::clamd_version, 'latest')
+  $service_name_real  = pick($service_name,    $clamav::params::clamd_service, 'clamav-daemon')
+  $service_ensure_real = pick($service_ensure, $clamav::params::clamd_service_ensure, 'running')
+  $service_enable_real = pick($service_enable, $clamav::params::clamd_service_enable, true)
 
-  package { $clamav::clamd_package:
-    ensure => $clamav::clamd_version,
+  package { $package_real:
+    ensure => $package_version_real,
     before => File[$config_file],
   }
 
@@ -38,14 +42,14 @@ class clamav::clamd(
     group   => $clamav::params::group,
     mode    => '0644',
     content => epp('clamav/clamd.conf.epp', { 'options' => $options }),
-    notify  => Service[$service_name],
+    notify  => Service[$service_name_real],
   }
 
-  service { $service_name:
-    ensure     => $service_ensure,
-    enable     => $service_enable,
+  service { $service_name_real:
+    ensure     => $service_ensure_real,
+    enable     => $service_enable_real,
     hasrestart => true,
     hasstatus  => true,
-    subscribe  => [Package[$clamav::clamd_package], File[$config_file]],
+    subscribe  => [Package[$package_real], File[$config_file]],
   }
 }
