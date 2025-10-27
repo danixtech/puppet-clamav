@@ -1,25 +1,4 @@
-class clamav::params (
-  # OS-specific defaults come from module Hiera data
-  Hash $os_clamd_defaults    = {},
-  Hash $os_freshclam_defaults = {},
-  Hash $os_milter_defaults    = {},
-
-  # Optional OS-specific package/service names
-  Optional[String] $clamd_package = undef,
-  Optional[String] $clamd_service = undef,
-  Optional[String] $freshclam_package = undef,
-  Optional[String] $freshclam_service = undef,
-  Optional[String] $clamav_milter_package = undef,
-  Optional[String] $clamav_milter_service = undef,
-  Optional[String] $user = undef,
-  Optional[String] $group = undef,
-  Optional[Integer] $uid = undef,
-  Optional[Integer] $gid = undef,
-  Optional[Stdlib::Absolutepath] $home = undef,
-  Optional[Stdlib::Absolutepath] $shell = undef,
-  Optional[String] $comment = undef,
-  Optional[Array[String]] $groups = undef,
-) {
+class clamav::params {
 
   # Generic management flags
   $manage_user          = false

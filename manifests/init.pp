@@ -8,6 +8,11 @@ class clamav (
   Boolean $manage_freshclam     = $clamav::params::manage_freshclam,
   Boolean $manage_clamav_milter = $clamav::params::manage_clamav_milter,
 
+  # OS-specific defaults from module Hiera (APL)
+  Hash $os_clamd_defaults       = {},
+  Hash $os_freshclam_defaults   = {},
+  Hash $os_milter_defaults      = {},
+
   # Packages
   Optional[String] $clamav_package        = undef,
   Optional[String] $clamd_package         = undef,
