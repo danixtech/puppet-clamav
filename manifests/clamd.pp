@@ -23,6 +23,10 @@ class clamav::clamd(
   Boolean $service_enable = $clamav::clamd_service_enable,
 ) {
 
+  notify { 'DEBUG clamd_package':
+    message => "clamd_package = '${clamav::clamd_package}'",
+  }
+
   package { $clamav::clamd_package:
     ensure => $clamav::clamd_version,
     before => File[$config_file],
