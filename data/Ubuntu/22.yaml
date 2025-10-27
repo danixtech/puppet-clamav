@@ -1,7 +1,8 @@
 ---
 # settings for Ubuntu 22.04 LTS
 
-clamav::clamd_default_options:
+# These parameters are looked up by clamav::params class
+clamav::params::os_clamd_defaults:
   LocalSocket: '/var/run/clamav/clamd.ctl'
   FixStaleSocket: true
   LocalSocketGroup: 'clamav'
@@ -108,7 +109,7 @@ clamav::freshclam_default_options:
   Bytecode: true
   NotifyClamd: '/etc/clamav/clamd.conf'
   Checks: 24
-  DatabaseMirror:
+  DatabaseMirror: 
     - 'db.local.clamav.net'
     - 'database.clamav.net'
   PidFile: '/var/run/clamav/freshclam.pid'

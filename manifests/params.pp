@@ -1,4 +1,25 @@
-class clamav::params {
+class clamav::params (
+  # OS-specific defaults come from module Hiera data
+  Hash $os_clamd_defaults    = {},
+  Hash $os_freshclam_defaults = {},
+  Hash $os_milter_defaults    = {},
+
+  # Optional OS-specific package/service names
+  Optional[String] $clamd_package = undef,
+  Optional[String] $clamd_service = undef,
+  Optional[String] $freshclam_package = undef,
+  Optional[String] $freshclam_service = undef,
+  Optional[String] $clamav_milter_package = undef,
+  Optional[String] $clamav_milter_service = undef,
+  Optional[String] $user = undef,
+  Optional[String] $group = undef,
+  Optional[Integer] $uid = undef,
+  Optional[Integer] $gid = undef,
+  Optional[Stdlib::Absolutepath] $home = undef,
+  Optional[Stdlib::Absolutepath] $shell = undef,
+  Optional[String] $comment = undef,
+  Optional[Array[String]] $groups = undef,
+) {
 
   # Generic management flags
   $manage_user          = false
@@ -16,8 +37,10 @@ class clamav::params {
   $clamd_config          = '/etc/clamav/clamd.conf'
   $freshclam_config      = '/etc/clamav/freshclam.conf'
   $clamav_milter_config  = '/etc/clamav/clamav-milter.conf'
+  $freshclam_sysconfig   = '/etc/default/freshclam'
+  $freshclam_delay       = '0'
 
-  # Generic ClamAV defaults
+  # Generic ClamAV defaults (baseline configuration)
   $default_clamd_options = {
     'AllowAllMatchScan'        => true,
     'Bytecode'                 => true,
@@ -118,8 +141,8 @@ class clamav::params {
     'LogSyslog'   => 'yes',
   }
 
-  # Lookup OS-specific overrides from Hiera
-  $clamd_default_options    = merge($default_clamd_options, lookup('clamav::clamd_default_options', Hash, 'deep', {}))
-  $freshclam_default_options = merge($default_freshclam_options, lookup('clamav::freshclam_default_options', Hash, 'deep', {}))
-  $clamav_milter_options     = merge($default_clamav_milter_options, lookup('clamav::milter_default_options', Hash, 'deep', {}))
+  # Merge base defaults with OS-specific overrides from module Hiera
+  $clamd_default_options    = merge($default_clamd_options, $os_clamd_defaults)
+  $freshclam_default_options = merge($default_freshclam_options, $os_freshclam_defaults)
+  $clamav_milter_default_options = merge($default_clamav_milter_options, $os_milter_defaults)
 }
