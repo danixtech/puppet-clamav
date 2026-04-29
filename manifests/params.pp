@@ -120,6 +120,11 @@ class clamav::params {
     'LogSyslog'   => 'yes',
   }
 
+  # Looking up OS specific overrides from Hiera
+  $os_clamd_defaults = lookup('clamav::clamd_default_options', Hash, 'deep', {})
+  $os_freshclam_defaults = lookup('clamav::freshclam_default_options', Hash, 'deep', {})
+  $os_milter_defaults = lookup('clamav::clamav_milter_default_options', Hash, 'deep', {})
+
   # Merge base defaults with OS-specific overrides from module Hiera
   $clamd_default_options    = merge($default_clamd_options, $os_clamd_defaults)
   $freshclam_default_options = merge($default_freshclam_options, $os_freshclam_defaults)
