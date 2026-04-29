@@ -67,10 +67,10 @@ class clamav (
   ###########################
 
   # Packages
-  $clamav_package_real        = pick($clamav_package, $clamav::params::clamav_package, 'clamav')
-  $clamd_package_real         = pick($clamd_package,  $clamav::params::clamd_package, 'clamd')
-  $freshclam_package_real     = pick($freshclam_package, $clamav::params::freshclam_package, 'clamav-freshclam')
-  $clamav_milter_package_real = pick($clamav_milter_package, $clamav::params::clamav_milter_package, 'clamav-milter')
+  $clamav_package_real        = pick($clamav_package, $clamav_package_default)
+  $clamd_package_real         = pick($clamd_package,  $clamd_package_default)
+  $freshclam_package_real     = pick($freshclam_package, $freshclam_package_default)
+  $clamav_milter_package_real = pick($clamav_milter_package, $clamav_milter_package_default)
 
   # Versions
   $clamav_version_real        = pick($clamav_version, $clamav::params::clamav_version, 'latest')

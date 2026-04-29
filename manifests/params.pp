@@ -7,6 +7,11 @@ class clamav::params {
   $manage_freshclam     = false
   $manage_clamav_milter = false
 
+  $clamav_package_default = 'clamav'
+  $clamd_package_default = 'clamd'
+  $freshclam_package_default = 'clamav-freshclam'
+  $clamav_milter_package_default = 'clamav-milter'
+
   $clamav_version        = 'latest'
   $clamd_version         = 'latest'
   $freshclam_version     = 'latest'
