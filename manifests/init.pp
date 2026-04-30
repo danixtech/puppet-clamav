@@ -40,16 +40,18 @@ class clamav (
   Optional[Stdlib::Absolutepath] $freshclam_config     = undef,
   Optional[Stdlib::Absolutepath] $clamav_milter_config = undef,
   Optional[Stdlib::Absolutepath] $freshclam_sysconfig  = undef,
-  Optional[Integer] $freshclam_delay                  = undef,
+  Optional[Integer] $freshclam_delay                   = undef,
 
   # Services
-  Optional[String] $clamd_service             = undef,
-  Optional[String] $freshclam_service         = undef,
-  Optional[String] $clamav_milter_service    = undef,
-  Optional[String] $clamd_service_ensure     = undef,
-  Optional[String] $freshclam_service_ensure = undef,
-  Optional[String] $clamav_milter_service_ensure = undef,
+  Optional[String] $clamd_service                 = undef,
+  Optional[String] $clamd_socket                  = undef,
+  Optional[String] $freshclam_service             = undef,
+  Optional[String] $clamav_milter_service         = undef,
+  Optional[String] $clamd_service_ensure          = undef,
+  Optional[String] $freshclam_service_ensure      = undef,
+  Optional[String] $clamav_milter_service_ensure  = undef,
   Optional[Boolean] $clamd_service_enable         = undef,
+  Optional[Boolean] clamd_use_socket              = undef,
   Optional[Boolean] $freshclam_service_enable     = undef,
   Optional[Boolean] $clamav_milter_service_enable = undef,
 
@@ -82,8 +84,8 @@ class clamav (
   $clamd_service_real        = pick($clamd_service, $clamd_service_default, 'clamd')
   $clamd_service_ensure_real = pick($clamd_service_ensure, $clamd_service_ensure_default, 'running')
   $clamd_service_enable_real = pick($clamd_service_enable, $clamd_service_enable_default, true)
-  $clamd_use_socket_real = pick($clamd_use_socket, false)
-  $clamd_socket_real     = pick($clamd_socket, $clamd_socket_default)
+  $clamd_use_socket_real     = pick($clamd_use_socket, false)
+  $clamd_socket_real         = pick($clamd_socket, $clamd_socket_default)
 
   $freshclam_service_real        = pick($freshclam_service, $freshclam_service_default, 'freshclam')
   $freshclam_service_ensure_real = pick($freshclam_service_ensure, $freshclam_service_ensure_default, 'running')
