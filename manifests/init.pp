@@ -40,7 +40,7 @@ class clamav (
   Optional[Stdlib::Absolutepath] $freshclam_config     = undef,
   Optional[Stdlib::Absolutepath] $clamav_milter_config = undef,
   Optional[Stdlib::Absolutepath] $freshclam_sysconfig  = undef,
-  Optional[String] $freshclam_delay                  = undef,
+  Optional[Integer] $freshclam_delay                  = undef,
 
   # Services
   Optional[String] $clamd_service             = undef,
@@ -160,14 +160,14 @@ class clamav (
   if $manage_freshclam {
     Class['clamav::install']
       -> class { 'clamav::freshclam':
-           config_file     => $freshclam_config_real,
-           sysconfig_file  => $freshclam_sysconfig_real,
-           freshclam_delay => $freshclam_delay_real,
-           service_name    => $freshclam_service_real,
-           service_ensure  => $freshclam_service_ensure_real,
-           service_enable  => $freshclam_service_enable_real,
-           package_name    => $freshclam_package_real,
-           package_version => $freshclam_version_real,
+           config_file         => $freshclam_config_real,
+           freshclam_sysconfig => $freshclam_sysconfig_real,
+           freshclam_delay     => $freshclam_delay_real,
+           service_name        => $freshclam_service_real,
+           service_ensure      => $freshclam_service_ensure_real,
+           service_enable      => $freshclam_service_enable_real,
+           package_name        => $freshclam_package_real,
+           package_version     => $freshclam_version_real,
          }
       -> Anchor['clamav::end']
   }
