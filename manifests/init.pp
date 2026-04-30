@@ -73,57 +73,57 @@ class clamav (
   $clamav_milter_package_real = pick($clamav_milter_package, $clamav_milter_package_default)
 
   # Versions
-  $clamav_version_real        = pick($clamav_version, $clamav::params::clamav_version, 'latest')
-  $clamd_version_real         = pick($clamd_version, $clamav::params::clamd_version, 'latest')
-  $freshclam_version_real     = pick($freshclam_version, $clamav::params::freshclam_version, 'latest')
-  $clamav_milter_version_real = pick($clamav_milter_version, $clamav::params::clamav_milter_version, 'latest')
+  $clamav_version_real        = pick($clamav_version, $clamav_version_default, 'latest')
+  $clamd_version_real         = pick($clamd_version, $clamd_version_default, 'latest')
+  $freshclam_version_real     = pick($freshclam_version, $freshclam_version_default, 'latest')
+  $clamav_milter_version_real = pick($clamav_milter_version, $clamav_milter_version_default, 'latest')
 
   # Services
-  $clamd_service_real             = pick($clamd_service, $clamav::params::clamd_service, 'clamd')
-  $clamd_service_ensure_real      = pick($clamd_service_ensure, $clamav::params::clamd_service_ensure, 'running')
-  $clamd_service_enable_real      = pick($clamd_service_enable, $clamav::params::clamd_service_enable, true)
+  $clamd_service_real        = pick($clamd_service, $clamd_service_default, 'clamd')
+  $clamd_service_ensure_real = pick($clamd_service_ensure, $clamd_service_ensure_default, 'running')
+  $clamd_service_enable_real = pick($clamd_service_enable, $clamd_service_enable_default, true)
 
-  $freshclam_service_real         = pick($freshclam_service, $clamav::params::freshclam_service, 'freshclam')
-  $freshclam_service_ensure_real  = pick($freshclam_service_ensure, $clamav::params::freshclam_service_ensure, 'running')
-  $freshclam_service_enable_real  = pick($freshclam_service_enable, $clamav::params::freshclam_service_enable, true)
+  $freshclam_service_real        = pick($freshclam_service, $freshclam_service_default, 'freshclam')
+  $freshclam_service_ensure_real = pick($freshclam_service_ensure, $freshclam_service_ensure_default, 'running')
+  $freshclam_service_enable_real = pick($freshclam_service_enable, $freshclam_service_enable_default, true)
 
-  $clamav_milter_service_real        = pick($clamav_milter_service, $clamav::params::clamav_milter_service, 'clamav-milter')
-  $clamav_milter_service_ensure_real = pick($clamav_milter_service_ensure, $clamav::params::clamav_milter_service_ensure, 'running')
-  $clamav_milter_service_enable_real = pick($clamav_milter_service_enable, $clamav::params::clamav_milter_service_enable, true)
+  $clamav_milter_service_real        = pick($clamav_milter_service, $clamav_milter_service_default, 'clamav-milter')
+  $clamav_milter_service_ensure_real = pick($clamav_milter_service_ensure, $clamav_milter_service_ensure_default, 'running')
+  $clamav_milter_service_enable_real = pick($clamav_milter_service_enable, $clamav_milter_service_enable_default, true)
 
   # User account
-  $user_real   = pick($user,  $clamav::params::user, 'clamav')
-  $group_real  = pick($group, $clamav::params::group, 'clamav')
-  $uid_real    = pick($uid,   $clamav::params::uid, 496)
-  $gid_real    = pick($gid,   $clamav::params::gid, 496)
-  $home_real   = pick($home,  $clamav::params::home, '/var/lib/clamav')
-  $shell_real  = pick($shell, $clamav::params::shell, '/sbin/false')
-  $comment_real = pick($comment, $clamav::params::comment, 'ClamAV user')
-  $groups_real  = pick($groups, $clamav::params::groups, [])
+  $user_real    = pick($user,  $user_default, 'clamav')
+  $group_real   = pick($group, $group_default, 'clamav')
+  $uid_real     = pick($uid,   $uid_default, 496)
+  $gid_real     = pick($gid,   $gid_default, 496)
+  $home_real    = pick($home,  $home_default, '/var/lib/clamav')
+  $shell_real   = pick($shell, $shell_default, '/sbin/false')
+  $comment_real = pick($comment, $comment_default, 'ClamAV user')
+  $groups_real  = pick($groups, $groups_default, [])
 
   # Config paths
-  $clamd_config_real         = pick($clamd_config, $clamav::params::clamd_config, '/etc/clamav/clamd.conf')
-  $freshclam_config_real     = pick($freshclam_config, $clamav::params::freshclam_config, '/etc/clamav/freshclam.conf')
-  $clamav_milter_config_real = pick($clamav_milter_config, $clamav::params::clamav_milter_config, '/etc/clamav/clamav-milter.conf')
-  $freshclam_sysconfig_real  = pick($freshclam_sysconfig, $clamav::params::freshclam_sysconfig, '/etc/default/freshclam')
-  $freshclam_delay_real      = pick($freshclam_delay, $clamav::params::freshclam_delay, '0')
+  $clamd_config_real         = pick($clamd_config, $clamd_config_default, '/etc/clamav/clamd.conf')
+  $freshclam_config_real     = pick($freshclam_config, $freshclam_config_default, '/etc/clamav/freshclam.conf')
+  $clamav_milter_config_real = pick($clamav_milter_config, $clamav_milter_config_default, '/etc/clamav/clamav-milter.conf')
+  $freshclam_sysconfig_real  = pick($freshclam_sysconfig, $freshclam_sysconfig_default, '/etc/default/freshclam')
+  $freshclam_delay_real      = pick($freshclam_delay, $freshclam_delay_default, '0')
 
   ############################
   # Merge options with defaults
   ############################
 
   $_clamd_options = merge(
-    pick($clamd_default_options, $clamav::params::clamd_default_options, {}),
+    pick($clamd_default_options, $clamd_default_options_default, {}),
     $clamd_options
   )
 
   $_freshclam_options = merge(
-    pick($freshclam_default_options, $clamav::params::freshclam_default_options, {}),
+    pick($freshclam_default_options, $freshclam_default_options_default, {}),
     $freshclam_options
   )
 
   $_clamav_milter_options = merge(
-    pick($milter_default_options, $clamav::params::clamav_milter_default_options, {}),
+    pick($milter_default_options, $clamav_milter_default_options_default, {}),
     $clamav_milter_options
   )
 

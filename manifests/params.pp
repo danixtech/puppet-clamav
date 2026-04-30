@@ -7,22 +7,45 @@ class clamav::params {
   $manage_freshclam     = false
   $manage_clamav_milter = false
 
-  $clamav_package_default = 'clamav'
-  $clamd_package_default = 'clamd'
-  $freshclam_package_default = 'clamav-freshclam'
+  $clamav_package_default        = 'clamav'
+  $clamd_package_default         = 'clamd'
+  $freshclam_package_default     = 'clamav-freshclam'
   $clamav_milter_package_default = 'clamav-milter'
 
-  $clamav_version        = 'latest'
-  $clamd_version         = 'latest'
-  $freshclam_version     = 'latest'
-  $clamav_milter_version = undef
+  $clamav_version_default        = 'latest'
+  $clamd_version_default         = 'latest'
+  $freshclam_version_default     = 'latest'
+  $clamav_milter_version_default = undef
+
+  # Services
+  $clamd_service_default        = 'clamd'
+  $clamd_service_ensure_default = 'running'
+  $clamd_service_enable_default = true
+
+  $freshclam_service_default        = 'freshclam'
+  $freshclam_service_ensure_default = 'running'
+  $freshclam_service_enable_default = true
+
+  $clamav_milter_service_default        = 'clamav-milter'
+  $clamav_milter_service_ensure_default = 'running'
+  $clamav_milter_service_enable_default = true
+
+  # User account
+  $user_default    = 'clamav'
+  $group_default   = 'clamav'
+  $uid_default     = 496
+  $gid_default     = 496
+  $home_default    = '/var/lib/clamav'
+  $shell_default   = '/sbin/false'
+  $comment_default = 'ClamAV user'
+  $groups_default  = []
 
   # Generic paths
-  $clamd_config          = '/etc/clamav/clamd.conf'
-  $freshclam_config      = '/etc/clamav/freshclam.conf'
-  $clamav_milter_config  = '/etc/clamav/clamav-milter.conf'
-  $freshclam_sysconfig   = '/etc/default/freshclam'
-  $freshclam_delay       = '0'
+  $clamd_config_default         = '/etc/clamav/clamd.conf'
+  $freshclam_config_default     = '/etc/clamav/freshclam.conf'
+  $clamav_milter_config_default = '/etc/clamav/clamav-milter.conf'
+  $freshclam_sysconfig_default  = '/etc/default/freshclam'
+  $freshclam_delay_default      = '0'
 
   # Generic ClamAV defaults (baseline configuration)
   $default_clamd_options = {
