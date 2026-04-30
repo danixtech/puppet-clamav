@@ -51,7 +51,7 @@ class clamav (
   Optional[String] $freshclam_service_ensure      = undef,
   Optional[String] $clamav_milter_service_ensure  = undef,
   Optional[Boolean] $clamd_service_enable         = undef,
-  Optional[Boolean] clamd_use_socket              = undef,
+  Optional[Boolean] $clamd_use_socket              = undef,
   Optional[Boolean] $freshclam_service_enable     = undef,
   Optional[Boolean] $clamav_milter_service_enable = undef,
 
