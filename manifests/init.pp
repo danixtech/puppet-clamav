@@ -82,6 +82,8 @@ class clamav (
   $clamd_service_real        = pick($clamd_service, $clamd_service_default, 'clamd')
   $clamd_service_ensure_real = pick($clamd_service_ensure, $clamd_service_ensure_default, 'running')
   $clamd_service_enable_real = pick($clamd_service_enable, $clamd_service_enable_default, true)
+  $clamd_use_socket_real = pick($clamd_use_socket, false)
+  $clamd_socket_real     = pick($clamd_socket, $clamd_socket_default)
 
   $freshclam_service_real        = pick($freshclam_service, $freshclam_service_default, 'freshclam')
   $freshclam_service_ensure_real = pick($freshclam_service_ensure, $freshclam_service_ensure_default, 'running')

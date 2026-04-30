@@ -12,11 +12,14 @@ class clamav::params {
     'Debian': {
       $clamd_package_default     = 'clamav-daemon'
       $clamd_service_default     = 'clamav-daemon'
+      $clamd_socket_default      = 'clamav-daemon.socket'
+      $clamd_use_socket          = true
       $freshclam_service_default = 'clamav-freshclam'
     }
     'RedHat': {
       $clamd_package_default     = 'clamd'
       $clamd_service_default     = 'clamd'
+      $clamd_use_socket          = false
       $freshclam_service_default = 'freshclam'
     }
   }

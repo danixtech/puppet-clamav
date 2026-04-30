@@ -39,11 +39,26 @@ class clamav::clamd(
     notify  => Service[$service_name],
   }
 
-  service { $service_name:
-    ensure     => $service_ensure,
-    enable     => $service_enable,
-    hasrestart => true,
-    hasstatus  => true,
-    subscribe  => [Package[$package_name], File[$config_file]],
+  # Socket or Service
+  if $clamav::clamd_use_socket_real {
+    service { $clamav::clamd_socket:
+      ensure => running,
+      enable => true,
+    }
+    service { $service_name:
+      ensure     => stopped,
+      enable     => false,
+      hasrestart => true,
+      hasstatus  => true,
+      subscribe  => [Package[$package_name], File[$config_file]],
+    }
+  } else {
+    service { $service_name:
+      ensure     => $service_ensure,
+      enable     => $service_enable,
+      hasrestart => true,
+      hasstatus  => true,
+      subscribe  => [Package[$package_name], File[$config_file]],
+    }
   }
 }
