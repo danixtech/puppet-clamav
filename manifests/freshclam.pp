@@ -11,6 +11,8 @@
 class clamav::freshclam(
   Hash $options = $clamav::_freshclam_options,
   Stdlib::Absolutepath $config_file = $clamav::freshclam_config,
+  Optional[Stdlib::Absolutepath] $freshclam_sysconfig = $clamav::freshclam_sysconfig,
+  Optional[Integer] $freshclam_delay = $clamav::freshclam_delay,
   String $service_name   = $clamav::freshclam_service,
   String $service_ensure = $clamav::freshclam_service_ensure,
   Boolean $service_enable = $clamav::freshclam_service_enable,
