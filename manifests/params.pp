@@ -45,7 +45,7 @@ class clamav::params {
   $freshclam_config_default     = '/etc/clamav/freshclam.conf'
   $clamav_milter_config_default = '/etc/clamav/clamav-milter.conf'
   $freshclam_sysconfig_default  = '/etc/default/freshclam'
-  $freshclam_delay_default      = '0'
+  $freshclam_delay_default      = 0
 
   # Generic ClamAV defaults (baseline configuration)
   $default_clamd_options = {
