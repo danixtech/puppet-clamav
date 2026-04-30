@@ -7,8 +7,17 @@ class clamav::params {
   $manage_freshclam     = false
   $manage_clamav_milter = false
 
+  # ClamAV Daemon Package
+  case $facts['os']['family'] {
+    'Debian': {
+      $clamd_package_default = 'clamav-daemon'
+    }
+    'RedHat': {
+      $clamd_package_default = 'clamd'
+    }
+  }
+
   $clamav_package_default        = 'clamav'
-  $clamd_package_default         = 'clamd'
   $freshclam_package_default     = 'clamav-freshclam'
   $clamav_milter_package_default = 'clamav-milter'
 
