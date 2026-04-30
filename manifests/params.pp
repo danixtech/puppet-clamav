@@ -11,9 +11,11 @@ class clamav::params {
   case $facts['os']['family'] {
     'Debian': {
       $clamd_package_default = 'clamav-daemon'
+      $clamd_service_default = 'clamav-daemon'
     }
     'RedHat': {
       $clamd_package_default = 'clamd'
+      $clamd_service_default = 'clamd'
     }
   }
 
@@ -27,7 +29,6 @@ class clamav::params {
   $clamav_milter_version_default = undef
 
   # Services
-  $clamd_service_default        = 'clamd'
   $clamd_service_ensure_default = 'running'
   $clamd_service_enable_default = true
 
