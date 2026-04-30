@@ -10,12 +10,14 @@ class clamav::params {
   # ClamAV Daemon Package
   case $facts['os']['family'] {
     'Debian': {
-      $clamd_package_default = 'clamav-daemon'
-      $clamd_service_default = 'clamav-daemon'
+      $clamd_package_default     = 'clamav-daemon'
+      $clamd_service_default     = 'clamav-daemon'
+      $freshclam_service_default = 'clamav-freshclam'
     }
     'RedHat': {
-      $clamd_package_default = 'clamd'
-      $clamd_service_default = 'clamd'
+      $clamd_package_default     = 'clamd'
+      $clamd_service_default     = 'clamd'
+      $freshclam_service_default = 'freshclam'
     }
   }
 
@@ -32,7 +34,6 @@ class clamav::params {
   $clamd_service_ensure_default = 'running'
   $clamd_service_enable_default = true
 
-  $freshclam_service_default        = 'freshclam'
   $freshclam_service_ensure_default = 'running'
   $freshclam_service_enable_default = true
 
