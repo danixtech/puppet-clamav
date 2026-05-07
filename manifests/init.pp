@@ -116,17 +116,17 @@ class clamav (
   # Merge options with defaults
   ############################
   $_clamd_options = merge(
-    $clamd_default_options,
+    pick($clamd_default_options, {}),
     pick($clamd_options, {})
   )
 
   $_freshclam_options = merge(
-    $freshclam_default_options,
+    pick($freshclam_default_options, {}),
     pick($freshclam_options, {})
   )
 
   $_clamav_milter_options = merge(
-    $clamav_milter_default_options,
+    pick($milter_default_options, {}),
     pick($clamav_milter_options, {})
   )
 
