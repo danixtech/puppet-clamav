@@ -1,8 +1,10 @@
 ---
-# settings for Ubuntu 22.04 LTS
+# settings for Ubuntu (22.04 LTS)
+
+clamav::clamd::sort_options: false
 
 # OS-specific defaults - automatically looked up by clamav class
-clamav::os_clamd_defaults:
+clamav::clamd_defaults_options:
   LocalSocket: '/var/run/clamav/clamd.ctl'
   FixStaleSocket: true
   LocalSocketGroup: 'clamav'
@@ -87,7 +89,7 @@ clamav::os_clamd_defaults:
   OnAccessMaxFileSize: '5M'
   PidFile: '/var/run/clamav/clamd.pid'
 
-clamav::params::os_freshclam_defaults:
+clamav::params::freshclam_default_options:
   DatabaseOwner: 'clamav'
   UpdateLogFile: '/var/log/clamav/freshclam.log'
   LogVerbose: false
@@ -114,7 +116,7 @@ clamav::params::os_freshclam_defaults:
     - 'database.clamav.net'
   PidFile: '/var/run/clamav/freshclam.pid'
 
-clamav::params::os_milter_defaults:
+clamav::params::milter_default_options:
   MilterSocket: '/var/run/clamav/clamav-milter.ctl'
   FixStaleSocket: true
   User: 'clamav'
