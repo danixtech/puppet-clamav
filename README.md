@@ -173,6 +173,8 @@ While I am sure other versions work, I have not tested them.
 This module supports modern RedHat and Debian based systems.  
 No plans to support other versions (unless you add it :)..
 
+ClamAV versions prior to 1.5 may fail in FIPS-enabled environments due to reliance on legacy MD5-based database verification. ClamAV 1.5 introduces .cvd.sign verification compatible with FIPS environments.
+
 ## Development
 
 Pull Requests welcome
