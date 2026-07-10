@@ -1,3 +1,4 @@
+# manifests/params.pp
 class clamav::params {
 
   # Generic management flags
@@ -19,9 +20,11 @@ class clamav::params {
     'RedHat': {
       $clamd_package_default     = 'clamd'
       $clamd_service_default     = 'clamd'
+      $clamd_socket_default      = undef
       $clamd_use_socket          = false
       $freshclam_service_default = 'freshclam'
     }
+    default: {}
   }
 
   $clamav_package_default        = 'clamav'
