@@ -3,8 +3,8 @@ class clamav::user {
   if $clamav::group {
     group { 'clamav':
       ensure => present,
-      name   => $clamav::group,
-      gid    => $clamav::gid,
+      name   => $clamav::group_real,
+      gid    => $clamav::gid_real,
       system => true,
     }
   }
@@ -12,13 +12,13 @@ class clamav::user {
   if $clamav::user {
     user { 'clamav':
       ensure  => present,
-      name    => $clamav::user,
-      comment => $clamav::comment,
-      uid     => $clamav::uid,
-      gid     => $clamav::gid,
-      groups  => $clamav::groups,
-      home    => $clamav::home,
-      shell   => $clamav::shell,
+      name    => $clamav::user_real,
+      comment => $clamav::comment_real,
+      uid     => $clamav::uid_real,
+      gid     => $clamav::gid_real,
+      groups  => $clamav::groups_real,
+      home    => $clamav::home_real,
+      shell   => $clamav::shell_real,
       system  => true,
     }
   }

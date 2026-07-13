@@ -27,8 +27,8 @@ class clamav::freshclam(
 
   file { $config_file:
     ensure  => file,
-    owner   => $clamav::user,
-    group   => $clamav::group,
+    owner   => $clamav::user_real,
+    group   => $clamav::group_real,
     mode    => '0644',
     content => epp('clamav/freshclam.conf.epp', { 'options' => $options }),
     notify  => Service[$service_name],
