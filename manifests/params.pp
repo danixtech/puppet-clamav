@@ -85,16 +85,6 @@ class clamav::params {
   $clamav_milter_service_ensure_default = 'running'
   $clamav_milter_service_enable_default = true
 
-  # User account
-  $user_default    = 'clamav'
-  $group_default   = 'clamav'
-  $uid_default     = 496
-  $gid_default     = 496
-  $home_default    = '/var/lib/clamav'
-  $shell_default   = '/sbin/false'
-  $comment_default = 'ClamAV user'
-  $groups_default  = []
-
   # Generic ClamAV defaults (baseline configuration)
   $default_clamd_options = {
     'AllowAllMatchScan'        => true,
