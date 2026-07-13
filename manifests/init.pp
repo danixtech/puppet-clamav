@@ -84,8 +84,15 @@ class clamav (
   $clamd_service_real        = pick($clamd_service, $clamav::params::clamd_service_default, 'clamd')
   $clamd_service_ensure_real = pick($clamd_service_ensure, $clamav::params::clamd_service_ensure_default, 'running')
   $clamd_service_enable_real = pick($clamd_service_enable, $clamav::params::clamd_service_enable_default, true)
-  $clamd_use_socket_real     = pick($clamd_use_socket, false)
+  $clamd_use_socket_real     = pick($clamd_use_socket, $clamav::params::clamd_use_socket)
   $clamd_socket_real         = pick($clamd_socket, $clamav::params::clamd_socket_default)
+
+  # Conditional definition of clamd_socket_real
+  if $clamd_use_socket_real {
+    $clamd_socket_real = pick($clamd_socket,$clamav::params::clamd_socket_default)
+  } else {
+    $clamd_socket_real = undef
+  }
 
   $freshclam_service_real        = pick($freshclam_service, $clamav::params::freshclam_service_default, 'freshclam')
   $freshclam_service_ensure_real = pick($freshclam_service_ensure, $clamav::params::freshclam_service_ensure_default, 'running')

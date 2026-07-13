@@ -41,7 +41,7 @@ class clamav::clamd(
 
   # Socket or Service
   if $clamav::clamd_use_socket_real {
-    service { $clamav::clamd_socket:
+    service { $clamav::clamd_socket_real:
       ensure => running,
       enable => true,
     }
