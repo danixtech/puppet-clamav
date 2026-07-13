@@ -11,6 +11,6 @@ clamav::os_clamd_defaults:
   User: clamscan
 
 clamav::os_freshclam_defaults:
-  DatabaseOwner: clamscan
+  DatabaseOwner: clamupdate
   NotifyClamd: /etc/clamd.d/scan.conf
   PidFile: /run/clamav/freshclam.pid
