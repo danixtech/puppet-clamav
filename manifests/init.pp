@@ -109,7 +109,7 @@ class clamav (
   $home_real    = pick($home,  $clamav::params::home_default)
   $shell_real   = pick($shell, $clamav::params::shell_default)
   $comment_real = pick($comment, $clamav::params::comment_default, 'ClamAV user')
-  $groups_real  = $groups ? { undef => $clamav::params::$groups_default, default => $groups }
+  $groups_real  = $groups ? { undef => $clamav::params::groups_default, default => $groups }
 
   # Config paths
   $clamd_config_real         = pick($clamd_config, $clamav::params::clamd_config_default, '/etc/clamav/clamd.conf')
