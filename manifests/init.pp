@@ -8,11 +8,6 @@ class clamav (
   Boolean $manage_freshclam     = $clamav::params::manage_freshclam,
   Boolean $manage_clamav_milter = $clamav::params::manage_clamav_milter,
 
-  # OS-specific defaults from module Hiera (APL)
-  Hash $os_clamd_defaults       = {},
-  Hash $os_freshclam_defaults   = {},
-  Hash $os_milter_defaults      = {},
-
   # Packages
   Optional[String] $clamav_package        = undef,
   Optional[String] $clamd_package         = undef,
@@ -122,17 +117,17 @@ class clamav (
   # Merge options with defaults
   ############################
   $_clamd_options = merge(
-    pick($clamd_default_options, {}),
+    pick($clamd_default_options, $clamav::params::clamd_default_options),
     pick($clamd_options, {})
   )
 
   $_freshclam_options = merge(
-    pick($freshclam_default_options, {}),
+    pick($freshclam_default_options, $clamav::params::freshclam_default_options),
     pick($freshclam_options, {})
   )
 
   $_clamav_milter_options = merge(
-    pick($milter_default_options, {}),
+    pick($milter_default_options, $clamav::params::clamav_milter_default_options),
     pick($clamav_milter_options, {})
   )
 
