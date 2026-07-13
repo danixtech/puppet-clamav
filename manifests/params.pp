@@ -23,6 +23,17 @@ class clamav::params {
       $freshclam_sysconfig_default  = '/etc/default/freshclam'
 
       $clamav_milter_config_default = '/etc/clamav/clamav-milter.conf'
+
+      # User account
+      $user_default    = 'clamav'
+      $group_default   = 'clamav'
+      $uid_default     = 496
+      $gid_default     = 496
+      $home_default    = '/var/lib/clamav'
+      $shell_default   = '/sbin/false'
+      $comment_default = 'ClamAV user'
+      $groups_default  = []
+
     }
     'RedHat': {
       $clamd_package_default        = 'clamd'
@@ -37,6 +48,17 @@ class clamav::params {
       $freshclam_sysconfig_default  = '/etc/sysconfig/freshclam'
 
       $clamav_milter_config_default = '/etc/clamav-milter.conf'
+
+      # User account
+      $user_default    = 'clamscan'
+      $group_default   = 'clamscan'
+      $uid_default     = undef
+      $gid_default     = undef
+      $home_default    = '/var/lib/clamav'
+      $shell_default   = '/sbin/false'
+      $comment_default = 'ClamAV scanner'
+      $groups_default  = []
+
     }
     default: {
       fail("Unsupported operating-system family: ${facts['os']['family']}")

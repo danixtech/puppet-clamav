@@ -26,14 +26,14 @@ class clamav (
   Optional[String] $clamav_milter_version = undef,
 
   # User account
-  Optional[String] $user  = undef,
-  Optional[String] $group = undef,
-  Optional[Integer] $uid  = undef,
-  Optional[Integer] $gid  = undef,
+  Optional[String[1]] $user             = undef,
+  Optional[String[1]] $group            = undef,
+  Optional[Integer] $uid                = undef,
+  Optional[Integer] $gid                = undef,
   Optional[Stdlib::Absolutepath] $home  = undef,
   Optional[Stdlib::Absolutepath] $shell = undef,
-  Optional[String] $comment = undef,
-  Optional[Array[String]] $groups = undef,
+  Optional[String] $comment             = undef,
+  Optional[Array[String]] $groups       = undef,
 
   # Configs
   Optional[Stdlib::Absolutepath] $clamd_config         = undef,
@@ -102,14 +102,14 @@ class clamav (
   $clamav_milter_service_enable_real = pick($clamav_milter_service_enable, $clamav::params::clamav_milter_service_enable_default, true)
 
   # User account
-  $user_real    = pick($user,  $user_default, 'clamav')
-  $group_real   = pick($group, $group_default, 'clamav')
-  $uid_real     = pick($uid,   $uid_default, 496)
-  $gid_real     = pick($gid,   $gid_default, 496)
-  $home_real    = pick($home,  $home_default, '/var/lib/clamav')
-  $shell_real   = pick($shell, $shell_default, '/sbin/false')
-  $comment_real = pick($comment, $comment_default, 'ClamAV user')
-  $groups_real  = pick($groups, $groups_default, [])
+  $user_real    = pick($user,  $clamav::params::user_default)
+  $group_real   = pick($group, $clamav::params::group_default)
+  $uid_real     = $uid ? { undef => $clamav::params::uid_default, default => $uid }
+  $gid_real     = $gid ? { undef => $clamav::params::gid_default, default => $gid }
+  $home_real    = pick($home,  $clamav::params::home_default)
+  $shell_real   = pick($shell, $clamav::params::shell_default)
+  $comment_real = pick($comment, $clamav::params::comment_default, 'ClamAV user')
+  $groups_real  = $groups ? { undef => $clamav::params::$groups_default, default => $groups }
 
   # Config paths
   $clamd_config_real         = pick($clamd_config, $clamav::params::clamd_config_default, '/etc/clamav/clamd.conf')
