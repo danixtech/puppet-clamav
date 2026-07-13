@@ -2,14 +2,15 @@
 # settings for RedHat (EL9)
 #
 
-clamav::clamd_default_options:
-  User: clamscan
-  PidFile: /run/clamd.scan/clamd.pid
+clamav::os_clamd_defaults:
+  Foreground: false
   LocalSocket: /run/clamd.scan/clamd.sock
   LocalSocketGroup: clamscan
-  LogFile: /var/log/clamd.scan
-  Foreground: false
+  LogFile: /var/log/clamav/clamav.log
+  PidFile: /run/clamd.scan/clamd.pid
+  User: clamscan
 
-clamav::freshclam_default_options:
+clamav::os_freshclam_defaults:
   DatabaseOwner: clamscan
+  NotifyClamd: /etc/clamd.d/scan.conf
   PidFile: /run/clamav/freshclam.pid

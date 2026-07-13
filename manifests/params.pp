@@ -187,8 +187,8 @@ class clamav::params {
   }
 
   # Looking up OS specific overrides from Hiera
-  $os_clamd_defaults = lookup('clamav::clamd_default_options', Hash, 'deep', {})
-  $os_freshclam_defaults = lookup('clamav::freshclam_default_options', Hash, 'deep', {})
+  $os_clamd_defaults = lookup('clamav::os_clamd_defaults', Hash, 'deep', {})
+  $os_freshclam_defaults = lookup('clamav::os_freshclam_defaults', Hash, 'deep', {})
   $os_milter_defaults = lookup('clamav::clamav_milter_default_options', Hash, 'deep', {})
 
   # Merge base defaults with OS-specific overrides from module Hiera
