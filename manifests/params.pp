@@ -11,24 +11,39 @@ class clamav::params {
   # ClamAV Daemon Package
   case $facts['os']['family'] {
     'Debian': {
-      $clamd_package_default     = 'clamav-daemon'
-      $clamd_service_default     = 'clamav-daemon'
-      $clamd_socket_default      = 'clamav-daemon.socket'
-      $clamd_use_socket          = true
-      $freshclam_service_default = 'clamav-freshclam'
+      $clamd_package_default        = 'clamav-daemon'
+      $clamd_service_default        = 'clamav-daemon'
+      $clamd_socket_default         = 'clamav-daemon.socket'
+      $clamd_use_socket             = true
+      $clamd_config_default         = '/etc/clamav/clamd.conf'
+
+      $freshclam_package_default    = 'clamav-freshclam'
+      $freshclam_service_default    = 'clamav-freshclam'
+      $freshclam_config_default     = '/etc/clamav/freshclam.conf'
+      $freshclam_sysconfig_default  = '/etc/default/freshclam'
+
+      $clamav_milter_config_default = '/etc/clamav/clamav-milter.conf'
     }
     'RedHat': {
-      $clamd_package_default     = 'clamd'
-      $clamd_service_default     = 'clamd'
-      $clamd_socket_default      = undef
-      $clamd_use_socket          = false
-      $freshclam_service_default = 'freshclam'
+      $clamd_package_default        = 'clamd'
+      $clamd_service_default        = 'clamd@scan'
+      $clamd_socket_default         = undef
+      $clamd_use_socket             = false
+      $clamd_config_default         = '/etc/clamd.d/scan.conf'
+
+      $freshclam_package_default    = 'clamav-update'
+      $freshclam_service_default    = 'clamav-freshclam'
+      $freshclam_config_default     = '/etc/freshclam.conf'
+      $freshclam_sysconfig_default  = '/etc/sysconfig/freshclam'
+
+      $clamav_milter_config_default = '/etc/clamav-milter.conf'
     }
-    default: {}
+    default: {
+      fail("Unsupported operating-system family: ${facts['os']['family']}")
+    }
   }
 
   $clamav_package_default        = 'clamav'
-  $freshclam_package_default     = 'clamav-freshclam'
   $clamav_milter_package_default = 'clamav-milter'
 
   $clamav_version_default        = 'latest'
@@ -42,6 +57,7 @@ class clamav::params {
 
   $freshclam_service_ensure_default = 'running'
   $freshclam_service_enable_default = true
+  $freshclam_delay_default      = 0
 
   $clamav_milter_service_default        = 'clamav-milter'
   $clamav_milter_service_ensure_default = 'running'
@@ -56,13 +72,6 @@ class clamav::params {
   $shell_default   = '/sbin/false'
   $comment_default = 'ClamAV user'
   $groups_default  = []
-
-  # Generic paths
-  $clamd_config_default         = '/etc/clamav/clamd.conf'
-  $freshclam_config_default     = '/etc/clamav/freshclam.conf'
-  $clamav_milter_config_default = '/etc/clamav/clamav-milter.conf'
-  $freshclam_sysconfig_default  = '/etc/default/freshclam'
-  $freshclam_delay_default      = 0
 
   # Generic ClamAV defaults (baseline configuration)
   $default_clamd_options = {
