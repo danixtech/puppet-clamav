@@ -1,13 +1,13 @@
 # @summary Set up freshclam config and service.
 #
-# @param config_owner
-#   owner of the freshclam config file
-# @param config_group
-#   group that owns the freshclam config file
-# @param mode
-#   mode of the freshclam config file
-# @param sort_options
-#   for true, the options are sorted,
+# @param options
+#   Hash of freshclam configuration options rendered into the config file.
+#
+# @param config_file
+#   Absolute path to the freshclam.conf file to manage.
+#
+# @param service_name
+#   Name of the freshclam system service.
 class clamav::freshclam(
   Hash $options = $clamav::_freshclam_options,
   Stdlib::Absolutepath $config_file = $clamav::freshclam_config,

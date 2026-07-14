@@ -39,7 +39,7 @@ describe 'clamav', type: :class do
         it { is_expected.to contain_class('clamav::freshclam') }
       end
 
-      context 'manage manage_clamav_milter' do
+      context 'manage clamav_milter' do
         if facts[:osfamily] == 'RedHat' && facts[:operatingsystemrelease] >= '7.0'
           let(:params) { { manage_clamav_milter: true } }
 
@@ -87,7 +87,7 @@ describe 'clamav', type: :class do
               it 'is valid when there is no freshclam package' do
                 is_expected.not_to contain_package('freshclam')
               end
-              it 'is valid when there no file freshclam_sysconfig' do
+              it 'is valid when there is no freshclam_sysconfig file' do
                 is_expected.not_to contain_file('freshclam_sysconfig')
               end
             elsif facts[:operatingsystemmajrelease].to_i == 7

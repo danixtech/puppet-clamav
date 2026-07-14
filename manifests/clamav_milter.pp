@@ -1,7 +1,13 @@
 # @summary Set up clamav_milter config and service.
 #
-# @param sort_options
-#   for true, the options are sorted,
+# @param options
+#   Hash of clamav-milter configuration options rendered into the config file.
+#
+# @param config_file
+#   Absolute path to the clamav-milter.conf file to manage.
+#
+# @param service_name
+#   Name of the clamav-milter system service.
 #
 class clamav::clamav_milter(
   Hash $options           = $clamav::_clamav_milter_options,
@@ -41,4 +47,3 @@ class clamav::clamav_milter(
     subscribe  => [Package[$package_real], File[$config_file]],
   }
 }
-

@@ -31,7 +31,7 @@ describe 'clamav' do
     end
 
     # test stuff
-    it 'is_expected.to work idempotently with no errors' do
+    it 'works idempotently with no errors' do
       pp = <<-EOS
       class { 'clamav':
         manage_clamd => true,

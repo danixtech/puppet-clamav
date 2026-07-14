@@ -1,7 +1,6 @@
 clamav
 =============
 
-[![Build Status](https://travis-ci.org/edestecd/puppet-clamav.svg)](https://travis-ci.org/edestecd/puppet-clamav)
 [![Puppet Forge](https://img.shields.io/puppetforge/v/edestecd/clamav.svg)](https://forge.puppet.com/edestecd/clamav)
 [![Puppet Forge Downloads](https://img.shields.io/puppetforge/dt/edestecd/clamav.svg)](https://forge.puppet.com/edestecd/clamav)
 [![Puppet Forge Score](https://img.shields.io/puppetforge/f/edestecd/clamav.svg)](https://forge.puppet.com/edestecd/clamav/scores)
@@ -29,14 +28,14 @@ Puppet Module to install/configure clamd and freshclam on Debian and RedHat
 The clamav module provides some classes to install and configure most of the components of clamav.  
 You may also choose to manage only the parts that you need.  
 This module aims to be minimalistic.  
-No options produces stock config files as provided by your package installer.
+The module supplies baseline configuration defaults that can be overridden with class parameters or Hiera data.
 
 This module has the following components that can be managed (or not):
 * Base clamav package - command line and libs
 * clamav user
 * clam daemon
 * freshclam daemon/cron (dependent on OS)
-* clamav-milter (RHEL7 and derivatives only for now)
+* clamav-milter
 
 ## Setup
 
@@ -109,8 +108,9 @@ class { 'clamav':
 }
 ```
 
-### Add clamav-milter support and customize its config (RHEL7 and derivatives only)
-#### Please note that as of RHEL 7.2 only the TCP socket has been tested successfully
+### Add clamav-milter support and customize its config
+
+Test milter socket choices on the target distribution before deployment.
 
 ```puppet
 class { 'clamav':
@@ -164,17 +164,16 @@ clamav::freshclam_options:
 * clamav::user
 * clamav::clamd
 * clamav::freshclam
+* clamav::clamav_milter
 
 ## Limitations
 
-This module has been built on and tested against Puppet 3.8 and higher.  
-While I am sure other versions work, I have not tested them.
+The supported Puppet range is declared in `metadata.json`. Puppet versions outside that range are not supported.
 
-This module supports modern RedHat and Debian based systems.  
-No plans to support other versions (unless you add it :)..
+The operating systems and releases supported by the published module are declared in `metadata.json`. Data files for additional releases may represent work in progress rather than a tested support commitment.
 
-ClamAV versions prior to 1.5 may fail in FIPS-enabled environments due to reliance on legacy MD5-based database verification. ClamAV 1.5 introduces .cvd.sign verification compatible with FIPS environments.
+ClamAV 1.5.x support is not yet validated by this module's test suite. Test package availability, configuration directives, database updates, and service startup before deploying it.
 
 ## Development
 
-Pull Requests welcome
+Run `bundle exec rake validate` and `bundle exec rake spec` before opening a pull request. Include the affected Puppet, operating-system, and ClamAV versions in the pull request description.
