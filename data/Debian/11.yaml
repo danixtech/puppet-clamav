@@ -4,7 +4,7 @@
 
 clamav::clamd::sort_options: false
 
-clamav::clamd_default_options:
+clamav::clamd_platform_options:
   LocalSocket: '/var/run/clamav/clamd.ctl'
   FixStaleSocket: true
   LocalSocketGroup: 'clamav'

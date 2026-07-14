@@ -156,6 +156,23 @@ clamav::freshclam_options:
   - clam.host2.mydomain.com
 ```
 
+### clamd option precedence
+
+`clamd.conf` is generated from four option layers, with later layers taking
+precedence:
+
+1. Module baseline options.
+2. OS-specific `clamav::clamd_platform_options` data.
+3. `clamav::clamd_default_options` supplied by the caller.
+4. `clamav::clamd_options` supplied by the caller.
+
+Use `clamd_options` for normal overrides. Set a key to `undef` to omit that
+directive. Boolean values render as `yes` or `no`; arrays render the directive
+once per non-empty element. Empty strings and empty arrays emit no directive.
+The legacy internal Hiera keys `clamav::os_clamd_defaults` and
+`clamav::clamd_defaults_options` remain accepted, but new platform data should
+use `clamav::clamd_platform_options`.
+
 ## Reference
 
 ### Classes

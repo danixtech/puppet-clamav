@@ -51,10 +51,10 @@ class clamav (
   Optional[Boolean] $clamav_milter_service_enable = undef,
 
   # Options
-  Optional[Hash] $clamd_options        = {},
+  Optional[Hash[String, Clamav::Config_value]] $clamd_options = {},
   Optional[Hash] $freshclam_options    = {},
   Optional[Hash] $clamav_milter_options = {},
-  Optional[Hash] $clamd_default_options     = undef,
+  Optional[Hash[String, Clamav::Config_value]] $clamd_default_options = undef,
   Optional[Hash] $freshclam_default_options = undef,
   Optional[Hash] $milter_default_options    = undef,
 ) inherits clamav::params {
@@ -116,13 +116,22 @@ class clamav (
   ############################
   # Merge options with defaults
   ############################
-  $clamd_defaults_real = $clamd_default_options ? {
-    undef   => $clamav::params::clamd_default_options,
-    default => merge(
-      $clamav::params::clamd_default_options,
-      $clamd_default_options,
-    ),
+  # clamd options are resolved in one explicit precedence chain:
+  # baseline < platform < caller defaults < caller overrides.
+  $clamd_caller_defaults = $clamd_default_options ? {
+    undef   => {},
+    default => $clamd_default_options,
   }
+  $clamd_caller_options = $clamd_options ? {
+    undef   => {},
+    default => $clamd_options,
+  }
+
+  $clamd_defaults_real = merge(
+    $clamav::params::clamd_baseline_options,
+    $clamav::params::clamd_platform_options,
+    $clamd_caller_defaults,
+  )
 
   $freshclam_defaults_real = $freshclam_default_options ? {
     undef   => $clamav::params::freshclam_default_options,
@@ -134,7 +143,7 @@ class clamav (
 
   $clamd_options_merged = merge(
     $clamd_defaults_real,
-    $clamd_options,
+    $clamd_caller_options,
   )
 
   $freshclam_options_merged = merge(

@@ -2,7 +2,7 @@
 # settings for RedHat (EL9)
 #
 
-clamav::os_clamd_defaults:
+clamav::clamd_platform_options:
   Foreground: false
   LocalSocket: /run/clamd.scan/clamd.sock
   LocalSocketGroup: clamscan

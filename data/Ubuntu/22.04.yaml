@@ -4,7 +4,7 @@
 clamav::clamd::sort_options: false
 
 # OS-specific defaults - automatically looked up by clamav class
-clamav::clamd_defaults_options:
+clamav::clamd_platform_options:
   LocalSocket: '/var/run/clamav/clamd.ctl'
   FixStaleSocket: true
   LocalSocketGroup: 'clamav'

@@ -186,13 +186,23 @@ class clamav::params {
     'LogSyslog'   => 'yes',
   }
 
-  # Looking up OS specific overrides from Hiera
+  # Looking up OS-specific overrides from Hiera. The two legacy keys remain
+  # supported below the canonical platform key for compatibility.
+  $legacy_clamd_defaults = lookup('clamav::clamd_defaults_options', Hash, 'deep', {})
   $os_clamd_defaults = lookup('clamav::os_clamd_defaults', Hash, 'deep', {})
+  $clamd_platform_defaults = lookup('clamav::clamd_platform_options', Hash, 'deep', {})
   $os_freshclam_defaults = lookup('clamav::os_freshclam_defaults', Hash, 'deep', {})
   $os_milter_defaults = lookup('clamav::clamav_milter_default_options', Hash, 'deep', {})
 
-  # Merge base defaults with OS-specific overrides from module Hiera
-  $clamd_default_options    = merge($default_clamd_options, $os_clamd_defaults)
+  # Expose normalized layers separately. clamd_default_options is retained as
+  # a compatibility variable for callers of the private params class.
+  $clamd_baseline_options = $default_clamd_options
+  $clamd_platform_options = merge(
+    $legacy_clamd_defaults,
+    $os_clamd_defaults,
+    $clamd_platform_defaults,
+  )
+  $clamd_default_options = merge($clamd_baseline_options, $clamd_platform_options)
   $freshclam_default_options = merge($default_freshclam_options, $os_freshclam_defaults)
   $clamav_milter_default_options = merge($default_clamav_milter_options, $os_milter_defaults)
 }
