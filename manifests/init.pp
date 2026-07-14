@@ -132,15 +132,25 @@ class clamav (
     ),
   }
 
-  $_clamd_options = merge(
+  $clamd_options_merged = merge(
     $clamd_defaults_real,
     $clamd_options,
   )
 
-  $_freshclam_options = merge(
+  $freshclam_options_merged = merge(
     $freshclam_defaults_real,
     $freshclam_options,
   )
+
+  # Ubuntu 20.04 packages ClamAV 0.103, which does not recognize this
+  # ClamAV 1.5 configuration option in either configuration file.
+  if $facts['os']['name'] == 'Ubuntu' and $facts['os']['release']['major'] == '20.04' {
+    $_clamd_options = delete($clamd_options_merged, 'FIPSCryptoHashLimits')
+    $_freshclam_options = delete($freshclam_options_merged, 'FIPSCryptoHashLimits')
+  } else {
+    $_clamd_options = $clamd_options_merged
+    $_freshclam_options = $freshclam_options_merged
+  }
 
   $_clamav_milter_options = merge(
     pick($milter_default_options, $clamav::params::clamav_milter_default_options),
