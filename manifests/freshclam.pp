@@ -25,6 +25,17 @@ class clamav::freshclam(
     before => File[$config_file],
   }
 
+  if $facts['os']['name'] == 'Ubuntu' and $facts['os']['release']['major'] == '20.04' {
+    file { '/var/run/clamav':
+      ensure  => directory,
+      owner   => $clamav::user_real,
+      group   => $clamav::group_real,
+      mode    => '0755',
+      require => Package[$package_name],
+      before  => File[$config_file],
+    }
+  }
+
   file { $config_file:
     ensure  => file,
     owner   => $clamav::user_real,
