@@ -21,8 +21,8 @@ class clamav (
   Optional[String] $clamav_milter_version = undef,
 
   # User account
-  Optional[String[1]] $user             = undef,
-  Optional[String[1]] $group            = undef,
+  Optional[Variant[String[1], Boolean]] $user  = undef,
+  Optional[Variant[String[1], Boolean]] $group = undef,
   Optional[Integer] $uid                = undef,
   Optional[Integer] $gid                = undef,
   Optional[Stdlib::Absolutepath] $home  = undef,
@@ -35,7 +35,7 @@ class clamav (
   Optional[Stdlib::Absolutepath] $freshclam_config     = undef,
   Optional[Stdlib::Absolutepath] $clamav_milter_config = undef,
   Optional[Stdlib::Absolutepath] $freshclam_sysconfig  = undef,
-  Optional[Integer] $freshclam_delay                   = undef,
+  Optional[Variant[Integer, String]] $freshclam_delay  = undef,
 
   # Services
   Optional[String] $clamd_service                 = undef,
@@ -88,7 +88,10 @@ class clamav (
     $clamd_socket_real = undef
   }
 
-  $freshclam_service_real        = pick($freshclam_service, $clamav::params::freshclam_service_default, 'freshclam')
+  $freshclam_service_real = $freshclam_service ? {
+    undef   => $clamav::params::freshclam_service_default,
+    default => $freshclam_service,
+  }
   $freshclam_service_ensure_real = pick($freshclam_service_ensure, $clamav::params::freshclam_service_ensure_default, 'running')
   $freshclam_service_enable_real = pick($freshclam_service_enable, $clamav::params::freshclam_service_enable_default, true)
 
@@ -110,28 +113,30 @@ class clamav (
   $clamd_config_real         = pick($clamd_config, $clamav::params::clamd_config_default, '/etc/clamav/clamd.conf')
   $freshclam_config_real     = pick($freshclam_config, $clamav::params::freshclam_config_default, '/etc/clamav/freshclam.conf')
   $clamav_milter_config_real = pick($clamav_milter_config, $clamav::params::clamav_milter_config_default, '/etc/clamav/clamav-milter.conf')
-  $freshclam_sysconfig_real  = pick($freshclam_sysconfig, $clamav::params::freshclam_sysconfig_default, '/etc/default/freshclam')
+  $freshclam_sysconfig_real = $freshclam_sysconfig ? {
+    undef   => $clamav::params::freshclam_sysconfig_default,
+    default => $freshclam_sysconfig,
+  }
   $freshclam_delay_real      = pick($freshclam_delay, $clamav::params::freshclam_delay_default, '0')
 
   ############################
   # Merge options with defaults
   ############################
-  # clamd options are resolved in one explicit precedence chain:
-  # baseline < platform < caller defaults < caller overrides.
-  $clamd_caller_defaults = $clamd_default_options ? {
-    undef   => {},
-    default => $clamd_default_options,
-  }
+  # A caller-supplied clamd_default_options hash replaces the module defaults,
+  # preserving the public behavior from master. clamd_options remains the
+  # final override layer in either case.
   $clamd_caller_options = $clamd_options ? {
     undef   => {},
     default => $clamd_options,
   }
 
-  $clamd_defaults_real = merge(
-    $clamav::params::clamd_baseline_options,
-    $clamav::params::clamd_platform_options,
-    $clamd_caller_defaults,
-  )
+  $clamd_defaults_real = $clamd_default_options ? {
+    undef   => merge(
+      $clamav::params::clamd_baseline_options,
+      $clamav::params::clamd_platform_options,
+    ),
+    default => $clamd_default_options,
+  }
 
   $freshclam_defaults_real = $freshclam_default_options ? {
     undef   => $clamav::params::freshclam_default_options,
@@ -175,10 +180,10 @@ class clamav (
   # Manage user
   ############################
   if $manage_user {
-    anchor { 'clamav::begin': }
+    Anchor['clamav::begin']
       -> class { 'clamav::user': }
-      -> class { 'clamav::install': }
-      -> anchor { 'clamav::end': }
+      -> Class['clamav::install']
+      -> Anchor['clamav::end']
   }
 
   ############################

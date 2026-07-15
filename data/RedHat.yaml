@@ -1,0 +1,15 @@
+---
+clamav::clamd_platform_options:
+  LocalSocket: /var/run/clamd.scan/clamd.sock
+  LocalSocketGroup: clamscan
+  LogFile: ~
+  LogRotate: ~
+  LogSyslog: true
+  PidFile: /var/run/clamd.scan/clamd.pid
+  TemporaryDirectory: /var/tmp
+  User: clamscan
+
+clamav::os_freshclam_defaults:
+  DatabaseOwner: clamupdate
+  PidFile: ~
+  UpdateLogFile: ~

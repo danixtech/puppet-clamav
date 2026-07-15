@@ -1,9 +1,7 @@
 # manifests/params.pp
 class clamav::params {
-
   # Generic management flags
   $manage_user          = false
-  $manage_repo          = false
   $manage_clamd         = false
   $manage_freshclam     = false
   $manage_clamav_milter = false
@@ -11,16 +9,17 @@ class clamav::params {
   # ClamAV Daemon Package
   case $facts['os']['family'] {
     'Debian': {
+      $manage_repo                  = false
       $clamd_package_default        = 'clamav-daemon'
       $clamd_service_default        = 'clamav-daemon'
       $clamd_socket_default         = 'clamav-daemon.socket'
-      $clamd_use_socket             = true
+      $clamd_use_socket             = false
       $clamd_config_default         = '/etc/clamav/clamd.conf'
 
       $freshclam_package_default    = 'clamav-freshclam'
       $freshclam_service_default    = 'clamav-freshclam'
       $freshclam_config_default     = '/etc/clamav/freshclam.conf'
-      $freshclam_sysconfig_default  = '/etc/default/freshclam'
+      $freshclam_sysconfig_default  = undef
 
       $clamav_milter_config_default = '/etc/clamav/clamav-milter.conf'
 
@@ -30,35 +29,44 @@ class clamav::params {
       $uid_default     = 496
       $gid_default     = 496
       $home_default    = '/var/lib/clamav'
-      $shell_default   = '/sbin/false'
+      $shell_default   = '/bin/false'
       $comment_default = 'ClamAV user'
       $groups_default  = []
-
     }
     'RedHat': {
-      $clamd_package_default        = 'clamd'
+      $manage_repo                  = true
+      $el10_or_newer = versioncmp($facts['os']['release']['major'], '10') >= 0
+      $clamd_package_default        = $el10_or_newer ? {
+        true    => 'clamd',
+        default => 'clamav-scanner-systemd',
+      }
       $clamd_service_default        = 'clamd@scan'
       $clamd_socket_default         = undef
       $clamd_use_socket             = false
       $clamd_config_default         = '/etc/clamd.d/scan.conf'
 
-      $freshclam_package_default    = 'clamav-update'
-      $freshclam_service_default    = 'clamav-freshclam'
+      $freshclam_package_default    = $el10_or_newer ? {
+        true    => 'clamav-freshclam',
+        default => 'clamav-update',
+      }
+      $freshclam_service_default    = versioncmp($facts['os']['release']['major'], '8') >= 0 ? {
+        true    => 'clamav-freshclam',
+        default => undef,
+      }
       $freshclam_config_default     = '/etc/freshclam.conf'
       $freshclam_sysconfig_default  = '/etc/sysconfig/freshclam'
 
-      $clamav_milter_config_default = '/etc/clamav-milter.conf'
+      $clamav_milter_config_default = '/etc/mail/clamav-milter.conf'
 
       # User account
       $user_default    = 'clamscan'
       $group_default   = 'clamscan'
-      $uid_default     = undef
-      $gid_default     = undef
-      $home_default    = '/var/lib/clamav'
-      $shell_default   = '/sbin/false'
-      $comment_default = 'ClamAV scanner'
+      $uid_default     = 496
+      $gid_default     = 496
+      $home_default    = '/'
+      $shell_default   = '/sbin/nologin'
+      $comment_default = 'Clamav scanner user'
       $groups_default  = []
-
     }
     default: {
       fail("Unsupported operating-system family: ${facts['os']['family']}")
@@ -66,7 +74,13 @@ class clamav::params {
   }
 
   $clamav_package_default        = 'clamav'
-  $clamav_milter_package_default = 'clamav-milter'
+  $clamav_milter_package_default = [$facts['os']['family'], $facts['os']['release']['major']] ? {
+    ['RedHat', Pattern[/^([1-9]|[1-9][0-9]+)$/]] => versioncmp($facts['os']['release']['major'], '10') >= 0 ? {
+      true    => 'clamav-milter',
+      default => 'clamav-milter-systemd',
+    },
+    default => 'clamav-milter',
+  }
 
   $clamav_version_default        = 'latest'
   $clamd_version_default         = 'latest'

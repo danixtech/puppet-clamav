@@ -1,6 +1,6 @@
 # @summary Manage clam user/group.
 class clamav::user {
-  if $clamav::group {
+  if $clamav::group_real {
     group { 'clamav':
       ensure => present,
       name   => $clamav::group_real,
@@ -9,7 +9,7 @@ class clamav::user {
     }
   }
 
-  if $clamav::user {
+  if $clamav::user_real {
     user { 'clamav':
       ensure  => present,
       name    => $clamav::user_real,

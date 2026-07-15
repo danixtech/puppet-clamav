@@ -15,16 +15,19 @@
 # @param service_enable
 #   Whether the clamd service is enabled at boot.
 #
-class clamav::clamd(
+# @param sort_options
+#   Whether configuration options are rendered in sorted order.
+#
+class clamav::clamd (
   Hash $options                     = $clamav::_clamd_options,
-  Stdlib::Absolutepath $config_file = $clamav::clamd_config,
-  String $service_name              = $clamav::clamd_service,
-  String $service_ensure            = $clamav::clamd_service_ensure,
-  Boolean $service_enable           = $clamav::clamd_service_enable,
-  String $package_name              = $clamav::clamd_package,
-  String $package_version           = $clamav::clamd_version,
+  Stdlib::Absolutepath $config_file = $clamav::clamd_config_real,
+  String $service_name              = $clamav::clamd_service_real,
+  String $service_ensure            = $clamav::clamd_service_ensure_real,
+  Boolean $service_enable           = $clamav::clamd_service_enable_real,
+  String $package_name              = $clamav::clamd_package_real,
+  String $package_version           = $clamav::clamd_version_real,
+  Boolean $sort_options             = true,
 ) {
-
   package { $package_name:
     ensure => $package_version,
     before => File[$config_file],
@@ -35,7 +38,7 @@ class clamav::clamd(
     owner   => $clamav::user_real,
     group   => $clamav::group_real,
     mode    => '0644',
-    content => epp('clamav/clamav.conf.epp', { 'options' => $options }),
+    content => epp('clamav/clamav.conf.epp', { 'options' => $options, 'sort_options' => $sort_options }),
     notify  => Service[$service_name],
   }
 

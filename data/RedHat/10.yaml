@@ -1,0 +1,13 @@
+---
+clamav::clamd_platform_options:
+  Foreground: false
+  LocalSocket: /run/clamd.scan/clamd.sock
+  LocalSocketGroup: clamscan
+  LogFile: /var/log/clamav/clamav.log
+  PidFile: /run/clamd.scan/clamd.pid
+  User: clamscan
+
+clamav::os_freshclam_defaults:
+  DatabaseOwner: clamupdate
+  NotifyClamd: /etc/clamd.d/scan.conf
+  PidFile: /run/clamav/freshclam.pid

@@ -7,7 +7,7 @@ ubuntu_2204_facts = supported_os.fetch('ubuntu-22.04-x86_64')
 describe 'clamav', type: :class do
   let(:facts) { debian_11_facts }
 
-  context 'with normalized option layers' do
+  context 'with replacement defaults and caller overrides' do
     let(:params) do
       {
         manage_clamd: true,
@@ -30,10 +30,10 @@ describe 'clamav', type: :class do
         .without_content(%r{^CallerDefault\s}m)
     end
 
-    it 'retains baseline and platform options' do
+    it 'does not retain baseline and platform options' do
       is_expected.to contain_file('/etc/clamav/clamd.conf')
-        .with_content(%r{^Bytecode yes$}m)
-        .with_content(%r{^LocalSocket /var/run/clamav/clamd\.ctl$}m)
+        .without_content(%r{^Bytecode\s}m)
+        .without_content(%r{^LocalSocket\s}m)
     end
   end
 

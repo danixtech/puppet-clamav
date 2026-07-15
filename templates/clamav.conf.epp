@@ -5,8 +5,11 @@
 %>
 ### File managed with puppet ###
 
-<% $sorted_keys = keys($options).sort -%>
-<% $sorted_keys.each |$k| { -%>
+<% $option_keys = $sort_options ? {
+     true    => keys($options).sort,
+     default => keys($options),
+   } -%>
+<% $option_keys.each |$k| { -%>
 <%   $v = $options[$k] -%>
 <%   $values = $v =~ Array ? {
          true    => $v,

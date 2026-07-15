@@ -25,16 +25,12 @@ describe 'clamav', type: :class do
         .that_comes_before('File[/etc/clamav/clamd.conf]')
     end
 
-    it do
-      is_expected.to contain_service('clamav-daemon.socket')
-        .with_ensure('running')
-        .with_enable(true)
-    end
+    it { is_expected.not_to contain_service('clamav-daemon.socket') }
 
     it do
       is_expected.to contain_service('clamav-daemon')
-        .with_ensure('stopped')
-        .with_enable(false)
+        .with_ensure('running')
+        .with_enable(true)
     end
 
     it do
@@ -88,7 +84,7 @@ describe 'clamav', type: :class do
     it { is_expected.not_to contain_service('clamav-daemon.socket') }
 
     it do
-      is_expected.to contain_package('clamd')
+      is_expected.to contain_package('clamav-scanner-systemd')
         .with_ensure('latest')
         .that_comes_before('File[/etc/clamd.d/scan.conf]')
     end
@@ -97,7 +93,7 @@ describe 'clamav', type: :class do
       is_expected.to contain_service('clamd@scan')
         .with_ensure('running')
         .with_enable(true)
-        .that_subscribes_to('Package[clamd]')
+        .that_subscribes_to('Package[clamav-scanner-systemd]')
         .that_subscribes_to('File[/etc/clamd.d/scan.conf]')
     end
   end
