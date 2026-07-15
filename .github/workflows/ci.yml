@@ -59,6 +59,9 @@ jobs:
       - name: Prepare fixtures
         run: bundle exec rake spec_prep
 
+      - name: Verify fact database
+        run: bundle exec ruby -rjson -rfacterdb -e 'JSON.parse(FacterDB.database)'
+
       - name: Run focused compatibility tests
         run: >-
           bundle exec rspec
@@ -89,6 +92,9 @@ jobs:
 
       - name: Prepare pinned puppet/epel 5.0.0 fixture
         run: bundle exec rake spec_prep
+
+      - name: Verify fact database
+        run: bundle exec ruby -rjson -rfacterdb -e 'JSON.parse(FacterDB.database)'
 
       - name: Run real EPEL integration tests
         run: >-
