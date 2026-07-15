@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - codex_compatibility_restore
   workflow_dispatch:
 
 permissions:
