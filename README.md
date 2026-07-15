@@ -170,13 +170,23 @@ clamav::freshclam_options:
 
 ### clamd option precedence
 
-`clamd.conf` is generated from four option layers, with later layers taking
-precedence:
+When `clamd_default_options` is omitted, `clamd.conf` is generated from three
+option layers, with later layers taking precedence:
 
 1. Module baseline options.
 2. OS-specific `clamav::clamd_platform_options` data.
-3. `clamav::clamd_default_options` supplied by the caller.
-4. `clamav::clamd_options` supplied by the caller.
+3. `clamav::clamd_options` supplied by the caller.
+
+For compatibility with earlier module releases, explicitly supplying
+`clamd_default_options` replaces both the module baseline and OS platform
+defaults. In that case the precedence is:
+
+1. `clamav::clamd_default_options` supplied by the caller.
+2. `clamav::clamd_options` supplied by the caller.
+
+This replacement behavior can remove required platform directives, so a
+custom `clamd_default_options` hash must include every default the target
+system needs.
 
 Use `clamd_options` for normal overrides. Set a key to `undef` to omit that
 directive. Boolean values render as `yes` or `no`; arrays render the directive
@@ -213,6 +223,12 @@ not a compatible hard dependency for this module's Puppet 8 support. Puppet 8
 users on EL10 must provide package repository availability separately and use
 `manage_repo => false`.
 
+Ubuntu 24.04, Ubuntu 26.04, EL10, and CentOS Stream 9/10 currently have catalog
+characterization coverage. Real package installation, service startup, and
+idempotency acceptance coverage is still required before treating every
+combination as production-validated. Ubuntu 26.04 compatibility is provisional
+and may require adjustment if the final release introduces breaking changes.
+
 ClamAV 1.5.x support is not yet validated by this module's test suite. Test package availability, configuration directives, database updates, and service startup before deploying it.
 
 ## Development
@@ -226,8 +242,13 @@ GitHub Actions runs three blocking CI jobs on pull requests and pushes to
 * The focused master-compatibility and priority-platform unit suites.
 * Real `puppet/epel` 5.0.0 integration catalogs for legacy EL7.9 and EL9.
 
-The broad `spec/classes/clamav_spec.rb` matrix still contains expectations for
-obsolete internal Puppet resource titles. It is intentionally excluded from
-the blocking workflow until those expectations are replaced with current
-platform-specific runtime assertions. Run `bundle exec rake spec` locally to
-audit that legacy matrix while it is being remediated.
+The test bundle pins `facterdb` 1.26.0 for compatibility with
+`rspec-puppet-facts` 2.x and JSON 2.9.x because later strict JSON parsers reject
+malformed historical Windows facts in that database. The CI fact-database
+smoke check reports these resolved versions before running platform specs.
+
+The broad `spec/classes/clamav_spec.rb` matrix asserts platform-resolved
+packages, absolute configuration paths and ownership, service names, ordering,
+notifications, and subscriptions. Run `bundle exec rake spec` locally for the
+complete unit suite; the blocking workflow keeps the smaller compatibility
+suite separate so failures in master-sensitive behavior remain easy to locate.

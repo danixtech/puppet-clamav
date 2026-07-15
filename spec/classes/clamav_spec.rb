@@ -75,9 +75,48 @@ describe 'clamav', type: :class do
         let(:params) { { manage_clamd: true } }
 
         context 'with defaults' do
-          it { is_expected.to contain_package('clamd') }
-          it { is_expected.to contain_file('clamd.conf') }
-          it { is_expected.to contain_service('clamd') }
+          if facts[:osfamily] == 'RedHat'
+            it do
+              is_expected.to contain_package('clamav-scanner-systemd')
+                .with_ensure('latest')
+                .that_comes_before('File[/etc/clamd.d/scan.conf]')
+            end
+
+            it do
+              is_expected.to contain_file('/etc/clamd.d/scan.conf').with(
+                owner: 'clamscan',
+                group: 'clamscan',
+                mode: '0644',
+              )
+            end
+
+            it do
+              is_expected.to contain_service('clamd@scan')
+                .that_subscribes_to('Package[clamav-scanner-systemd]')
+                .that_subscribes_to('File[/etc/clamd.d/scan.conf]')
+            end
+          elsif facts[:osfamily] == 'Debian'
+            it do
+              is_expected.to contain_package('clamav-daemon')
+                .with_ensure('latest')
+                .that_comes_before('File[/etc/clamav/clamd.conf]')
+            end
+
+            it do
+              is_expected.to contain_file('/etc/clamav/clamd.conf').with(
+                owner: 'clamav',
+                group: 'clamav',
+                mode: '0644',
+              )
+            end
+
+            it do
+              is_expected.to contain_service('clamav-daemon')
+                .with(ensure: 'running', enable: true)
+                .that_subscribes_to('Package[clamav-daemon]')
+                .that_subscribes_to('File[/etc/clamav/clamd.conf]')
+            end
+          end
         end
       end
 
@@ -86,32 +125,68 @@ describe 'clamav', type: :class do
 
         context 'with defaults' do
           if facts[:osfamily] == 'RedHat'
-            if facts[:operatingsystemmajrelease].to_i == 6
-              it 'is valid when there is no freshclam package' do
-                is_expected.not_to contain_package('freshclam')
-              end
-              it 'is valid when there is no freshclam_sysconfig file' do
-                is_expected.not_to contain_file('freshclam_sysconfig')
-              end
-            elsif facts[:operatingsystemmajrelease].to_i == 7
-              it 'is valid when there is freshclam package' do
-                is_expected.to contain_package('freshclam')
-              end
-              it 'is valid when there is freshclam_sysconfig file' do
-                is_expected.to contain_file('freshclam_sysconfig')
-              end
+            it do
+              is_expected.to contain_package('clamav-update')
+                .with_ensure('latest')
+                .that_comes_before('File[/etc/freshclam.conf]')
             end
-            it 'is valid when there is freshclam.conf file' do
-              is_expected.to contain_file('freshclam.conf')
+
+            it do
+              is_expected.to contain_file('/etc/sysconfig/freshclam').with(
+                owner: 'root',
+                group: 'root',
+                mode: '0644',
+              ).with_content(%r{^FRESHCLAM_DELAY=0$}m)
             end
-            it 'is valid when there is no freshclam service' do
-              is_expected.not_to contain_service('freshclam')
+
+            it do
+              config = contain_file('/etc/freshclam.conf').with(
+                owner: 'clamscan',
+                group: 'clamscan',
+                mode: '0644',
+              )
+
+              if facts[:operatingsystemmajrelease].to_i >= 8
+                config = config.that_notifies('Service[clamav-freshclam]')
+              end
+
+              is_expected.to config
+            end
+
+            if facts[:operatingsystemmajrelease].to_i >= 8
+              it do
+                is_expected.to contain_service('clamav-freshclam')
+                  .with(ensure: 'running', enable: true)
+                  .that_subscribes_to('Package[clamav-update]')
+                  .that_subscribes_to('File[/etc/freshclam.conf]')
+                  .that_subscribes_to('File[/etc/sysconfig/freshclam]')
+              end
+            else
+              it { is_expected.not_to contain_service('clamav-freshclam') }
             end
           elsif facts[:osfamily] == 'Debian'
-            it { is_expected.to contain_package('freshclam') }
-            it { is_expected.to contain_file('freshclam.conf') }
-            it { is_expected.to contain_service('freshclam') }
-            it { is_expected.not_to contain_file('freshclam_sysconfig') }
+            it do
+              is_expected.to contain_package('clamav-freshclam')
+                .with_ensure('latest')
+                .that_comes_before('File[/etc/clamav/freshclam.conf]')
+            end
+
+            it do
+              is_expected.to contain_file('/etc/clamav/freshclam.conf').with(
+                owner: 'clamav',
+                group: 'clamav',
+                mode: '0644',
+              ).that_notifies('Service[clamav-freshclam]')
+            end
+
+            it do
+              is_expected.to contain_service('clamav-freshclam')
+                .with(ensure: 'running', enable: true)
+                .that_subscribes_to('Package[clamav-freshclam]')
+                .that_subscribes_to('File[/etc/clamav/freshclam.conf]')
+            end
+
+            it { is_expected.not_to contain_file('/etc/default/freshclam') }
           end
         end
       end
