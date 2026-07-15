@@ -6,6 +6,9 @@ describe 'clamav', type: :class do
       let(:facts) do
         facts
       end
+      let(:pre_condition) do
+        'class epel {}' if facts[:osfamily] == 'RedHat'
+      end
 
       context 'with defaults' do
         it { is_expected.to compile.with_all_deps }

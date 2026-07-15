@@ -4,7 +4,12 @@
 fixtures:
   forge_modules:
     stdlib: "puppetlabs/stdlib"
-    epel: "puppet/epel"
+    # 5.0.0 is the newest release that supports legacy EL7 while retaining
+    # Puppet 7 and Puppet 8 compatibility. EL10 repository integration is
+    # tested separately from the Puppet unit fixture.
+    epel:
+      repo: "puppet/epel"
+      ref: "5.0.0"
     # Extracted from core in puppet 6
     yumrepo_core: "puppetlabs/yumrepo_core"
   symlinks:

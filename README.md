@@ -49,7 +49,19 @@ This module has the following components that can be managed (or not):
 
 ### Setup Requirements
 
-only need to install the module
+The module depends on `puppet/epel` for its optional Red Hat repository
+management. The supported repository-module combinations are not uniform
+across Enterprise Linux releases:
+
+* EL7.9 is legacy, best-effort compatibility and uses `puppet/epel` 5.0.0.
+* EL8 and EL9 are compatible with `puppet/epel` 5.0.0.
+* On EL10 with Puppet 8, manage EPEL or an equivalent package source outside
+  this module and set `manage_repo => false`.
+
+EL7.9 support may be removed in a future release if its obsolete packages,
+fixtures, or dependencies can no longer be maintained reasonably. No support
+through a particular date is guaranteed. EL8-10 and current Ubuntu releases
+are the primary development and testing targets.
 
 ### Beginning with clamav
 
@@ -188,6 +200,18 @@ use `clamav::clamd_platform_options`.
 The supported Puppet range is declared in `metadata.json`. Puppet versions outside that range are not supported.
 
 The operating systems and releases supported by the published module are declared in `metadata.json`. Data files for additional releases may represent work in progress rather than a tested support commitment.
+
+RHEL 7.9 is maintained as legacy, best-effort compatibility rather than a
+primary target. Its catalog behavior is isolated from repository-module
+internals in unit tests, with limited real `puppet/epel` 5.0.0 integration
+coverage. This compatibility may be withdrawn before the end of Red Hat's
+extended lifecycle if maintaining the required legacy dependency becomes
+impractical.
+
+EL10 catalog behavior is tested, but `puppet/epel` 6.x targets OpenVox and is
+not a compatible hard dependency for this module's Puppet 8 support. Puppet 8
+users on EL10 must provide package repository availability separately and use
+`manage_repo => false`.
 
 ClamAV 1.5.x support is not yet validated by this module's test suite. Test package availability, configuration directives, database updates, and service startup before deploying it.
 
