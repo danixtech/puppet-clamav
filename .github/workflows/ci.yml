@@ -60,7 +60,7 @@ jobs:
         run: bundle exec rake spec_prep
 
       - name: Verify fact database
-        run: bundle exec ruby -rjson -rfacterdb -e 'JSON.parse(FacterDB.database)'
+        run: bundle exec ruby -rjson -rfacterdb -e 'puts "json=#{JSON::VERSION} facterdb=#{Gem.loaded_specs.fetch("facterdb").version}"; JSON.parse(FacterDB.database)'
 
       - name: Run focused compatibility tests
         run: >-
@@ -94,7 +94,7 @@ jobs:
         run: bundle exec rake spec_prep
 
       - name: Verify fact database
-        run: bundle exec ruby -rjson -rfacterdb -e 'JSON.parse(FacterDB.database)'
+        run: bundle exec ruby -rjson -rfacterdb -e 'puts "json=#{JSON::VERSION} facterdb=#{Gem.loaded_specs.fetch("facterdb").version}"; JSON.parse(FacterDB.database)'
 
       - name: Run real EPEL integration tests
         run: >-

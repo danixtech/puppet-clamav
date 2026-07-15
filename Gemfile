@@ -15,9 +15,10 @@ end
 
 group :development do
   gem "voxpupuli-puppet-lint-plugins", '~> 5.0', require: false
-  # 1.27.0 can produce an invalid combined facts database on Linux, causing
-  # on_supported_os to fail while specs are being loaded.
+  # facterdb 1.x is required by rspec-puppet-facts 2.x, but its historical
+  # Windows facts contain paths rejected by JSON's newer strict parser.
   gem "facterdb", '= 1.26.0',                    require: false
+  gem "json", '~> 2.9.0',                        require: false
   gem "metadata-json-lint", '~> 3.0',            require: false
   gem "puppetlabs_spec_helper", '~> 6.0',        require: false
   gem "rspec-puppet-facts", '~> 2.0',            require: false
