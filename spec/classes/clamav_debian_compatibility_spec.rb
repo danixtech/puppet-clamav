@@ -3,15 +3,15 @@ require 'spec_helper'
 supported_os = on_supported_os
 
 describe 'clamav', type: :class do
-  %w[
-    debian-8-x86_64
-    debian-9-x86_64
-    debian-11-x86_64
-    ubuntu-14.04-x86_64
-    ubuntu-16.04-x86_64
-    ubuntu-18.04-x86_64
-    ubuntu-20.04-x86_64
-    ubuntu-22.04-x86_64
+  [
+    'debian-8-x86_64',
+    'debian-9-x86_64',
+    'debian-11-x86_64',
+    'ubuntu-14.04-x86_64',
+    'ubuntu-16.04-x86_64',
+    'ubuntu-18.04-x86_64',
+    'ubuntu-20.04-x86_64',
+    'ubuntu-22.04-x86_64',
   ].each do |os|
     context "on #{os}" do
       let(:facts) { supported_os.fetch(os) }

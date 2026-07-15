@@ -218,3 +218,16 @@ ClamAV 1.5.x support is not yet validated by this module's test suite. Test pack
 ## Development
 
 Run `bundle exec rake validate` and `bundle exec rake spec` before opening a pull request. Include the affected Puppet, operating-system, and ClamAV versions in the pull request description.
+
+GitHub Actions runs three blocking CI jobs on pull requests and pushes to
+`master`:
+
+* Metadata, Puppet syntax, and Ruby style validation on Puppet 8/Ruby 3.3.
+* The focused master-compatibility and priority-platform unit suites.
+* Real `puppet/epel` 5.0.0 integration catalogs for legacy EL7.9 and EL9.
+
+The broad `spec/classes/clamav_spec.rb` matrix still contains expectations for
+obsolete internal Puppet resource titles. It is intentionally excluded from
+the blocking workflow until those expectations are replaced with current
+platform-specific runtime assertions. Run `bundle exec rake spec` locally to
+audit that legacy matrix while it is being remediated.

@@ -1,5 +1,8 @@
 require 'spec_helper'
 
+# Direct declaration compatibility requires separate rspec-puppet subjects.
+# rubocop:disable RSpec/MultipleDescribes
+
 supported_os = on_supported_os
 debian_11_facts = supported_os.fetch('debian-11-x86_64')
 
@@ -73,3 +76,4 @@ describe 'clamav::clamav_milter', type: :class do
 
   it { is_expected.to compile.with_all_deps }
 end
+# rubocop:enable RSpec/MultipleDescribes
