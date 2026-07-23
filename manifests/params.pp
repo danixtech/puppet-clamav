@@ -7,6 +7,7 @@ class clamav::params {
   $manage_freshclam             = false
   $clamd_service_ensure         = 'running'
   $clamd_service_enable         = true
+  $clamd_use_socket             = false
   $freshclam_service_ensure     = 'running'
   $freshclam_service_enable     = true
   $clamav_milter_service_ensure = 'running'
@@ -17,6 +18,7 @@ class clamav::params {
     $manage_repo    = true
     $clamav_package = 'clamav'
     $clamav_version = 'latest'
+    $clamd_socket   = undef
 
     if versioncmp($facts['os']['release']['major'], '7') >= 0 {
       # ### user vars ####
@@ -143,6 +145,7 @@ class clamav::params {
     $clamd_version     = 'latest'
     $clamd_config      = '/etc/clamav/clamd.conf'
     $clamd_service     = 'clamav-daemon'
+    $clamd_socket      = 'clamav-daemon.socket'
     $clamd_options     = {}
 
     # ### freshclam vars ####
