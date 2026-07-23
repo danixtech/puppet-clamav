@@ -25,6 +25,19 @@ class clamav::freshclam (
     }
   }
 
+  # Ubuntu 20.04 does not reliably create the runtime directory before
+  # freshclam attempts to write its PID file.
+  if $facts['os']['name'] == 'Ubuntu' and $facts['os']['release']['major'] == '20.04' {
+    file { '/var/run/clamav':
+      ensure  => directory,
+      owner   => $clamav::user,
+      group   => $clamav::group,
+      mode    => '0755',
+      require => Package['freshclam'],
+      before  => File['freshclam.conf'],
+    }
+  }
+
   file { 'freshclam.conf':
     ensure  => file,
     path    => $clamav::freshclam_config,
