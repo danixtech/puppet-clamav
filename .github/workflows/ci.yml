@@ -71,6 +71,27 @@ jobs:
           spec/classes/clamav_socket_activation_spec.rb
           --format progress
 
+  unit:
+    name: Complete unit suite (Puppet 8 / Ruby 3.3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Prepare fixtures
+        run: bundle exec rake spec_prep
+
+      - name: Run complete unit suite
+        run: bundle exec rake spec
+
   legacy_epel:
     name: Legacy EL7.9 and EL9 EPEL integration
     runs-on: ubuntu-latest
