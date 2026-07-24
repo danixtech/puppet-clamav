@@ -149,6 +149,25 @@ socket unit is active. A custom socket unit can be supplied with
 `clamd_socket`. Enabling socket activation on a platform without a socket-unit
 default requires an explicit `clamd_socket` value.
 
+The compatibility configuration renders `LocalSocketMode 666`, allowing any
+local account that can reach the socket path to connect. Sites that do not
+require world-accessible scanning should restrict the socket to its configured
+group:
+
+```puppet
+class { 'clamav':
+  manage_clamd  => true,
+  clamd_options => {
+    'LocalSocketMode' => '660',
+  },
+}
+```
+
+Ensure every local client that needs the socket belongs to the configured
+`LocalSocketGroup` before applying a restrictive mode. The module retains
+`666` as its compatibility default; changing that default requires a
+separately documented migration.
+
 ### Understand freshclam service policy
 
 Debian-family systems manage the `clamav-freshclam` service directly.
