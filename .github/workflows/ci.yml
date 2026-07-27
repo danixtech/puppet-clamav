@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - modernization
   workflow_dispatch:
 
 permissions:
@@ -90,6 +91,48 @@ jobs:
         run: bundle exec rake spec_prep
 
       - name: Run complete unit suite
+        run: bundle exec rake spec
+
+  openvox:
+    name: Complete unit suite (OpenVox 8 / Ruby 3.3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PUPPET_GEM_NAME: openvox
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Report selected runtime
+        env:
+          RUBYOPT: "-r./spec/support/openvox_load_path"
+        run: >-
+          bundle exec ruby -e
+          'require "puppet";
+          source = $LOADED_FEATURES.grep(%r{/puppet\.rb$}).first;
+          abort "OpenVox was not loaded: #{source}" unless source.include?("/openvox-");
+          puts "#{Puppet.version} from #{source}"'
+
+      - name: Validate metadata and syntax
+        env:
+          RUBYOPT: "-r./spec/support/openvox_load_path"
+        run: bundle exec rake validate
+
+      - name: Prepare fixtures
+        env:
+          RUBYOPT: "-r./spec/support/openvox_load_path"
+        run: bundle exec rake spec_prep
+
+      - name: Run complete unit suite
+        env:
+          RUBYOPT: "-r./spec/support/openvox_load_path"
         run: bundle exec rake spec
 
   legacy_epel:

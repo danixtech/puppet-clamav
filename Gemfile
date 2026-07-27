@@ -43,13 +43,14 @@ group :system_tests do
   gem "serverspec", '~> 2.41',   require: false
 end
 
+puppet_gem = ENV.fetch('PUPPET_GEM_NAME', 'puppet')
 puppet_version = ENV['PUPPET_GEM_VERSION']
 facter_version = ENV['FACTER_GEM_VERSION']
 hiera_version = ENV['HIERA_GEM_VERSION']
 
 gems = {}
 
-gems['puppet'] = location_for(puppet_version)
+gems[puppet_gem] = location_for(puppet_version)
 
 # If facter or hiera versions have been specified via the environment
 # variables

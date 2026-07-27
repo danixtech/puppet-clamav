@@ -267,6 +267,14 @@ signing-key resources. It is not a package-installation acceptance test.
 Pull requests should describe the affected operating systems, Puppet and
 ClamAV versions, compatibility impact, and tests run.
 
+### Puppet and OpenVox
+
+The module uses one source tree for Puppet and OpenVox. Puppet 8 has catalog
+and runtime CI coverage; OpenVox 8 currently has dependency-resolution,
+metadata-validation, and catalog coverage. OpenVox runtime support is not yet
+formally claimed. See [the dual-runtime support strategy](docs/openvox-support.md)
+for the evidence requirements and publishing recommendation.
+
 ### Runtime acceptance
 
 The Litmus smoke suite provisions the `smoke` target from `provision.yaml`,
