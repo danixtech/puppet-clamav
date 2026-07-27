@@ -59,7 +59,8 @@ describe 'clamav on Ubuntu 24.04' do
   end
 
   before(:each) do
-    skip 'Ubuntu 24.04 target only' unless fact('os.release.full').start_with?('24.04')
+    release = run_shell('facter os.release.full').stdout.strip
+    skip 'Ubuntu 24.04 target only' unless release.start_with?('24.04')
   end
 
   it 'records platform and repository package evidence' do
