@@ -271,8 +271,8 @@ ClamAV versions, compatibility impact, and tests run.
 
 The Litmus smoke suite provisions the `smoke` target from `provision.yaml`,
 installs Puppet 8 and this module, applies the ClamAV manifest twice, and
-checks packages, generated configuration, permissions, services, runtime
-directories, and native configuration parsing. Evidence is emitted with the
+checks packages, generated configuration, permissions, explicit stopped-service
+policy, database directories, and native configuration parsing. Evidence is emitted with the
 `CLAMAV_ACCEPTANCE_EVIDENCE` prefix so CI logs record the tested Puppet,
 operating-system, ClamAV, and database state.
 
@@ -289,4 +289,6 @@ bundle exec rake litmus:tear_down
 
 Always tear down the target when debugging interrupts the sequence. The smoke
 target demonstrates the harness; it does not add a runtime support claim.
-Platform-specific acceptance and support decisions remain separate work.
+It keeps daemons stopped so platform-specific service startup and runtime-directory
+requirements can be characterized without folding new platform behavior into the
+harness issue. Platform-specific acceptance and support decisions remain separate work.

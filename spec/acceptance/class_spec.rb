@@ -6,9 +6,13 @@ describe 'clamav smoke acceptance' do
   let(:manifest) do
     <<~MANIFEST
       class { 'clamav':
-        manage_repo      => false,
-        manage_clamd     => true,
-        manage_freshclam => true,
+        manage_repo              => false,
+        manage_clamd             => true,
+        manage_freshclam         => true,
+        clamd_service_ensure     => 'stopped',
+        clamd_service_enable     => false,
+        freshclam_service_ensure => 'stopped',
+        freshclam_service_enable => false,
       }
     MANIFEST
   end
@@ -49,18 +53,18 @@ describe 'clamav smoke acceptance' do
     it { is_expected.to be_mode 644 }
   end
 
-  describe file('/var/run/clamav') do
+  describe file('/var/lib/clamav') do
     it { is_expected.to be_directory }
   end
 
   describe service('clamav-daemon') do
-    it { is_expected.to be_enabled }
-    it { is_expected.to be_running }
+    it { is_expected.not_to be_enabled }
+    it { is_expected.not_to be_running }
   end
 
   describe service('clamav-freshclam') do
-    it { is_expected.to be_enabled }
-    it { is_expected.to be_running }
+    it { is_expected.not_to be_enabled }
+    it { is_expected.not_to be_running }
   end
 
   describe command('clamd --config-file=/etc/clamav/clamd.conf --version') do
