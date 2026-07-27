@@ -3,3 +3,8 @@ smoke:
   provisioner: docker
   images:
     - litmusimage/ubuntu:22.04
+
+ubuntu-2404:
+  provisioner: docker
+  images:
+    - litmusimage/ubuntu:24.04

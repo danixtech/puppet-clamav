@@ -5,23 +5,21 @@ on:
     branches:
       - modernization
   workflow_dispatch:
-    inputs:
-      target:
-        description: Litmus provision.yaml target
-        required: true
-        default: smoke
-        type: choice
-        options:
-          - smoke
 
 permissions:
   contents: read
 
 jobs:
-  smoke:
-    name: Litmus smoke (${{ inputs.target || 'smoke' }})
+  acceptance:
+    name: Litmus (${{ matrix.target }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - smoke
+          - ubuntu-2404
 
     steps:
       - name: Check out repository
@@ -36,8 +34,8 @@ jobs:
       - name: Prepare Litmus fixtures
         run: bundle exec rake spec_prep
 
-      - name: Provision smoke target
-        run: bundle exec rake "litmus:provision_list[${{ inputs.target || 'smoke' }}]"
+      - name: Provision target
+        run: bundle exec rake "litmus:provision_list[${{ matrix.target }}]"
 
       - name: Install Puppet 8
         run: bundle exec rake "litmus:install_agent[puppet8]"

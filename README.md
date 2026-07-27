@@ -277,8 +277,9 @@ for the evidence requirements and publishing recommendation.
 
 ### Runtime acceptance
 
-The Litmus smoke suite provisions the `smoke` target from `provision.yaml`,
-installs Puppet 8 and this module, applies the ClamAV manifest twice, and
+The Litmus suite provisions the `smoke` and `ubuntu-2404` targets from
+`provision.yaml`, installs Puppet 8 and this module, applies the ClamAV
+manifest twice, and
 checks packages, generated configuration, permissions, explicit stopped-service
 policy, database directories, and native configuration parsing. Evidence is emitted with the
 `CLAMAV_ACCEPTANCE_EVIDENCE` prefix so CI logs record the tested Puppet,
@@ -300,3 +301,9 @@ target demonstrates the harness; it does not add a runtime support claim.
 It keeps daemons stopped so platform-specific service startup and runtime-directory
 requirements can be characterized without folding new platform behavior into the
 harness issue. Platform-specific acceptance and support decisions remain separate work.
+
+Use `ubuntu-2404` instead of `smoke` in the commands above to exercise Ubuntu
+24.04 package versions, direct services, opt-in socket activation, restricted
+socket permissions, a deterministic local test signature, and two-run
+convergence. This evidence does not by itself change the published support
+matrix.
