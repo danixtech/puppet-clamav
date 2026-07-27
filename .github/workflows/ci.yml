@@ -111,29 +111,28 @@ jobs:
           bundler-cache: true
 
       - name: Report selected runtime
-        env:
-          RUBYOPT: "-r./spec/support/openvox_load_path"
-        run: >-
-          bundle exec ruby -e
+        run: |
+          OPENVOX_LIB="$(bundle show openvox)/lib"
+          RUBYLIB="${OPENVOX_LIB}${RUBYLIB:+:${RUBYLIB}}" bundle exec ruby -e \
           'require "puppet";
           source = $LOADED_FEATURES.grep(%r{/puppet\.rb$}).first;
           abort "OpenVox was not loaded: #{source}" unless source.include?("/openvox-");
           puts "#{Puppet.version} from #{source}"'
 
       - name: Validate metadata and syntax
-        env:
-          RUBYOPT: "-r./spec/support/openvox_load_path"
-        run: bundle exec rake validate
+        run: |
+          OPENVOX_LIB="$(bundle show openvox)/lib"
+          RUBYLIB="${OPENVOX_LIB}${RUBYLIB:+:${RUBYLIB}}" bundle exec rake validate
 
       - name: Prepare fixtures
-        env:
-          RUBYOPT: "-r./spec/support/openvox_load_path"
-        run: bundle exec rake spec_prep
+        run: |
+          OPENVOX_LIB="$(bundle show openvox)/lib"
+          RUBYLIB="${OPENVOX_LIB}${RUBYLIB:+:${RUBYLIB}}" bundle exec rake spec_prep
 
       - name: Run complete unit suite
-        env:
-          RUBYOPT: "-r./spec/support/openvox_load_path"
-        run: bundle exec rake spec
+        run: |
+          OPENVOX_LIB="$(bundle show openvox)/lib"
+          RUBYLIB="${OPENVOX_LIB}${RUBYLIB:+:${RUBYLIB}}" bundle exec rake spec
 
   legacy_epel:
     name: Legacy EL7.9 and EL9 EPEL integration
