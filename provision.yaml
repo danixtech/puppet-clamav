@@ -1,0 +1,5 @@
+---
+smoke:
+  provisioner: docker
+  images:
+    - litmusimage/ubuntu:22.04

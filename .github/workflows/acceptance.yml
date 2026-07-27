@@ -1,0 +1,55 @@
+name: Runtime acceptance
+
+on:
+  push:
+    branches:
+      - modernization
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Litmus provision.yaml target
+        required: true
+        default: smoke
+        type: choice
+        options:
+          - smoke
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Litmus smoke (${{ inputs.target || 'smoke' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Prepare Litmus fixtures
+        run: bundle exec rake spec_prep
+
+      - name: Provision smoke target
+        run: bundle exec rake "litmus:provision_list[${{ inputs.target || 'smoke' }}]"
+
+      - name: Install Puppet 8
+        run: bundle exec rake "litmus:install_agent[puppet8]"
+
+      - name: Install module under test
+        run: bundle exec rake litmus:install_module
+
+      - name: Run acceptance suite
+        env:
+          RSPEC_DEBUG: "true"
+        run: bundle exec rake litmus:acceptance:parallel
+
+      - name: Tear down targets
+        if: always()
+        run: bundle exec rake litmus:tear_down

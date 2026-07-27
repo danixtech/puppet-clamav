@@ -1,54 +1,84 @@
+# frozen_string_literal: true
+
 require 'spec_helper_acceptance'
 
-describe 'clamav' do
-  context 'install' do
-    it 'works idempotently with no errors' do
-      pp = <<-EOS
+describe 'clamav smoke acceptance' do
+  let(:manifest) do
+    <<~MANIFEST
       class { 'clamav':
+        manage_repo      => false,
+        manage_clamd     => true,
+        manage_freshclam => true,
       }
-      EOS
+    MANIFEST
+  end
 
-      # Run it twice and test for idempotency
-      apply_manifest(pp, catch_failures: true)
-      apply_manifest(pp, catch_changes:  true)
-    end
+  before(:all) do
+    acceptance_evidence('puppet_version', 'puppet --version')
+    acceptance_evidence('os_name', 'facter os.name')
+    acceptance_evidence('os_release', 'facter os.release.full')
+  end
 
-    describe package('clamav') do
-      it { is_expected.to be_installed }
-    end
-  end # install
+  it 'applies twice without failures or second-run changes' do
+    idempotent_apply(manifest)
+  end
 
-  context 'clamd' do
-    # set params
-    if fact('osfamily') == 'RedHat'
-      service_name = 'clamd'
-      clamd_name = 'clamd'
-    end
+  describe package('clamav') do
+    it { is_expected.to be_installed }
+  end
 
-    if fact('osfamily') == 'Debian'
-      service_name = 'clamav-daemon'
-      clamd_name = 'clamav-daemon'
-    end
+  describe package('clamav-daemon') do
+    it { is_expected.to be_installed }
+  end
 
-    # test stuff
-    it 'is_expected.to work idempotently with no errors' do
-      pp = <<-EOS
-      class { 'clamav':
-        manage_clamd => true,
-      }
-      EOS
+  describe package('clamav-freshclam') do
+    it { is_expected.to be_installed }
+  end
 
-      # Run it twice and test for idempotency
-      apply_manifest(pp, catch_failures: true)
-      apply_manifest(pp, catch_changes: true)
-    end
+  describe file('/etc/clamav/clamd.conf') do
+    it { is_expected.to be_file }
+    it { is_expected.to be_owned_by 'root' }
+    it { is_expected.to be_grouped_into 'root' }
+    it { is_expected.to be_mode 644 }
+  end
 
-    describe package(clamd_name) do
-      it { is_expected.to be_installed }
-    end
+  describe file('/etc/clamav/freshclam.conf') do
+    it { is_expected.to be_file }
+    it { is_expected.to be_owned_by 'root' }
+    it { is_expected.to be_grouped_into 'root' }
+    it { is_expected.to be_mode 644 }
+  end
 
-    describe service(service_name) do
-      it { is_expected.to be_running }
-    end
+  describe file('/var/run/clamav') do
+    it { is_expected.to be_directory }
+  end
+
+  describe service('clamav-daemon') do
+    it { is_expected.to be_enabled }
+    it { is_expected.to be_running }
+  end
+
+  describe service('clamav-freshclam') do
+    it { is_expected.to be_enabled }
+    it { is_expected.to be_running }
+  end
+
+  describe command('clamd --config-file=/etc/clamav/clamd.conf --version') do
+    its(:exit_status) { is_expected.to eq 0 }
+  end
+
+  describe command('freshclam --config-file=/etc/clamav/freshclam.conf --version') do
+    its(:exit_status) { is_expected.to eq 0 }
+  end
+
+  it 'reports installed ClamAV versions and database state' do
+    expect(acceptance_evidence('clamd_version', 'clamd --version')).not_to be_empty
+    expect(acceptance_evidence('freshclam_version', 'freshclam --version')).not_to be_empty
+    expect(
+      acceptance_evidence(
+        'database_files',
+        "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
+      ),
+    ).to be_a(String)
   end
 end

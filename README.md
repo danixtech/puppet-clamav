@@ -266,3 +266,27 @@ signing-key resources. It is not a package-installation acceptance test.
 
 Pull requests should describe the affected operating systems, Puppet and
 ClamAV versions, compatibility impact, and tests run.
+
+### Runtime acceptance
+
+The Litmus smoke suite provisions the `smoke` target from `provision.yaml`,
+installs Puppet 8 and this module, applies the ClamAV manifest twice, and
+checks packages, generated configuration, permissions, services, runtime
+directories, and native configuration parsing. Evidence is emitted with the
+`CLAMAV_ACCEPTANCE_EVIDENCE` prefix so CI logs record the tested Puppet,
+operating-system, ClamAV, and database state.
+
+Run the complete workflow locally with Docker:
+
+```shell
+bundle exec rake spec_prep
+bundle exec rake 'litmus:provision_list[smoke]'
+bundle exec rake 'litmus:install_agent[puppet8]'
+bundle exec rake litmus:install_module
+bundle exec rake litmus:acceptance:parallel
+bundle exec rake litmus:tear_down
+```
+
+Always tear down the target when debugging interrupts the sequence. The smoke
+target demonstrates the harness; it does not add a runtime support claim.
+Platform-specific acceptance and support decisions remain separate work.
