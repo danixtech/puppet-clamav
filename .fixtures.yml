@@ -3,6 +3,9 @@
 ---
 fixtures:
   repositories:
+    facts:
+      repo: "https://github.com/puppetlabs/puppetlabs-facts.git"
+      ref: "1.7.0"
     puppet_agent:
       repo: "https://github.com/puppetlabs/puppetlabs-puppet_agent.git"
       ref: "v4.28.0"
