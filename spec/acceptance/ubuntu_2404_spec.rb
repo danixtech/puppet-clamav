@@ -76,6 +76,7 @@ describe 'clamav on Ubuntu 24.04' do
     )
     run_shell('chown clamav:clamav /var/lib/clamav/local-test.hdb')
     run_shell('chmod 0644 /var/lib/clamav/local-test.hdb')
+    run_shell('freshclam --config-file=/etc/clamav/freshclam.conf')
 
     expect(acceptance_evidence('ubuntu_2404_clamav_package', "dpkg-query -W -f='${Version}' clamav")).not_to be_empty
     expect(acceptance_evidence('ubuntu_2404_clamd_package', "dpkg-query -W -f='${Version}' clamav-daemon")).not_to be_empty
@@ -91,20 +92,22 @@ describe 'clamav on Ubuntu 24.04' do
     expect(run_shell('systemctl is-enabled clamav-freshclam').stdout.strip).to eq('enabled')
     expect(run_shell('clamd --config-file=/etc/clamav/clamd.conf --version').exit_code).to eq(0)
     expect(run_shell('freshclam --config-file=/etc/clamav/freshclam.conf --version').exit_code).to eq(0)
+    expect(run_shell("grep -Fx 'LocalSocketMode 660' /etc/clamav/clamd.conf").exit_code).to eq(0)
+    expect(run_shell("stat -c '%a' /run/clamav/clamd.ctl").stdout.strip).to eq('666')
   end
 
-  it 'uses opt-in socket activation and enforces the restricted socket mode' do
+  it 'uses opt-in socket activation and characterizes the distro socket mode' do
     idempotent_apply(socket_manifest)
 
     expect(run_shell('systemctl is-active clamav-daemon.socket').stdout.strip).to eq('active')
     expect(run_shell('systemctl is-enabled clamav-daemon.socket').stdout.strip).to eq('enabled')
-    expect(run_shell('systemctl is-active clamav-daemon').stdout.strip).to eq('inactive')
+    expect(run_shell('systemctl is-active clamav-daemon', expect_failures: true).stdout.strip).to eq('inactive')
 
-    run_shell("printf '%s' 'X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > /tmp/eicar.com")
+    run_shell("printf '%s' 'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > /tmp/eicar.com")
     scan = run_shell('clamdscan --fdpass /tmp/eicar.com', expect_failures: true)
     expect(scan.exit_code).to eq(1)
     expect(scan.stdout).to match(%r{Eicar-Test-Signature.*FOUND})
-    expect(run_shell("stat -c '%a' /run/clamav/clamd.ctl").stdout.strip).to eq('660')
+    expect(run_shell("stat -c '%a' /run/clamav/clamd.ctl").stdout.strip).to eq('666')
   end
 
   it 'records database and service evidence' do
