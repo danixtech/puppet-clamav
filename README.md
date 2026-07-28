@@ -277,9 +277,9 @@ for the evidence requirements and publishing recommendation.
 
 ### Runtime acceptance
 
-The Litmus CI suite provisions the `smoke`, `ubuntu-2404`, and `debian-12`
-targets from `provision.yaml`, installs Puppet 8 and this module, applies the
-ClamAV manifest twice, and
+The Litmus CI suite provisions the `smoke`, `ubuntu-2404`, `debian-12`, and
+`rocky-9` targets from `provision.yaml`, installs Puppet 8 and this module,
+applies the ClamAV manifest twice, and
 checks packages, generated configuration, permissions, explicit stopped-service
 policy, database directories, and native configuration parsing. Evidence is emitted with the
 `CLAMAV_ACCEPTANCE_EVIDENCE` prefix so CI logs record the tested Puppet,
@@ -319,3 +319,9 @@ matrix and is not a claimed runtime target. As of July 2026, the Puppet agent
 installer requests `puppet8-release-trixie.deb`, which is unavailable from the
 Puppet package repository. Do not substitute Debian 12 agent packages or infer
 Debian 13 support from container provisioning alone.
+
+Use `rocky-9` to exercise Rocky Linux 9 with the module-managed EPEL
+repository. The target records the distribution, enabled repository, package,
+ClamAV, and SELinux state while checking database updates, `clamd@scan`,
+freshclam, runtime paths, test-file detection, and two-run convergence. This
+evidence applies specifically to Rocky Linux 9 and does not imply EL10 support.
