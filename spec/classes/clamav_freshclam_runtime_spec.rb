@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-supported_os = on_supported_os
+supported_os = characterized_os_facts
 ubuntu_2004_facts = supported_os.fetch('ubuntu-20.04-x86_64')
 ubuntu_2204_facts = supported_os.fetch('ubuntu-22.04-x86_64')
 

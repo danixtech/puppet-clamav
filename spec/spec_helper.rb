@@ -71,4 +71,54 @@ def ensure_module_defined(module_name)
   end
 end
 
+# Compatibility examples intentionally exercise legacy platforms that are no
+# longer formal metadata support claims. Keep those fixtures explicit so
+# narrowing the maintained support matrix does not erase public-behavior
+# characterization.
+def characterized_os_facts
+  on_supported_os(
+    supported_os: [
+      {
+        'operatingsystem' => 'Debian',
+        'operatingsystemrelease' => ['11'],
+      },
+      {
+        'operatingsystem' => 'RedHat',
+        'operatingsystemrelease' => ['7', '8'],
+      },
+      {
+        'operatingsystem' => 'Ubuntu',
+        'operatingsystemrelease' => ['20.04', '22.04'],
+      },
+    ],
+  )
+end
+
+# FacterDB 1.26.0 does not contain Ubuntu 24.04, but it remains pinned for
+# parser compatibility with historical facts. Derive only that missing fact
+# set from Ubuntu 22.04 and fail if any other formal metadata row disappears
+# from the catalog matrix.
+def formally_supported_os_facts
+  expected = RspecPuppetFacts.meta_supported_os.flat_map do |os|
+    os.fetch('operatingsystemrelease').map do |release|
+      "#{os.fetch('operatingsystem').downcase}-#{release}-x86_64"
+    end
+  end
+  facts = on_supported_os
+
+  if expected.include?('ubuntu-24.04-x86_64') && !facts.key?('ubuntu-24.04-x86_64')
+    ubuntu_facts = Marshal.load(Marshal.dump(characterized_os_facts.fetch('ubuntu-22.04-x86_64')))
+    ubuntu_facts[:operatingsystemrelease] = '24.04'
+    ubuntu_facts[:operatingsystemmajrelease] = '24.04'
+    ubuntu_facts[:os]['release']['full'] = '24.04'
+    ubuntu_facts[:os]['release']['major'] = '24.04'
+    facts['ubuntu-24.04-x86_64'] = ubuntu_facts
+  end
+
+  missing = expected - facts.keys
+  raise "No catalog facts available for formal support rows: #{missing.join(', ')}" unless missing.empty?
+
+  facts
+end
+
 # 'spec_overrides' from sync.yml will appear below this line

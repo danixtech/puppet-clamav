@@ -5,7 +5,7 @@ require 'spec_helper'
 # preferred future implementation.
 # rubocop:disable RSpec/MultipleDescribes
 
-supported_os = on_supported_os
+supported_os = characterized_os_facts
 debian_11_facts = supported_os.fetch('debian-11-x86_64')
 redhat_7_facts = supported_os.fetch('redhat-7-x86_64')
 redhat_8_facts = supported_os.fetch('redhat-8-x86_64')

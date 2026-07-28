@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-redhat_10_facts = on_supported_os.fetch('redhat-8-x86_64')
+redhat_10_facts = characterized_os_facts.fetch('redhat-8-x86_64')
 redhat_10_facts = Marshal.load(Marshal.dump(redhat_10_facts))
 redhat_10_facts[:operatingsystemrelease] = '10.0'
 redhat_10_facts[:operatingsystemmajrelease] = '10'

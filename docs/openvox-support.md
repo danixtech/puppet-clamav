@@ -38,15 +38,14 @@ sufficient: without load-path control, the current toolchain can load Puppet's
 `puppet.rb` instead. The OpenVox job therefore prepends the selected OpenVox
 library directory, asserts the actual loaded file, and reports that source
 before running validation and catalogs. A clean local Ruby 3.3 resolution
-selected OpenVox 8.23.1 and the complete 403-example suite passed with that
-load-path control. This proves source/catalog compatibility with the selected
-OpenVox implementation, but it is not a pure OpenVox toolchain or agent-runtime
-test.
+selected OpenVox 8.23.1 and the complete suite passed with that load-path
+control. This proves source/catalog compatibility with the selected OpenVox
+implementation, but it is not a pure OpenVox toolchain or agent-runtime test.
 
 Puppet module metadata has a `puppet` requirement but no separate `openvox`
-requirement. The existing `>= 4.7.0 < 9.0.0` declaration therefore describes
-the language/API compatibility boundary; it is not, by itself, evidence of
-OpenVox runtime support. Do not add an unrecognized metadata requirement.
+requirement. The `>= 8.0.0 < 9.0.0` declaration records the formally supported
+Puppet runtime boundary; it is not, by itself, evidence of OpenVox runtime
+support. Do not add an unrecognized metadata requirement.
 
 The `puppet/epel` dependency is a Puppet Forge module dependency, not a Ruby
 runtime dependency. Its namespace does not require the proprietary Puppet

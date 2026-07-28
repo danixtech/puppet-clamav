@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-supported_os = on_supported_os
+supported_os = characterized_os_facts
 redhat_7_facts = supported_os.fetch('redhat-7-x86_64')
 redhat_8_facts = supported_os.fetch('redhat-8-x86_64')
 redhat_9_facts = Marshal.load(Marshal.dump(redhat_8_facts))

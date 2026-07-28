@@ -236,17 +236,18 @@ clamav::freshclam_options:
 
 ## Limitations
 
-The supported Puppet and operating-system ranges are declared in
-`metadata.json`. Catalog compilation in CI does not replace runtime acceptance
-testing of package availability, generated configuration, database updates,
-or service startup.
+Formal support currently covers Puppet 8 on Ubuntu 24.04, Debian 12, and
+AlmaLinux 9. These combinations are declared in `metadata.json` and have
+automated catalog and runtime acceptance evidence.
 
-ClamAV 1.5+, Ubuntu 26.04, Debian 13, EL10, and OpenVox 8 have not been
-runtime-validated by this work and are not additional support claims.
+Older platforms retained in characterization tests are catalog-compatible
+legacy evidence, not maintained runtime-support claims. OpenVox 8 is
+source/catalog tested but has not been agent-runtime tested. ClamAV 1.5+,
+Ubuntu 26.04, Debian 13, and EL10 are not formally supported.
 
-The [EL10 packaging investigation](docs/el10-investigation.md) documents
-current EPEL package mappings, repository/runtime constraints, and the
-evidence required before EL10 support can be declared.
+See the [support policy and evidence matrix](docs/support-policy.md) for the
+meaning of each evidence level, legacy-removal policy, and links to the
+relevant workflows and investigations.
 
 ## Development
 
@@ -314,16 +315,15 @@ It keeps daemons stopped so platform-specific service startup and runtime-direct
 requirements can be characterized without folding new platform behavior into the
 harness issue. Platform-specific acceptance and support decisions remain separate work.
 
-Use `ubuntu-2404` instead of `smoke` in the commands above to exercise Ubuntu
-24.04 package versions, direct services, opt-in socket activation, restricted
-socket permissions, a deterministic local test signature, and two-run
-convergence. This evidence does not by itself change the published support
-matrix.
+Use `ubuntu-2404` instead of `smoke` in the commands above to exercise formally
+supported Ubuntu 24.04 package versions, direct services, opt-in socket
+activation, restricted socket permissions, a deterministic local test
+signature, and two-run convergence.
 
-Use `debian-12` to exercise Debian 12. The target records its package and
-ClamAV versions independently and checks configuration rendering, database
-updates, direct services, opt-in socket activation, runtime paths, test-file
-detection, and two-run convergence.
+Use `debian-12` to exercise formally supported Debian 12. The target records its
+package and ClamAV versions independently and checks configuration rendering,
+database updates, direct services, opt-in socket activation, runtime paths,
+test-file detection, and two-run convergence.
 
 A `debian-13` provisioning entry and release-aware acceptance assertions are
 available for continued investigation, but Debian 13 is not in the required CI
@@ -332,8 +332,9 @@ installer requests `puppet8-release-trixie.deb`, which is unavailable from the
 Puppet package repository. Do not substitute Debian 12 agent packages or infer
 Debian 13 support from container provisioning alone.
 
-Use `alma-9` to exercise AlmaLinux 9 with the module-managed EPEL
-repository. The target records the distribution, enabled repository, package,
-ClamAV, and SELinux state while checking database updates, `clamd@scan`,
-freshclam, runtime paths, test-file detection, and two-run convergence. This
-evidence applies specifically to AlmaLinux 9 and does not imply EL10 support.
+Use `alma-9` to exercise formally supported AlmaLinux 9 with the module-managed
+EPEL repository. The target records the distribution, enabled repository,
+package, ClamAV, and SELinux state while checking database updates,
+`clamd@scan`, freshclam, runtime paths, test-file detection, and two-run
+convergence. This evidence applies specifically to AlmaLinux 9 and does not
+imply EL10 support.

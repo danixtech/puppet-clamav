@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'clamav', type: :class do
-  on_supported_os.each do |os, facts|
+  formally_supported_os_facts.each do |os, facts|
     context "on #{os}" do
       let(:facts) { facts }
       let(:pre_condition) { 'class epel {}' if facts[:osfamily] == 'RedHat' }

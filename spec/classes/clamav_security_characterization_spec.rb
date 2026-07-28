@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'clamav' do
-  supported_os = on_supported_os
+  supported_os = characterized_os_facts
 
   context 'on Debian 11' do
     let(:facts) { supported_os.fetch('debian-11-x86_64') }
