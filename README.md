@@ -243,6 +243,10 @@ or service startup.
 ClamAV 1.5+, Ubuntu 26.04, Debian 13, EL10, and OpenVox 8 have not been
 runtime-validated by this work and are not additional support claims.
 
+The [EL10 packaging investigation](docs/el10-investigation.md) documents
+current EPEL package mappings, repository/runtime constraints, and the
+evidence required before EL10 support can be declared.
+
 ## Development
 
 Use the repository's Bundler environment:
