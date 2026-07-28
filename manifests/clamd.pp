@@ -40,6 +40,8 @@ class clamav::clamd (
       hasstatus  => true,
       subscribe  => [Package['clamd'], File['clamd.conf']],
     }
+
+    Service['clamd'] -> Service['clamd_socket']
   } else {
     service { 'clamd':
       ensure     => $clamav::clamd_service_ensure,

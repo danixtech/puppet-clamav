@@ -55,6 +55,8 @@ describe 'clamav' do
           subscribe: ['Package[clamd]', 'File[clamd.conf]'],
         )
       end
+
+      it { is_expected.to contain_service('clamd').that_comes_before('Service[clamd_socket]') }
     end
 
     context 'with a custom socket unit' do
