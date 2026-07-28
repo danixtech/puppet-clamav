@@ -45,7 +45,7 @@ jobs:
         if: matrix.target == 'alma-9'
         run: |
           container_id="$(ruby -ryaml -e "puts YAML.load_file('spec/fixtures/litmus_inventory.yaml').dig('groups', 0, 'targets', 0, 'facts', 'container_id')")"
-          ssh-keygen -q -t ed25519 -N '' -f /tmp/litmus_ci_key
+          ssh-keygen -q -t rsa -b 3072 -N '' -f /tmp/litmus_ci_key
           root_password="$(openssl rand -base64 24)"
           docker exec "${container_id}" sh -c "echo root:${root_password} | chpasswd"
           docker exec "${container_id}" mkdir -p /root/.ssh
