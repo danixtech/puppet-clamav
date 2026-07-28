@@ -277,9 +277,9 @@ for the evidence requirements and publishing recommendation.
 
 ### Runtime acceptance
 
-The Litmus suite provisions the `smoke` and `ubuntu-2404` targets from
-`provision.yaml`, installs Puppet 8 and this module, applies the ClamAV
-manifest twice, and
+The Litmus CI suite provisions the `smoke`, `ubuntu-2404`, and `debian-12`
+targets from `provision.yaml`, installs Puppet 8 and this module, applies the
+ClamAV manifest twice, and
 checks packages, generated configuration, permissions, explicit stopped-service
 policy, database directories, and native configuration parsing. Evidence is emitted with the
 `CLAMAV_ACCEPTANCE_EVIDENCE` prefix so CI logs record the tested Puppet,
@@ -307,3 +307,15 @@ Use `ubuntu-2404` instead of `smoke` in the commands above to exercise Ubuntu
 socket permissions, a deterministic local test signature, and two-run
 convergence. This evidence does not by itself change the published support
 matrix.
+
+Use `debian-12` to exercise Debian 12. The target records its package and
+ClamAV versions independently and checks configuration rendering, database
+updates, direct services, opt-in socket activation, runtime paths, test-file
+detection, and two-run convergence.
+
+A `debian-13` provisioning entry and release-aware acceptance assertions are
+available for continued investigation, but Debian 13 is not in the required CI
+matrix and is not a claimed runtime target. As of July 2026, the Puppet agent
+installer requests `puppet8-release-trixie.deb`, which is unavailable from the
+Puppet package repository. Do not substitute Debian 12 agent packages or infer
+Debian 13 support from container provisioning alone.

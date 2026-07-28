@@ -8,3 +8,13 @@ ubuntu-2404:
   provisioner: docker
   images:
     - litmusimage/ubuntu:24.04
+
+debian-12:
+  provisioner: docker
+  images:
+    - litmusimage/debian:12
+
+debian-13:
+  provisioner: docker
+  images:
+    - litmusimage/debian:13
