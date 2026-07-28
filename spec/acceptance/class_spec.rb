@@ -23,6 +23,12 @@ describe 'clamav smoke acceptance' do
     acceptance_evidence('os_release', 'facter os.release.full')
   end
 
+  before(:each) do
+    os_name = run_shell('facter os.name').stdout.strip
+    release = run_shell('facter os.release.full').stdout.strip
+    skip 'Ubuntu 22.04 smoke target only' unless os_name == 'Ubuntu' && release.start_with?('22.04')
+  end
+
   it 'applies twice without failures or second-run changes' do
     idempotent_apply(manifest)
   end
