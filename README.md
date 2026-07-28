@@ -1,7 +1,8 @@
 clamav
 =============
 
-[![Build Status](https://travis-ci.org/edestecd/puppet-clamav.svg)](https://travis-ci.org/edestecd/puppet-clamav)
+[![CI](https://github.com/danixtech/puppet-clamav/actions/workflows/ci.yml/badge.svg)](https://github.com/danixtech/puppet-clamav/actions/workflows/ci.yml)
+[![Runtime acceptance](https://github.com/danixtech/puppet-clamav/actions/workflows/acceptance.yml/badge.svg)](https://github.com/danixtech/puppet-clamav/actions/workflows/acceptance.yml)
 [![Puppet Forge](https://img.shields.io/puppetforge/v/edestecd/clamav.svg)](https://forge.puppet.com/edestecd/clamav)
 [![Puppet Forge Downloads](https://img.shields.io/puppetforge/dt/edestecd/clamav.svg)](https://forge.puppet.com/edestecd/clamav)
 [![Puppet Forge Score](https://img.shields.io/puppetforge/f/edestecd/clamav.svg)](https://forge.puppet.com/edestecd/clamav/scores)
@@ -256,16 +257,23 @@ bundle exec rake validate
 bundle exec rake spec
 ```
 
-GitHub Actions runs four Puppet 8/Ruby 3.3 jobs:
+GitHub Actions is the authoritative CI service. Its main workflow runs five
+Ruby 3.3 jobs:
 
 * Metadata, Puppet syntax, Hiera, and Ruby style validation.
 * A focused compatibility suite for configuration precedence and
   platform-sensitive behavior.
 * The complete unit suite across the operating systems declared in metadata.
+* The complete unit suite with OpenVox 8 selected as the runtime.
 * Catalog integration with the pinned `puppet/epel` 5.0.0 fixture for EL7.9
   and EL9.
 
-The EPEL coverage verifies catalog relationships, repository resources, and
+The separate runtime-acceptance workflow exercises four Litmus targets. See
+[development and CI](docs/development.md) for the supported local toolchain,
+dependency rationale, commands, and the boundary between catalog and runtime
+evidence.
+
+The EPEL catalog coverage verifies relationships, repository resources, and
 signing-key resources. It is not a package-installation acceptance test.
 
 Pull requests should describe the affected operating systems, Puppet and

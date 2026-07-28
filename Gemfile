@@ -1,5 +1,7 @@
 source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
+ruby '>= 3.2', '< 4.0'
+
 def location_for(place_or_version, fake_version = nil)
   git_url_regex = %r{\A(?<url>(https?|git)[:@][^#]*)(#(?<branch>.*))?}
   file_url_regex = %r{\Afile:\/\/(?<path>.*)}
@@ -14,12 +16,7 @@ def location_for(place_or_version, fake_version = nil)
 end
 
 group :development do
-  gem "json", '= 2.1.0',                         require: false if Gem::Requirement.create(['>= 2.5.0', '< 2.7.0']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
-  gem "json", '= 2.3.0',                         require: false if Gem::Requirement.create(['>= 2.7.0', '< 3.0.0']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
-  gem "json", '= 2.5.1',                         require: false if Gem::Requirement.create(['>= 3.0.0', '< 3.0.5']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
-  gem "json", '= 2.6.1',                         require: false if Gem::Requirement.create(['>= 3.1.0', '< 3.1.3']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
-  gem "json", '~> 2.9.0',                        require: false if Gem::Requirement.create(['>= 3.2.0', '< 4.0.0']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
-  gem "racc", '~> 1.4.0',                        require: false if Gem::Requirement.create(['>= 2.7.0', '< 3.0.0']).satisfied_by?(Gem::Version.new(RUBY_VERSION.dup))
+  gem "json", '~> 2.9.0',                        require: false
   gem "voxpupuli-puppet-lint-plugins", '~> 5.0', require: false
   # facterdb 1.x contains historical Windows paths rejected by newer JSON
   # parsers. Keep this tested pair stable for the Puppet 8 CI environment.
@@ -27,12 +24,7 @@ group :development do
   gem "metadata-json-lint", '~> 3.0',            require: false
   gem "puppetlabs_spec_helper", '~> 6.0',        require: false
   gem "rspec-puppet-facts", '~> 2.0',            require: false
-  gem "codecov", '~> 0.2',                       require: false
-  gem "dependency_checker", '~> 1.0.0',          require: false
   gem "parallel_tests", '= 3.12.1',              require: false
-  gem "pry", '~> 0.10',                          require: false
-  gem "simplecov-console", '~> 0.5',             require: false
-  gem "puppet-debugger", '~> 1.0',               require: false
   gem "rubocop", '= 1.48.1',                     require: false
   gem "rubocop-performance", '= 1.16.0',         require: false
   gem "rubocop-rspec", '= 2.19.0',               require: false
