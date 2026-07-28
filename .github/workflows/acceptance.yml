@@ -47,7 +47,7 @@ jobs:
           container_id="$(ruby -ryaml -e "puts YAML.load_file('spec/fixtures/litmus_inventory.yaml').dig('groups', 0, 'targets', 0, 'facts', 'container_id')")"
           root_password="$(openssl rand -base64 24)"
           docker exec "${container_id}" sh -c "echo root:${root_password} | chpasswd"
-          docker exec "${container_id}" sh -c "printf 'PermitRootLogin yes\\nPasswordAuthentication yes\\n' > /etc/ssh/sshd_config.d/00-litmus.conf"
+          docker exec "${container_id}" sh -c "printf 'PermitRootLogin yes\\nPasswordAuthentication yes\\nUsePAM no\\n' > /etc/ssh/sshd_config.d/00-litmus.conf"
           docker exec "${container_id}" /usr/sbin/sshd -t
           docker exec "${container_id}" pkill -HUP -x sshd
           ruby -ryaml -e "path = 'spec/fixtures/litmus_inventory.yaml'; inventory = YAML.load_file(path); ssh = inventory.dig('groups', 0, 'targets', 0, 'config', 'ssh'); ssh['password'] = '${root_password}'; File.write(path, inventory.to_yaml)"
