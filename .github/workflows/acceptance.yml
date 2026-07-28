@@ -39,6 +39,16 @@ jobs:
       - name: Provision target
         run: bundle exec rake "litmus:provision_list[${{ matrix.target }}]"
 
+      # The linux/amd64 AlmaLinux 9 Litmus image currently has a locked root
+      # account, unlike its arm64 variant and the other Litmus images.
+      - name: Repair AlmaLinux Litmus SSH access
+        if: matrix.target == 'alma-9'
+        run: |
+          container_id="$(ruby -ryaml -e "puts YAML.load_file('spec/fixtures/litmus_inventory.yaml').dig('groups', 0, 'targets', 0, 'facts', 'container_id')")"
+          docker exec "${container_id}" sh -c "echo root:root | chpasswd"
+          docker exec "${container_id}" sh -c "printf '\\nPermitRootLogin yes\\nPasswordAuthentication yes\\n' >> /etc/ssh/sshd_config"
+          docker exec "${container_id}" systemctl restart sshd
+
       - name: Install Puppet 8
         run: bundle exec rake "litmus:install_agent[puppet8]"
 
