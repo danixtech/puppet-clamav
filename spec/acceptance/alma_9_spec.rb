@@ -2,7 +2,7 @@
 
 require 'spec_helper_acceptance'
 
-describe 'clamav on Rocky Linux 9' do
+describe 'clamav on AlmaLinux 9' do
   let(:common_parameters) do
     <<~PUPPET
       manage_repo      => true,
@@ -51,14 +51,14 @@ describe 'clamav on Rocky Linux 9' do
   before(:each) do
     os_name = run_shell('facter os.name').stdout.strip
     release = run_shell('facter os.release.major').stdout.strip
-    skip 'Rocky Linux 9 target only' unless os_name == 'Rocky' && release == '9'
+    skip 'AlmaLinux 9 target only' unless os_name == 'AlmaLinux' && release == '9'
   end
 
   it 'records platform, repository, and SELinux evidence' do
-    expect(acceptance_evidence('rocky_9_os_release', 'facter os.release.full')).to start_with('9.')
-    expect(acceptance_evidence('rocky_9_puppet_version', 'puppet --version')).not_to be_empty
-    expect(acceptance_evidence('rocky_9_architecture', 'facter os.architecture')).not_to be_empty
-    expect(acceptance_evidence('rocky_9_selinux_enabled', 'facter selinux')).to match(%r{true|false})
+    expect(acceptance_evidence('alma_9_os_release', 'facter os.release.full')).to start_with('9.')
+    expect(acceptance_evidence('alma_9_puppet_version', 'puppet --version')).not_to be_empty
+    expect(acceptance_evidence('alma_9_architecture', 'facter os.architecture')).not_to be_empty
+    expect(acceptance_evidence('alma_9_selinux_enabled', 'facter selinux')).to match(%r{true|false})
   end
 
   it 'installs EPEL packages and bootstraps official and local databases' do
@@ -71,15 +71,15 @@ describe 'clamav on Rocky Linux 9' do
     run_shell('chmod 0644 /var/lib/clamav/local-test.hdb')
     run_shell('freshclam --config-file=/etc/freshclam.conf')
 
-    expect(acceptance_evidence('rocky_9_enabled_repositories', 'dnf -q repolist --enabled')).to match(%r{\bepel\b})
-    expect(acceptance_evidence('rocky_9_clamav_package', "rpm -q --qf '%{VERSION}-%{RELEASE}' clamav")).not_to be_empty
+    expect(acceptance_evidence('alma_9_enabled_repositories', 'dnf -q repolist --enabled')).to match(%r{\bepel\b})
+    expect(acceptance_evidence('alma_9_clamav_package', "rpm -q --qf '%{VERSION}-%{RELEASE}' clamav")).not_to be_empty
     expect(
-      acceptance_evidence('rocky_9_clamd_provider', 'rpm -q --whatprovides clamav-scanner-systemd'),
+      acceptance_evidence('alma_9_clamd_provider', 'rpm -q --whatprovides clamav-scanner-systemd'),
     ).to match(%r{\Aclamd-})
     expect(
-      acceptance_evidence('rocky_9_freshclam_provider', 'rpm -q --whatprovides clamav-update'),
+      acceptance_evidence('alma_9_freshclam_provider', 'rpm -q --whatprovides clamav-update'),
     ).to match(%r{\Aclamav-freshclam-})
-    expect(acceptance_evidence('rocky_9_clamav_repository', 'dnf -q info installed clamav')).to match(%r{From repo\s+:\s+epel})
+    expect(acceptance_evidence('alma_9_clamav_repository', 'dnf -q info installed clamav')).to match(%r{From repo\s+:\s+epel})
   end
 
   it 'runs clamd and freshclam with valid configuration and converges' do
@@ -105,12 +105,12 @@ describe 'clamav on Rocky Linux 9' do
   it 'records database, service, and runtime-path evidence' do
     expect(
       acceptance_evidence(
-        'rocky_9_database_files',
+        'alma_9_database_files',
         "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
       ),
     ).to include('local-test.hdb')
-    expect(acceptance_evidence('rocky_9_clamd_version', 'clamd --version')).not_to be_empty
-    expect(acceptance_evidence('rocky_9_service_unit', 'systemctl show clamd@scan -p ActiveState -p UnitFileState')).to include('ActiveState=active')
-    expect(acceptance_evidence('rocky_9_socket_mode', "stat -c '%a' /run/clamd.scan/clamd.sock")).to eq('660')
+    expect(acceptance_evidence('alma_9_clamd_version', 'clamd --version')).not_to be_empty
+    expect(acceptance_evidence('alma_9_service_unit', 'systemctl show clamd@scan -p ActiveState -p UnitFileState')).to include('ActiveState=active')
+    expect(acceptance_evidence('alma_9_socket_mode', "stat -c '%a' /run/clamd.scan/clamd.sock")).to eq('660')
   end
 end

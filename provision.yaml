@@ -19,7 +19,7 @@ debian-13:
   images:
     - litmusimage/debian:13
 
-rocky-9:
+alma-9:
   provisioner: docker
   images:
-    - litmusimage/rockylinux:9
+    - litmusimage/almalinux:9
