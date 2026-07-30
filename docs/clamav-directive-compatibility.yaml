@@ -1,0 +1,556 @@
+---
+schema: 1
+generated_from:
+  1.4.3-clamd: https://raw.githubusercontent.com/Cisco-Talos/clamav/clamav-1.4.3/etc/clamd.conf.sample
+  1.5.3-clamd: https://raw.githubusercontent.com/Cisco-Talos/clamav/clamav-1.5.3/etc/clamd.conf.sample
+  1.4.3-freshclam: https://raw.githubusercontent.com/Cisco-Talos/clamav/clamav-1.4.3/etc/freshclam.conf.sample
+  1.5.3-freshclam: https://raw.githubusercontent.com/Cisco-Talos/clamav/clamav-1.5.3/etc/freshclam.conf.sample
+  1.4.3-milter: https://raw.githubusercontent.com/Cisco-Talos/clamav/clamav-1.4.3/etc/clamav-milter.conf.sample
+  1.5.3-milter: https://raw.githubusercontent.com/Cisco-Talos/clamav/clamav-1.5.3/etc/clamav-milter.conf.sample
+runtime_evidence:
+  pre_1_5: Stage 0 package acceptance on supported distribution packages
+  '1_5': Ubuntu 24.04.4, ClamAV 1.5.3, FLEVEL 233, production parity apply and clamconf
+directives:
+  clamd:
+    AlgorithmicDetection:
+      classification: legacy_release_data_not_emitted_on_ubuntu_1_5
+      sample_1_4_3: false
+      sample_1_5_3: false
+    AllowAllMatchScan:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ArchiveBlockEncrypted:
+      classification: legacy_release_data_not_emitted_on_ubuntu_1_5
+      sample_1_4_3: false
+      sample_1_5_3: false
+    Bytecode:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    BytecodeSecurity:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    BytecodeTimeout:
+      classification: native_validated_on_1_5_not_in_samples
+      sample_1_4_3: false
+      sample_1_5_3: false
+    CommandReadTimeout:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    CrossFilesystems:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    DatabaseDirectory:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    Debug:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    DetectPUA:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    DisableCache:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    DisableCertCheck:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ExitOnOOM:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ExtendedDetectionInfo:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    FixStaleSocket:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    FollowDirectorySymlinks:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    FollowFileSymlinks:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ForceToDisk:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    Foreground:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    HeuristicScanPrecedence:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    IdleTimeout:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LeaveTemporaryFiles:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LocalSocket:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LocalSocketGroup:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LocalSocketMode:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogClean:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFacility:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFile:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFileMaxSize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFileUnlock:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogRotate:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogSyslog:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogTime:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogVerbose:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxConnectionQueueLength:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxDirectoryRecursion:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxEmbeddedPE:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxFileSize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxFiles:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxHTMLNoTags:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxHTMLNormalize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxIconsPE:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxPartitions:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxQueue:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxRecHWP3:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxRecursion:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxScanSize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxScanTime:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxScriptNormalize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxThreads:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxZipTypeRcg:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    OLE2BlockMacros:
+      classification: legacy_release_data_not_emitted_on_ubuntu_1_5
+      sample_1_4_3: false
+      sample_1_5_3: false
+    OfficialDatabaseOnly:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    OnAccessMaxFileSize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PCREMatchLimit:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PCREMaxFileSize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PCRERecMatchLimit:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PartitionIntersection:
+      classification: legacy_release_data_not_emitted_on_ubuntu_1_5
+      sample_1_4_3: false
+      sample_1_5_3: false
+    PhishingAlwaysBlockCloak:
+      classification: legacy_release_data_not_emitted_on_ubuntu_1_5
+      sample_1_4_3: false
+      sample_1_5_3: false
+    PhishingAlwaysBlockSSLMismatch:
+      classification: legacy_release_data_not_emitted_on_ubuntu_1_5
+      sample_1_4_3: false
+      sample_1_5_3: false
+    PhishingScanURLs:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PhishingSignatures:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PidFile:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PreludeAnalyzerName:
+      classification: supported_but_inactive_when_prelude_disabled
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PreludeEnable:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ReadTimeout:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanArchive:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanELF:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanHTML:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanHWP3:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanMail:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanOLE2:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanOnAccess:
+      classification: accepted_but_deprecated_in_1_5
+      sample_1_4_3: false
+      sample_1_5_3: false
+    ScanPDF:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanPE:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanPartialMessages:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanSWF:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScanXMLDOCS:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    SelfCheck:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    SendBufTimeout:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    StreamMaxLength:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    StructuredDataDetection:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    TemporaryDirectory:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    User:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    FIPSCryptoHashLimits:
+      classification: available_in_1_5_not_emitted_by_module
+      sample_1_4_3: false
+      sample_1_5_3: true
+  freshclam:
+    Bytecode:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    Checks:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    CompressLocalDatabase:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ConnectTimeout:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    DNSDatabaseInfo:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    DatabaseDirectory:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    DatabaseMirror:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    DatabaseOwner:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    Debug:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    Foreground:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFacility:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFileMaxSize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogRotate:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogSyslog:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogTime:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogVerbose:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxAttempts:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    NotifyClamd:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PidFile:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ReceiveTimeout:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ScriptedUpdates:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    TestDatabases:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    UpdateLogFile:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+  milter:
+    AddHeader:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ClamdSocket:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    FixStaleSocket:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    Foreground:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogClean:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFacility:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFile:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFileMaxSize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogFileUnlock:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogInfected:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogRotate:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogSyslog:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogTime:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    LogVerbose:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MaxFileSize:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MilterSocket:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MilterSocketGroup:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    MilterSocketMode:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    OnClean:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    OnFail:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    OnInfected:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    PidFile:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    ReadTimeout:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    SupportMultipleRecipients:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    TemporaryDirectory:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
+    User:
+      classification: supported_pre_1_5_and_1_5
+      sample_1_4_3: true
+      sample_1_5_3: true
