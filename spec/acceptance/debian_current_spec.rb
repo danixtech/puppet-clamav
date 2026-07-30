@@ -113,13 +113,23 @@ describe 'clamav on current Debian releases' do
   end
 
   it 'records database, service, and socket evidence' do
-    expect(
-      acceptance_evidence(
-        "#{evidence_prefix}_database_files",
-        "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
-      ),
-    ).to include('local-test.hdb')
+    database_files = acceptance_evidence(
+      "#{evidence_prefix}_database_files",
+      "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
+    )
+    expect(database_files).to include('main.cvd', 'local-test.hdb')
+    expect(database_files).to match(%r{daily\.c[lv]d})
+    expect(run_shell("find /var/lib/clamav -maxdepth 1 -type f \\( -name '*.cvd' -o -name '*.cld' \\) ! -user clamav -print -quit").stdout).to be_empty
+    expect(run_shell("find /var/lib/clamav -maxdepth 1 -type f \\( -name '*.cvd' -o -name '*.cld' \\) -perm /022 -print -quit").stdout).to be_empty
+    expect(run_shell('sigtool --info /var/lib/clamav/main.cvd').stdout).to include('Verification OK')
+
+    run_shell('systemctl stop clamav-freshclam')
+    no_op_update = run_shell('freshclam --config-file=/etc/clamav/freshclam.conf --stdout 2>&1')
+    run_shell('systemctl start clamav-freshclam')
+    expect(no_op_update.stdout).to include('is up-to-date')
+
     expect(acceptance_evidence("#{evidence_prefix}_clamd_version", 'clamd --version')).not_to be_empty
+    expect(acceptance_evidence("#{evidence_prefix}_freshclam_version", 'freshclam --version')).not_to be_empty
     expect(
       acceptance_evidence(
         "#{evidence_prefix}_socket_unit",

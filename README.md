@@ -350,6 +350,9 @@ caller-enabled `FIPSCryptoHashLimits` for both clamd and freshclam, records the
 target's kernel FIPS state, and verifies detached CVD signatures. This proves
 the opt-in ClamAV behavior, not that the ordinary CI container is FIPS-enabled.
 See the [ClamAV 1.5 FIPS characterization](docs/clamav-1.5-fips.md).
+Fresh database bootstrap, subsequent current-database checks, native signature
+inspection, ownership, and clamd notification are described in the
+[freshclam and database characterization](docs/clamav-1.5-freshclam-databases.md).
 
 Use `debian-12` to exercise formally supported Debian 12. The target records its
 package and ClamAV versions independently and checks configuration rendering,

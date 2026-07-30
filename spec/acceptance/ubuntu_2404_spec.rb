@@ -46,6 +46,9 @@ describe 'clamav on Ubuntu 24.04' do
     <<~PUPPET
       class { 'clamav':
         #{common_parameters}
+        freshclam_options => {
+          'NotifyClamd' => '/etc/clamav/clamd.conf',
+        },
       }
     PUPPET
   end
@@ -56,6 +59,9 @@ describe 'clamav on Ubuntu 24.04' do
         #{common_parameters}
         clamd_use_socket => true,
         clamd_socket     => 'clamav-daemon.socket',
+        freshclam_options => {
+          'NotifyClamd' => '/etc/clamav/clamd.conf',
+        },
       }
     PUPPET
   end
@@ -132,6 +138,22 @@ describe 'clamav on Ubuntu 24.04' do
     expect(run_shell('systemctl is-active clamav-daemon').stdout.strip).to eq('active')
   end
 
+  it 'updates a missing database and notifies clamd without restarting it' do
+    apply_manifest(direct_manifest, catch_failures: true)
+    run_shell('systemctl stop clamav-freshclam')
+    clamd_pid = run_shell('systemctl show clamav-daemon -p MainPID --value').stdout.strip
+    run_shell('rm -f /var/lib/clamav/daily.cvd /var/lib/clamav/daily-*.cvd.sign')
+
+    update = run_shell('freshclam --config-file=/etc/clamav/freshclam.conf --stdout 2>&1')
+
+    expect(update.stdout).to include('Clamd successfully notified about the update')
+    expect(run_shell('systemctl is-active clamav-daemon').stdout.strip).to eq('active')
+    expect(run_shell('systemctl show clamav-daemon -p MainPID --value').stdout.strip).to eq(clamd_pid)
+    expect(run_shell('test -f /var/lib/clamav/daily.cvd').exit_code).to eq(0)
+    expect(run_shell("find /var/lib/clamav -maxdepth 1 -name 'daily-*.cvd.sign' -print -quit | grep -q .").exit_code).to eq(0)
+    run_shell('systemctl start clamav-freshclam')
+  end
+
   it 'uses opt-in socket activation and characterizes the distro socket mode' do
     idempotent_apply(socket_manifest)
 
@@ -160,6 +182,15 @@ describe 'clamav on Ubuntu 24.04' do
     expect(database_files).to include('main.cvd', 'daily.cvd', 'local-test.hdb')
     expect(database_files).to match(%r{(?:\A|,)main-\d+\.cvd\.sign(?:,|\z)})
     expect(database_files).to match(%r{(?:\A|,)daily-\d+\.cvd\.sign(?:,|\z)})
+    expect(run_shell("find /var/lib/clamav -maxdepth 1 -type f \\( -name '*.cvd' -o -name '*.cld' -o -name '*.cvd.sign' \\) ! -user clamav -print -quit").stdout).to be_empty
+    expect(run_shell("find /var/lib/clamav -maxdepth 1 -type f \\( -name '*.cvd' -o -name '*.cld' -o -name '*.cvd.sign' \\) -perm /022 -print -quit").stdout).to be_empty
+    expect(run_shell('sigtool --info /var/lib/clamav/main.cvd').stdout).to include('Verification OK')
+    expect(run_shell('sigtool --info /var/lib/clamav/daily.cvd').stdout).to include('Verification OK')
+
+    run_shell('systemctl stop clamav-freshclam')
+    no_op_update = run_shell('freshclam --config-file=/etc/clamav/freshclam.conf --stdout 2>&1')
+    run_shell('systemctl start clamav-freshclam')
+    expect(no_op_update.stdout).to include('is up-to-date')
 
     clamd_version = acceptance_evidence('ubuntu_2404_clamd_version', 'clamd --version')
     expect(Gem::Version.new(clamd_version.split[1].split('/').first)).to be >= Gem::Version.new('1.5.0')

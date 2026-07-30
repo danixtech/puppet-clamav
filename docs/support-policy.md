@@ -78,7 +78,8 @@ See [the OpenVox strategy](openvox-support.md), the
 [Enterprise Linux ClamAV 1.5 investigation](clamav-1.5-enterprise-linux.md).
 The [ClamAV 1.5 FIPS characterization](clamav-1.5-fips.md) documents the
 caller-controlled FIPS-limits mechanism and its remaining runtime evidence
-gate.
+gate. The [freshclam and database characterization](clamav-1.5-freshclam-databases.md)
+records update, ownership, signature, mirror, and daemon-notification behavior.
 
 ## Removing or adding a support claim
 

@@ -121,9 +121,18 @@ describe 'clamav on AlmaLinux 9' do
     )
     expect(database_files).to include('main.cvd', 'local-test.hdb')
     expect(database_files).to match(%r{daily\.c[lv]d})
+    expect(run_shell("find /var/lib/clamav -maxdepth 1 -type f \\( -name '*.cvd' -o -name '*.cld' \\) ! -user clamupdate -print -quit").stdout).to be_empty
+    expect(run_shell("find /var/lib/clamav -maxdepth 1 -type f \\( -name '*.cvd' -o -name '*.cld' \\) -perm /022 -print -quit").stdout).to be_empty
+    expect(run_shell('sigtool --info /var/lib/clamav/main.cvd').stdout).to include('Verification OK')
+
+    run_shell('systemctl stop clamav-freshclam')
+    no_op_update = run_shell('freshclam --config-file=/etc/freshclam.conf --stdout 2>&1')
+    run_shell('systemctl start clamav-freshclam')
+    expect(no_op_update.stdout).to include('is up-to-date')
 
     clamd_version = acceptance_evidence('alma_9_clamd_version', 'clamd --version')
     expect(Gem::Version.new(clamd_version.split[1].split('/').first)).to be < Gem::Version.new('1.5.0')
+    expect(acceptance_evidence('alma_9_freshclam_version', 'freshclam --version')).not_to be_empty
     expect(acceptance_evidence('alma_9_service_unit', 'systemctl show clamd@scan -p ActiveState -p UnitFileState')).to include('ActiveState=active')
     expect(acceptance_evidence('alma_9_socket_mode', "stat -c '%a' /run/clamd.scan/clamd.sock")).to eq('660')
   end
