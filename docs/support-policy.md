@@ -53,7 +53,7 @@ daemon version so repository or packaging changes remain reviewable.
 | Runtime/platform | Evidence level | Current evidence | Missing release gate |
 | --- | --- | --- | --- |
 | OpenVox 8 | Source/catalog tested | Runtime selection is asserted before metadata validation and the complete unit suite | Install an OpenVox agent and pass required runtime acceptance on every claimed OS |
-| Red Hat 9 | Source/catalog tested | Real `puppet/epel` 5.0.0 catalog integration | Runtime package, service, scan, permission, and idempotency evidence on RHEL |
+| Red Hat 9 | Source/catalog tested | Real `puppet/epel` 5.0.0 catalog integration plus AlmaLinux 9 runtime evidence for the equivalent EPEL package layout | Runtime evidence on RHEL itself |
 | EL7 and EL8 families | Legacy characterized | Package names, EPEL resources, cron/service policy, paths, and relationships remain in unit tests | Maintained repositories and runtime acceptance on each named distribution |
 | Debian 8, 9, and 11 | Legacy characterized | Historical package, path, ownership, and direct-service catalogs | Maintained package/runtime acceptance |
 | Ubuntu 14.04 through 22.04 | Legacy characterized | Historical package, path, ownership, and direct-service catalogs | Maintained package/runtime acceptance |
@@ -69,12 +69,13 @@ installation, or ClamAV packaging on end-of-life platforms.
 | Debian 13 | Provisional | Acceptance assertions exist, but the Puppet 8 installer cannot obtain the expected Debian 13 agent repository package |
 | EL10 | Provisional | ClamAV package names and freshclam service behavior differ; the current EPEL module dependency does not provide a compatible Puppet 8/EL10 path |
 | OpenVox 8 agents | Provisional | Catalog compatibility is proven, but there is no agent-runtime acceptance matrix |
-| ClamAV 1.5+ outside Ubuntu 24.04 distro packaging | Unsupported as a version claim | No other required target currently supplies and validates ClamAV 1.5+ |
+| ClamAV 1.5+ outside Ubuntu 24.04 distro packaging | Unsupported as a version claim | EPEL 9/10 remains on 1.4.x; the official RPM lacks repository, account, directory, configuration, and systemd integration |
 | Ubuntu 26.04 | Unsupported | No catalog or runtime evidence |
 
-See [the OpenVox strategy](openvox-support.md) and
-[the EL10 investigation](el10-investigation.md) for the corresponding release
-gates.
+See [the OpenVox strategy](openvox-support.md), the
+[EL10 investigation](el10-investigation.md), and the
+[Enterprise Linux ClamAV 1.5 investigation](clamav-1.5-enterprise-linux.md)
+for the corresponding release gates.
 
 ## Removing or adding a support claim
 

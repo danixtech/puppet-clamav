@@ -72,7 +72,14 @@ describe 'clamav on AlmaLinux 9' do
     run_shell('freshclam --config-file=/etc/freshclam.conf')
 
     expect(acceptance_evidence('alma_9_enabled_repositories', 'dnf -q repolist --enabled')).to match(%r{\bepel\b})
-    expect(acceptance_evidence('alma_9_clamav_package', "rpm -q --qf '%{VERSION}-%{RELEASE}' clamav")).not_to be_empty
+    package_version = acceptance_evidence('alma_9_clamav_package', "rpm -q --qf '%{VERSION}-%{RELEASE}' clamav")
+    expect(Gem::Version.new(package_version.split('-').first)).to be < Gem::Version.new('1.5.0')
+    expect(
+      acceptance_evidence(
+        'alma_9_clamav_package_provenance',
+        "rpm -q --qf '%{VENDOR}|%{PACKAGER}|%{SOURCERPM}' clamav",
+      ),
+    ).to include('clamav-')
     expect(
       acceptance_evidence('alma_9_clamd_provider', 'rpm -q --whatprovides clamav-scanner-systemd'),
     ).to match(%r{\Aclamd-})
@@ -80,6 +87,9 @@ describe 'clamav on AlmaLinux 9' do
       acceptance_evidence('alma_9_freshclam_provider', 'rpm -q --whatprovides clamav-update'),
     ).to match(%r{\Aclamav-freshclam-})
     expect(acceptance_evidence('alma_9_clamav_repository', 'dnf -q info installed clamav')).to match(%r{From repo\s+:\s+epel})
+    expect(acceptance_evidence('alma_9_clamscan_path', 'command -v clamscan')).to eq('/usr/bin/clamscan')
+    expect(acceptance_evidence('alma_9_clamd_path', 'command -v clamd')).to eq('/usr/sbin/clamd')
+    expect(acceptance_evidence('alma_9_freshclam_path', 'command -v freshclam')).to eq('/usr/bin/freshclam')
   end
 
   it 'runs clamd and freshclam with valid configuration and converges' do
@@ -93,6 +103,8 @@ describe 'clamav on AlmaLinux 9' do
     expect(run_shell('freshclam --config-file=/etc/freshclam.conf --version').exit_code).to eq(0)
     expect(run_shell("grep -Fx 'LocalSocketMode 660' /etc/clamd.d/scan.conf").exit_code).to eq(0)
     expect(run_shell("stat -c '%U:%G' /run/clamd.scan").stdout.strip).to eq('clamscan:virusgroup')
+    expect(run_shell('systemctl show clamd@scan -p FragmentPath --value').stdout.strip).to eq('/usr/lib/systemd/system/clamd@.service')
+    expect(run_shell('systemctl show clamav-freshclam -p FragmentPath --value').stdout.strip).to eq('/usr/lib/systemd/system/clamav-freshclam.service')
   end
 
   it 'detects a deterministic test signature through clamd' do
@@ -103,13 +115,15 @@ describe 'clamav on AlmaLinux 9' do
   end
 
   it 'records database, service, and runtime-path evidence' do
-    expect(
-      acceptance_evidence(
-        'alma_9_database_files',
-        "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
-      ),
-    ).to include('local-test.hdb')
-    expect(acceptance_evidence('alma_9_clamd_version', 'clamd --version')).not_to be_empty
+    database_files = acceptance_evidence(
+      'alma_9_database_files',
+      "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
+    )
+    expect(database_files).to include('main.cvd', 'local-test.hdb')
+    expect(database_files).to match(%r{daily\.c[lv]d})
+
+    clamd_version = acceptance_evidence('alma_9_clamd_version', 'clamd --version')
+    expect(Gem::Version.new(clamd_version.split[1].split('/').first)).to be < Gem::Version.new('1.5.0')
     expect(acceptance_evidence('alma_9_service_unit', 'systemctl show clamd@scan -p ActiveState -p UnitFileState')).to include('ActiveState=active')
     expect(acceptance_evidence('alma_9_socket_mode', "stat -c '%a' /run/clamd.scan/clamd.sock")).to eq('660')
   end

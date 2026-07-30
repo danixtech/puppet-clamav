@@ -265,8 +265,10 @@ Older platforms retained in characterization tests are catalog-compatible
 legacy evidence, not maintained runtime-support claims. OpenVox 8 is
 source/catalog tested but has not been agent-runtime tested. ClamAV 1.5+ is
 runtime tested only with Ubuntu 24.04 distribution packages; this does not
-establish a general upstream-package or cross-platform version claim. Ubuntu
-26.04, Debian 13, and EL10 are not formally supported.
+establish a general upstream-package or cross-platform version claim. EPEL 9
+runtime currently supplies ClamAV 1.4.x, while the official 1.5 RPM lacks the
+package-native service and account integration required for an Enterprise
+Linux claim. Ubuntu 26.04, Debian 13, and EL10 are not formally supported.
 
 See the [support policy and evidence matrix](docs/support-policy.md) for the
 meaning of each evidence level, legacy-removal policy, and links to the
@@ -359,7 +361,9 @@ Debian 13 support from container provisioning alone.
 
 Use `alma-9` to exercise formally supported AlmaLinux 9 with the module-managed
 EPEL repository. The target records the distribution, enabled repository,
-package, ClamAV, and SELinux state while checking database updates,
+package provenance, ClamAV, binary and unit paths, and SELinux state while
+asserting that the current EPEL package remains below 1.5 and checking database updates,
 `clamd@scan`, freshclam, runtime paths, test-file detection, and two-run
 convergence. This evidence applies specifically to AlmaLinux 9 and does not
-imply EL10 support.
+imply EL10 or Enterprise Linux ClamAV 1.5 support. See the
+[Enterprise Linux 1.5 investigation](docs/clamav-1.5-enterprise-linux.md).
