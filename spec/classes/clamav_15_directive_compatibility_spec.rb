@@ -52,6 +52,6 @@ describe 'ClamAV directive compatibility evidence' do
     expect(clamd.fetch('PreludeAnalyzerName').fetch('classification'))
       .to eq('supported_but_inactive_when_prelude_disabled')
     expect(clamd.fetch('FIPSCryptoHashLimits').fetch('classification'))
-      .to eq('available_in_1_5_not_emitted_by_module')
+      .to eq('clamav_1_5_caller_policy_no_module_default')
   end
 end

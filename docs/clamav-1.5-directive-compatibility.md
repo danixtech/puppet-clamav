@@ -31,8 +31,10 @@ reviewed as an evidence update.
 - `ScanOnAccess` is still accepted by ClamAV 1.5.3 but emits a deprecation
   warning. Removal is a follow-up compatibility change, not part of this
   characterization.
-- `FIPSCryptoHashLimits` is available in ClamAV 1.5 but is not emitted by this
-  module. Its FIPS policy belongs in issue #13.
+- `FIPSCryptoHashLimits` is available in ClamAV 1.5, is not a module default,
+  and remains available through the clamd and freshclam caller option hashes.
+  The [FIPS characterization](clamav-1.5-fips.md) records the runtime evidence
+  and explains why no global default is safe.
 - `PreludeAnalyzerName` is supported but operationally inactive while Prelude
   is disabled.
 - Directives absent from an upstream sample are not automatically considered
@@ -44,6 +46,8 @@ reviewed as an evidence update.
 - Issue #10 should use native configuration preflight before service refresh.
 - Issues #11 and #12 should capture exact native validation on Debian-family
   and Enterprise Linux ClamAV 1.5 packages.
-- Issue #13 owns FIPS-specific policy, including `FIPSCryptoHashLimits`.
+- A formal FIPS-enabled support claim remains gated on a reproducible target
+  that records authoritative enabled state and passes update, service, scan,
+  and convergence checks.
 - Any removal or version gate must receive a separate compatibility test and
   migration note.

@@ -353,7 +353,7 @@ directives:
       sample_1_4_3: true
       sample_1_5_3: true
     FIPSCryptoHashLimits:
-      classification: available_in_1_5_not_emitted_by_module
+      classification: clamav_1_5_caller_policy_no_module_default
       sample_1_4_3: false
       sample_1_5_3: true
   freshclam:

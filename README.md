@@ -345,7 +345,11 @@ supported Ubuntu 24.04 package versions, including a required ClamAV 1.5-or-newe
 version assertion and Ubuntu package provenance. The target validates direct
 services, native configuration parsing, runtime and database directories,
 official database updates, systemd unit paths, opt-in socket activation, a
-deterministic local test signature, and two-run convergence.
+deterministic local test signature, and two-run convergence. It also exercises
+caller-enabled `FIPSCryptoHashLimits` for both clamd and freshclam, records the
+target's kernel FIPS state, and verifies detached CVD signatures. This proves
+the opt-in ClamAV behavior, not that the ordinary CI container is FIPS-enabled.
+See the [ClamAV 1.5 FIPS characterization](docs/clamav-1.5-fips.md).
 
 Use `debian-12` to exercise formally supported Debian 12. The target records its
 package and ClamAV versions independently and checks configuration rendering,

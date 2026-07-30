@@ -42,8 +42,9 @@ from that platform's tested repositories.
 | 1.5+ | Ubuntu 24.04 | Ubuntu archive/security package carrying an Ubuntu version suffix | Required `ubuntu-2404` acceptance asserts the installed version is at least 1.5, validates both generated configurations natively, starts direct services, exercises socket activation and signature detection, updates official databases, and proves two-run convergence | Formally runtime tested on this distribution/package combination |
 
 This claim is deliberately narrower than general ClamAV 1.5 support. It does
-not cover upstream binary packages, other Debian-family releases, FIPS policy,
-clamonacc, or future directives merely because their version number is newer.
+not cover upstream binary packages, other Debian-family releases, a formally
+FIPS-enabled runtime, clamonacc, or future directives merely because their
+version number is newer.
 The acceptance log records `apt-cache policy`, source-package identity, exact
 binary package versions, service-unit paths, database files, and the installed
 daemon version so repository or packaging changes remain reviewable.
@@ -74,8 +75,10 @@ installation, or ClamAV packaging on end-of-life platforms.
 
 See [the OpenVox strategy](openvox-support.md), the
 [EL10 investigation](el10-investigation.md), and the
-[Enterprise Linux ClamAV 1.5 investigation](clamav-1.5-enterprise-linux.md)
-for the corresponding release gates.
+[Enterprise Linux ClamAV 1.5 investigation](clamav-1.5-enterprise-linux.md).
+The [ClamAV 1.5 FIPS characterization](clamav-1.5-fips.md) documents the
+caller-controlled FIPS-limits mechanism and its remaining runtime evidence
+gate.
 
 ## Removing or adding a support claim
 

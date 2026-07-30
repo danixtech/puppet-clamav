@@ -10,6 +10,7 @@ describe 'clamav on Ubuntu 24.04' do
       manage_freshclam => true,
       clamd_default_options => {
         'DatabaseDirectory' => '/var/lib/clamav',
+        'FIPSCryptoHashLimits' => true,
         'Foreground'        => false,
         'LocalSocket'       => '/run/clamav/clamd.ctl',
         'LocalSocketGroup'  => 'clamav',
@@ -22,6 +23,7 @@ describe 'clamav on Ubuntu 24.04' do
         'DatabaseDirectory' => '/var/lib/clamav',
         'DatabaseMirror'    => 'database.clamav.net',
         'DatabaseOwner'     => 'clamav',
+        'FIPSCryptoHashLimits' => true,
         'Foreground'        => false,
         'LogSyslog'         => true,
       },
@@ -101,6 +103,8 @@ describe 'clamav on Ubuntu 24.04' do
     expect(run_shell('systemctl is-enabled clamav-freshclam').stdout.strip).to eq('enabled')
     expect(run_shell('clamd --config-file=/etc/clamav/clamd.conf --version').exit_code).to eq(0)
     expect(run_shell('freshclam --config-file=/etc/clamav/freshclam.conf --version').exit_code).to eq(0)
+    expect(run_shell("grep -Fx 'FIPSCryptoHashLimits true' /etc/clamav/clamd.conf").exit_code).to eq(0)
+    expect(run_shell("grep -Fx 'FIPSCryptoHashLimits true' /etc/clamav/freshclam.conf").exit_code).to eq(0)
     expect(run_shell("grep -Fx 'LocalSocketMode 660' /etc/clamav/clamd.conf").exit_code).to eq(0)
     expect(run_shell("stat -c '%U:%G %a' /run/clamav").stdout.strip).to eq('clamav:root 755')
     expect(run_shell("stat -c '%U:%G %a' /var/lib/clamav").stdout.strip).to eq('clamav:clamav 755')
@@ -143,11 +147,18 @@ describe 'clamav on Ubuntu 24.04' do
   end
 
   it 'records database and service evidence' do
+    fips_state = acceptance_evidence(
+      'ubuntu_2404_fips_state',
+      "if test -r /proc/sys/crypto/fips_enabled; then cat /proc/sys/crypto/fips_enabled; else printf 'unavailable\\n'; fi",
+    )
+    expect(fips_state).to match(%r{\A(?:0|1|unavailable)\z})
+
     database_files = acceptance_evidence(
       'ubuntu_2404_database_files',
       "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
     )
     expect(database_files).to include('main.cvd', 'daily.cvd', 'local-test.hdb')
+    expect(database_files).to include('main.cvd.sign', 'daily.cvd.sign')
 
     clamd_version = acceptance_evidence('ubuntu_2404_clamd_version', 'clamd --version')
     expect(Gem::Version.new(clamd_version.split[1].split('/').first)).to be >= Gem::Version.new('1.5.0')
