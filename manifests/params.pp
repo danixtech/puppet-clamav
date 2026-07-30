@@ -3,6 +3,7 @@ class clamav::params {
   # ### init vars ####
   $manage_user                  = false
   $manage_clamd                 = false
+  $manage_clamonacc             = false
   $manage_clamav_milter         = false
   $manage_freshclam             = false
   $clamd_service_ensure         = 'running'
@@ -15,6 +16,24 @@ class clamav::params {
   $clamd_config_validate_cmd     = '/usr/bin/env clamd --config-file % --version'
   $freshclam_config_validate_cmd = '/usr/bin/env freshclam --config-file % --version'
   $milter_config_validate_cmd    = '/usr/bin/env clamav-milter --config-file % --version'
+
+  # clamonacc remains package-neutral and opt-in. Platform/package integration
+  # is intentionally deferred until it has runtime evidence.
+  $clamonacc_package             = undef
+  $clamonacc_package_version     = undef
+  $clamonacc_binary              = undef
+  $clamonacc_config              = undef
+  $clamonacc_service             = undef
+  $clamonacc_service_ensure      = 'running'
+  $clamonacc_service_enable      = true
+  $clamonacc_options             = {}
+  $clamonacc_include_paths       = undef
+  $clamonacc_exclude_paths       = undef
+  $clamonacc_exclude_usernames   = undef
+  $clamonacc_temporary_directory = undef
+  $clamonacc_quarantine_path     = undef
+  $clamonacc_daemon_username     = undef
+  $clamonacc_listen_mode         = undef
 
   if ($facts['os']['family'] == 'RedHat') and (versioncmp($facts['os']['release']['full'], '6.0') >= 0) {
     # ### init vars ####

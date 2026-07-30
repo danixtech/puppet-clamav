@@ -3,6 +3,7 @@ class clamav (
   Boolean $manage_user          = $clamav::params::manage_user,
   Boolean $manage_repo          = $clamav::params::manage_repo,
   Boolean $manage_clamd         = $clamav::params::manage_clamd,
+  Boolean $manage_clamonacc     = $clamav::params::manage_clamonacc,
   Boolean $manage_freshclam     = $clamav::params::manage_freshclam,
   Boolean $manage_clamav_milter = $clamav::params::manage_clamav_milter,
   String $clamav_package        = $clamav::params::clamav_package,
@@ -27,6 +28,22 @@ class clamav (
   Boolean $clamd_use_socket     = $clamav::params::clamd_use_socket,
   Hash $clamd_options           = $clamav::params::clamd_options,
   String[1] $clamd_config_validate_cmd = $clamav::params::clamd_config_validate_cmd,
+
+  Optional[String[1]] $clamonacc_package = $clamav::params::clamonacc_package,
+  Optional[String[1]] $clamonacc_package_version = $clamav::params::clamonacc_package_version,
+  Optional[Stdlib::Absolutepath] $clamonacc_binary = $clamav::params::clamonacc_binary,
+  Optional[Stdlib::Absolutepath] $clamonacc_config = $clamav::params::clamonacc_config,
+  Optional[String[1]] $clamonacc_service = $clamav::params::clamonacc_service,
+  Clamav::Service_ensure $clamonacc_service_ensure = $clamav::params::clamonacc_service_ensure,
+  Boolean $clamonacc_service_enable = $clamav::params::clamonacc_service_enable,
+  Clamav::Clamonacc_options $clamonacc_options = $clamav::params::clamonacc_options,
+  Optional[Array[Stdlib::Absolutepath, 1]] $clamonacc_include_paths = $clamav::params::clamonacc_include_paths,
+  Optional[Array[Stdlib::Absolutepath]] $clamonacc_exclude_paths = $clamav::params::clamonacc_exclude_paths,
+  Optional[Array[String[1]]] $clamonacc_exclude_usernames = $clamav::params::clamonacc_exclude_usernames,
+  Optional[Stdlib::Absolutepath] $clamonacc_temporary_directory = $clamav::params::clamonacc_temporary_directory,
+  Optional[Stdlib::Absolutepath] $clamonacc_quarantine_path = $clamav::params::clamonacc_quarantine_path,
+  Optional[String[1]] $clamonacc_daemon_username = $clamav::params::clamonacc_daemon_username,
+  Optional[Clamav::Clamonacc_listen_mode] $clamonacc_listen_mode = $clamav::params::clamonacc_listen_mode,
 
   $freshclam_package            = $clamav::params::freshclam_package,
   $freshclam_version            = $clamav::params::freshclam_version,
@@ -89,6 +106,28 @@ class clamav (
   if $manage_clamd {
     Class['clamav::install']
     -> class { 'clamav::clamd': }
+    -> Anchor['clamav::end']
+  }
+
+  if $manage_clamonacc {
+    Class['clamav::install']
+    -> class { 'clamav::clamonacc':
+      package_name        => $clamonacc_package,
+      package_version     => $clamonacc_package_version,
+      binary_path         => $clamonacc_binary,
+      config_path         => $clamonacc_config,
+      service_name        => $clamonacc_service,
+      service_ensure      => $clamonacc_service_ensure,
+      service_enable      => $clamonacc_service_enable,
+      options             => $clamonacc_options,
+      include_paths       => $clamonacc_include_paths,
+      exclude_paths       => $clamonacc_exclude_paths,
+      exclude_usernames   => $clamonacc_exclude_usernames,
+      temporary_directory => $clamonacc_temporary_directory,
+      quarantine_path     => $clamonacc_quarantine_path,
+      daemon_username     => $clamonacc_daemon_username,
+      listen_mode         => $clamonacc_listen_mode,
+    }
     -> Anchor['clamav::end']
   }
 

@@ -56,6 +56,16 @@ Install the module and its dependencies. On Red Hat-family systems,
 dependency. Set `manage_repo => false` when repository management is provided
 elsewhere.
 
+The supported default integration model uses distribution-native package
+layouts, including Ubuntu and Debian archive packages and Enterprise Linux
+packages supplied through EPEL or an equivalent distribution-style
+repository. Official Cisco/Talos installer DEB/RPM packages are not assumed to
+provide the same paths, accounts, package splits, systemd units, or runtime
+directories. The module does not download or build ClamAV source. Any future
+installer-package support requires an explicit external package-integration
+contract; repository locations and organization-specific packaging remain
+caller policy.
+
 ### Beginning with clamav
 
 Minimal clamav package install for command line use:
@@ -176,6 +186,62 @@ Red Hat-family EL7 packages use their cron-based update behavior, so the
 module does not declare a freshclam service there. EL8 manages the
 `clamav-freshclam` service and its `/etc/sysconfig/freshclam` environment
 file.
+
+### Define the clamonacc interface
+
+On-access scanning remains disabled by default:
+
+```puppet
+class { 'clamav':
+  manage_clamonacc => false,
+}
+```
+
+The Stage 2 interface foundation accepts package-neutral operational inputs
+without yet managing a clamonacc package, configuration file, service,
+directory, or quarantine action. Operational support is being added
+separately so that package paths and service integration can be validated
+before the module claims clamonacc support.
+
+The public contract includes:
+
+* optional package name/version, binary path, configuration path, and service
+  name;
+* typed service `ensure` (`running` or `stopped`) and enable policy;
+* `LocalSocket` or `TCPSocket` listen mode;
+* daemon username;
+* one or more absolute include paths;
+* optional absolute exclude paths, excluded usernames, temporary directory,
+  and quarantine path;
+* `clamonacc_options` for compatible native/component options.
+
+At least one include path is required when `manage_clamonacc` is true. Named
+typed parameters take precedence over equivalent compatibility keys in
+`clamonacc_options`. The preserved compatibility keys are `ListenMode`,
+`DaemonUsername`, `OnAccessIncludePath`, `OnAccessExcludePath`,
+`OnAccessExcludeUname`, and `TemporaryDirectory`.
+
+For example, this declares and validates the interface only:
+
+```puppet
+class { 'clamav':
+  manage_clamonacc             => true,
+  clamonacc_include_paths      => ['/srv/data'],
+  clamonacc_exclude_paths      => ['/srv/data/quarantine'],
+  clamonacc_exclude_usernames  => ['clamav'],
+  clamonacc_temporary_directory => '/var/tmp/clamonacc',
+  clamonacc_quarantine_path    => '/srv/data/quarantine',
+}
+```
+
+These paths are examples rather than module defaults. Package and binary
+locations are intentionally optional so later platform data can describe
+distribution-native layouts without assuming that Cisco/Talos installers
+provide equivalent integration. Do not treat this interface-only stage as
+operational clamonacc support. `clamav::clamonacc` can also be declared
+directly with the same child-class parameters. Resource ordering remains an
+internal module responsibility once later stages add resources; this
+foundation does not expose resource-reference relationship parameters.
 
 ### Validate configuration before service refresh
 
