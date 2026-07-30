@@ -177,6 +177,27 @@ module does not declare a freshclam service there. EL8 manages the
 `clamav-freshclam` service and its `/etc/sysconfig/freshclam` environment
 file.
 
+### Validate configuration before service refresh
+
+Managed clamd, freshclam, and milter files are validated with their
+package-provided binaries before Puppet replaces the live configuration.
+Validation failure leaves the existing file in place, so its service
+subscription is not refreshed with rejected content.
+
+The default commands use `/usr/bin/env` to resolve distribution package paths:
+
+```text
+/usr/bin/env clamd --config-file % --version
+/usr/bin/env freshclam --config-file % --version
+/usr/bin/env clamav-milter --config-file % --version
+```
+
+Callers using custom packages can replace the commands with
+`clamd_config_validate_cmd`, `freshclam_config_validate_cmd`, and
+`milter_config_validate_cmd`. Set `validate_configs => false` only for a
+platform whose package has no safe parse-only interface. Disabling validation
+permits invalid caller options to reach the live file and is not recommended.
+
 ### Add clamav-milter support and customize its config (RHEL7 and derivatives only)
 #### Please note that as of RHEL 7.2 only the TCP socket has been tested successfully
 

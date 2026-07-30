@@ -6,6 +6,11 @@
 class clamav::clamd (
   Boolean $sort_options = true,
 ) {
+  $config_validate_cmd = $clamav::validate_configs ? {
+    true    => $clamav::clamd_config_validate_cmd,
+    default => undef,
+  }
+
   package { 'clamd':
     ensure => $clamav::clamd_version,
     name   => $clamav::clamd_package,
@@ -13,12 +18,13 @@ class clamav::clamd (
   }
 
   file { 'clamd.conf':
-    ensure  => file,
-    path    => $clamav::clamd_config,
-    mode    => '0644',
-    owner   => 'root',
-    group   => 'root',
-    content => epp('clamav/clamav.conf.epp', {
+    ensure       => file,
+    path         => $clamav::clamd_config,
+    mode         => '0644',
+    owner        => 'root',
+    group        => 'root',
+    validate_cmd => $config_validate_cmd,
+    content      => epp('clamav/clamav.conf.epp', {
         'options'      => $clamav::_clamd_options,
         'sort_options' => $sort_options,
     }),

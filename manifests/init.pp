@@ -26,6 +26,7 @@ class clamav (
   Optional[String[1]] $clamd_socket = $clamav::params::clamd_socket,
   Boolean $clamd_use_socket     = $clamav::params::clamd_use_socket,
   Hash $clamd_options           = $clamav::params::clamd_options,
+  String[1] $clamd_config_validate_cmd = $clamav::params::clamd_config_validate_cmd,
 
   $freshclam_package            = $clamav::params::freshclam_package,
   $freshclam_version            = $clamav::params::freshclam_version,
@@ -36,6 +37,7 @@ class clamav (
   Hash $freshclam_options       = $clamav::params::freshclam_options,
   Optional[Stdlib::Absolutepath] $freshclam_sysconfig = $clamav::params::freshclam_sysconfig,
   Optional[String] $freshclam_delay = $clamav::params::freshclam_delay,
+  String[1] $freshclam_config_validate_cmd = $clamav::params::freshclam_config_validate_cmd,
 
   Optional[String]               $clamav_milter_package        = $clamav::params::clamav_milter_package,
   Optional[String]               $clamav_milter_version        = $clamav::params::clamav_milter_version,
@@ -44,6 +46,8 @@ class clamav (
   String                         $clamav_milter_service_ensure = $clamav::params::clamav_milter_service_ensure,
   Boolean                        $clamav_milter_service_enable = $clamav::params::clamav_milter_service_enable,
   Hash                           $clamav_milter_options        = $clamav::params::clamav_milter_options,
+  String[1]                      $milter_config_validate_cmd   = $clamav::params::milter_config_validate_cmd,
+  Boolean                        $validate_configs             = true,
 
   Optional[Hash]                 $clamd_default_options        = undef,
   Optional[Hash]                 $freshclam_default_options    = undef,

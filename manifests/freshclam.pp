@@ -15,6 +15,11 @@ class clamav::freshclam (
   String  $config_mode  = '0644',
   Boolean $sort_options = true,
 ) {
+  $config_validate_cmd = $clamav::validate_configs ? {
+    true    => $clamav::freshclam_config_validate_cmd,
+    default => undef,
+  }
+
   # NOTE: In RedHat this is part of the base clamav_package
   # NOTE: In Debian this is a dependency of the base clamav_package
   if $clamav::freshclam_package {
@@ -39,12 +44,13 @@ class clamav::freshclam (
   }
 
   file { 'freshclam.conf':
-    ensure  => file,
-    path    => $clamav::freshclam_config,
-    mode    => $config_mode,
-    owner   => $config_owner,
-    group   => $config_group,
-    content => epp('clamav/freshclam.conf.epp', {
+    ensure       => file,
+    path         => $clamav::freshclam_config,
+    mode         => $config_mode,
+    owner        => $config_owner,
+    group        => $config_group,
+    validate_cmd => $config_validate_cmd,
+    content      => epp('clamav/freshclam.conf.epp', {
         'options'      => $clamav::_freshclam_options,
         'sort_options' => $sort_options,
     }),

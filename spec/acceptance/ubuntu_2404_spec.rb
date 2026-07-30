@@ -96,6 +96,25 @@ describe 'clamav on Ubuntu 24.04' do
     expect(run_shell("stat -c '%a' /run/clamav/clamd.ctl").stdout.strip).to eq('666')
   end
 
+  it 'rejects invalid candidate configuration before replacing or refreshing clamd' do
+    apply_manifest(direct_manifest, catch_failures: true)
+    before_digest = run_shell('sha256sum /etc/clamav/clamd.conf').stdout.split.first
+
+    invalid_manifest = <<~PUPPET
+      class { 'clamav':
+        #{common_parameters}
+        clamd_options => {
+          'DefinitelyInvalidDirective' => true,
+        },
+      }
+    PUPPET
+
+    apply_manifest(invalid_manifest, expect_failures: true)
+
+    expect(run_shell('sha256sum /etc/clamav/clamd.conf').stdout.split.first).to eq(before_digest)
+    expect(run_shell('systemctl is-active clamav-daemon').stdout.strip).to eq('active')
+  end
+
   it 'uses opt-in socket activation and characterizes the distro socket mode' do
     idempotent_apply(socket_manifest)
 

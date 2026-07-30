@@ -12,6 +12,9 @@ class clamav::params {
   $freshclam_service_enable     = true
   $clamav_milter_service_ensure = 'running'
   $clamav_milter_service_enable = true
+  $clamd_config_validate_cmd     = '/usr/bin/env clamd --config-file % --version'
+  $freshclam_config_validate_cmd = '/usr/bin/env freshclam --config-file % --version'
+  $milter_config_validate_cmd    = '/usr/bin/env clamav-milter --config-file % --version'
 
   if ($facts['os']['family'] == 'RedHat') and (versioncmp($facts['os']['release']['full'], '6.0') >= 0) {
     # ### init vars ####
