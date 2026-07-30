@@ -263,8 +263,10 @@ automated catalog and runtime acceptance evidence.
 
 Older platforms retained in characterization tests are catalog-compatible
 legacy evidence, not maintained runtime-support claims. OpenVox 8 is
-source/catalog tested but has not been agent-runtime tested. ClamAV 1.5+,
-Ubuntu 26.04, Debian 13, and EL10 are not formally supported.
+source/catalog tested but has not been agent-runtime tested. ClamAV 1.5+ is
+runtime tested only with Ubuntu 24.04 distribution packages; this does not
+establish a general upstream-package or cross-platform version claim. Ubuntu
+26.04, Debian 13, and EL10 are not formally supported.
 
 See the [support policy and evidence matrix](docs/support-policy.md) for the
 meaning of each evidence level, legacy-removal policy, and links to the
@@ -337,9 +339,11 @@ requirements can be characterized without folding new platform behavior into the
 harness issue. Platform-specific acceptance and support decisions remain separate work.
 
 Use `ubuntu-2404` instead of `smoke` in the commands above to exercise formally
-supported Ubuntu 24.04 package versions, direct services, opt-in socket
-activation, restricted socket permissions, a deterministic local test
-signature, and two-run convergence.
+supported Ubuntu 24.04 package versions, including a required ClamAV 1.5-or-newer
+version assertion and Ubuntu package provenance. The target validates direct
+services, native configuration parsing, runtime and database directories,
+official database updates, systemd unit paths, opt-in socket activation, a
+deterministic local test signature, and two-run convergence.
 
 Use `debian-12` to exercise formally supported Debian 12. The target records its
 package and ClamAV versions independently and checks configuration rendering,

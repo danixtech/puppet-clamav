@@ -35,6 +35,19 @@ The exact ClamAV package version is emitted by each acceptance job. Formal OS
 support does not imply support for a newer ClamAV release that is unavailable
 from that platform's tested repositories.
 
+## ClamAV version-specific runtime evidence
+
+| ClamAV release | Operating system | Package source | Runtime evidence | Claim |
+| --- | --- | --- | --- | --- |
+| 1.5+ | Ubuntu 24.04 | Ubuntu archive/security package carrying an Ubuntu version suffix | Required `ubuntu-2404` acceptance asserts the installed version is at least 1.5, validates both generated configurations natively, starts direct services, exercises socket activation and signature detection, updates official databases, and proves two-run convergence | Formally runtime tested on this distribution/package combination |
+
+This claim is deliberately narrower than general ClamAV 1.5 support. It does
+not cover upstream binary packages, other Debian-family releases, FIPS policy,
+clamonacc, or future directives merely because their version number is newer.
+The acceptance log records `apt-cache policy`, source-package identity, exact
+binary package versions, service-unit paths, database files, and the installed
+daemon version so repository or packaging changes remain reviewable.
+
 ## Source and catalog compatibility
 
 | Runtime/platform | Evidence level | Current evidence | Missing release gate |
@@ -56,7 +69,7 @@ installation, or ClamAV packaging on end-of-life platforms.
 | Debian 13 | Provisional | Acceptance assertions exist, but the Puppet 8 installer cannot obtain the expected Debian 13 agent repository package |
 | EL10 | Provisional | ClamAV package names and freshclam service behavior differ; the current EPEL module dependency does not provide a compatible Puppet 8/EL10 path |
 | OpenVox 8 agents | Provisional | Catalog compatibility is proven, but there is no agent-runtime acceptance matrix |
-| ClamAV 1.5+ | Unsupported as a version claim | No required target currently supplies and validates ClamAV 1.5+ |
+| ClamAV 1.5+ outside Ubuntu 24.04 distro packaging | Unsupported as a version claim | No other required target currently supplies and validates ClamAV 1.5+ |
 | Ubuntu 26.04 | Unsupported | No catalog or runtime evidence |
 
 See [the OpenVox strategy](openvox-support.md) and

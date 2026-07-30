@@ -66,6 +66,12 @@ describe 'clamav on Ubuntu 24.04' do
   it 'records platform and repository package evidence' do
     expect(acceptance_evidence('ubuntu_2404_os_release', 'facter os.release.full')).to start_with('24.04')
     expect(acceptance_evidence('ubuntu_2404_puppet_version', 'puppet --version')).not_to be_empty
+    expect(
+      acceptance_evidence(
+        'ubuntu_2404_clamav_package_policy',
+        "apt-cache policy clamav | sed -n '1,8p'",
+      ),
+    ).to include('ubuntu')
   end
 
   it 'installs packages and bootstraps a deterministic local test database' do
@@ -78,9 +84,12 @@ describe 'clamav on Ubuntu 24.04' do
     run_shell('chmod 0644 /var/lib/clamav/local-test.hdb')
     run_shell('freshclam --config-file=/etc/clamav/freshclam.conf')
 
-    expect(acceptance_evidence('ubuntu_2404_clamav_package', "dpkg-query -W -f='${Version}' clamav")).not_to be_empty
-    expect(acceptance_evidence('ubuntu_2404_clamd_package', "dpkg-query -W -f='${Version}' clamav-daemon")).not_to be_empty
-    expect(acceptance_evidence('ubuntu_2404_freshclam_package', "dpkg-query -W -f='${Version}' clamav-freshclam")).not_to be_empty
+    package_version = acceptance_evidence('ubuntu_2404_clamav_package', "dpkg-query -W -f='${Version}' clamav")
+    expect(Gem::Version.new(package_version.split('+').first)).to be >= Gem::Version.new('1.5.0')
+    expect(package_version).to include('ubuntu')
+    expect(acceptance_evidence('ubuntu_2404_clamd_package', "dpkg-query -W -f='${Version}' clamav-daemon")).to eq(package_version)
+    expect(acceptance_evidence('ubuntu_2404_freshclam_package', "dpkg-query -W -f='${Version}' clamav-freshclam")).to eq(package_version)
+    expect(acceptance_evidence('ubuntu_2404_clamav_source_package', "dpkg-query -W -f='${source:Package}' clamav")).to eq('clamav')
   end
 
   it 'runs direct services with valid configuration and converges' do
@@ -93,7 +102,11 @@ describe 'clamav on Ubuntu 24.04' do
     expect(run_shell('clamd --config-file=/etc/clamav/clamd.conf --version').exit_code).to eq(0)
     expect(run_shell('freshclam --config-file=/etc/clamav/freshclam.conf --version').exit_code).to eq(0)
     expect(run_shell("grep -Fx 'LocalSocketMode 660' /etc/clamav/clamd.conf").exit_code).to eq(0)
+    expect(run_shell("stat -c '%U:%G %a' /run/clamav").stdout.strip).to eq('clamav:clamav 755')
+    expect(run_shell("stat -c '%U:%G %a' /var/lib/clamav").stdout.strip).to eq('clamav:clamav 755')
     expect(run_shell("stat -c '%a' /run/clamav/clamd.ctl").stdout.strip).to eq('666')
+    expect(run_shell('systemctl show clamav-daemon.service -p FragmentPath --value').stdout.strip).to end_with('/clamav-daemon.service')
+    expect(run_shell('systemctl show clamav-freshclam.service -p FragmentPath --value').stdout.strip).to end_with('/clamav-freshclam.service')
   end
 
   it 'rejects invalid candidate configuration before replacing or refreshing clamd' do
@@ -130,13 +143,21 @@ describe 'clamav on Ubuntu 24.04' do
   end
 
   it 'records database and service evidence' do
+    database_files = acceptance_evidence(
+      'ubuntu_2404_database_files',
+      "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
+    )
+    expect(database_files).to include('main.cvd', 'daily.cvd', 'local-test.hdb')
+
+    clamd_version = acceptance_evidence('ubuntu_2404_clamd_version', 'clamd --version')
+    expect(Gem::Version.new(clamd_version.split[1].split('/').first)).to be >= Gem::Version.new('1.5.0')
     expect(
       acceptance_evidence(
-        'ubuntu_2404_database_files',
-        "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
+        'ubuntu_2404_clamd_service_unit',
+        'systemctl show clamav-daemon.service -p ActiveState -p UnitFileState -p FragmentPath',
       ),
-    ).to include('local-test.hdb')
-    expect(acceptance_evidence('ubuntu_2404_clamd_version', 'clamd --version')).not_to be_empty
+    ).to include('ActiveState=active', 'UnitFileState=enabled')
     expect(acceptance_evidence('ubuntu_2404_socket_unit', 'systemctl show clamav-daemon.socket -p ActiveState -p UnitFileState')).to include('ActiveState=active')
+    expect(run_shell("systemctl cat clamav-daemon.socket | grep -F 'ListenStream=/run/clamav/clamd.ctl'").exit_code).to eq(0)
   end
 end
