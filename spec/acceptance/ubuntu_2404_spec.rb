@@ -158,7 +158,8 @@ describe 'clamav on Ubuntu 24.04' do
       "find /var/lib/clamav -maxdepth 1 -type f -printf '%f\\n' | sort | paste -sd, -",
     )
     expect(database_files).to include('main.cvd', 'daily.cvd', 'local-test.hdb')
-    expect(database_files).to include('main.cvd.sign', 'daily.cvd.sign')
+    expect(database_files).to match(%r{(?:\A|,)main-\d+\.cvd\.sign(?:,|\z)})
+    expect(database_files).to match(%r{(?:\A|,)daily-\d+\.cvd\.sign(?:,|\z)})
 
     clamd_version = acceptance_evidence('ubuntu_2404_clamd_version', 'clamd --version')
     expect(Gem::Version.new(clamd_version.split[1].split('/').first)).to be >= Gem::Version.new('1.5.0')
