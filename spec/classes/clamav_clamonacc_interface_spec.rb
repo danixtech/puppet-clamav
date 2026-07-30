@@ -37,6 +37,7 @@ describe 'clamav', type: :class do
     let(:params) do
       {
         manage_clamonacc: true,
+        clamonacc_config: '/etc/clamav/clamonacc.conf',
         clamonacc_options: {
           'ListenMode' => 'LocalSocket',
           'DaemonUsername' => 'clamav',
@@ -51,9 +52,9 @@ describe 'clamav', type: :class do
     it { is_expected.to compile.with_all_deps }
     it { is_expected.to contain_class('clamav::clamonacc') }
 
-    it 'still creates no operational resources at the interface stage' do
+    it 'creates only the configuration resource at this stage' do
       is_expected.not_to contain_package('clamonacc')
-      is_expected.not_to contain_file('clamonacc.conf')
+      is_expected.to contain_file('clamonacc.conf')
       is_expected.not_to contain_service('clamonacc')
     end
   end
@@ -70,6 +71,8 @@ describe 'clamav', type: :class do
         clamonacc_service_ensure: 'stopped',
         clamonacc_service_enable: false,
         clamonacc_listen_mode: 'TCPSocket',
+        clamonacc_tcp_port: 3310,
+        clamonacc_tcp_address: '127.0.0.1',
         clamonacc_daemon_username: 'scanner',
         clamonacc_include_paths: ['/srv/data'],
         clamonacc_exclude_paths: ['/srv/data/quarantine'],
@@ -105,7 +108,12 @@ describe 'clamav', type: :class do
   end
 
   context 'with clamonacc enabled without an include path' do
-    let(:params) { { manage_clamonacc: true } }
+    let(:params) do
+      {
+        manage_clamonacc: true,
+        clamonacc_config: '/etc/clamav/clamonacc.conf',
+      }
+    end
 
     it { is_expected.to compile.and_raise_error(%r{requires at least one include path}) }
   end
@@ -148,13 +156,19 @@ end
 
 describe 'clamav::clamonacc', type: :class do
   let(:facts) { debian_12_facts }
-  let(:params) { { include_paths: ['/home'] } }
+  let(:params) do
+    {
+      config_path: '/etc/clamav/clamonacc.conf',
+      local_socket: '/run/clamav/clamd.ctl',
+      include_paths: ['/home'],
+    }
+  end
 
   it { is_expected.to compile.with_all_deps }
 
-  it 'does not manage operational resources before the later Stage 2 issues' do
+  it 'manages only configuration before the later Stage 2 issues' do
     is_expected.not_to contain_package('clamonacc')
-    is_expected.not_to contain_file('clamonacc.conf')
+    is_expected.to contain_file('clamonacc.conf')
     is_expected.not_to contain_service('clamonacc')
   end
 end

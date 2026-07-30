@@ -197,11 +197,11 @@ class { 'clamav':
 }
 ```
 
-The Stage 2 interface foundation accepts package-neutral operational inputs
-without yet managing a clamonacc package, configuration file, service,
-directory, or quarantine action. Operational support is being added
-separately so that package paths and service integration can be validated
-before the module claims clamonacc support.
+The Stage 2 component accepts package-neutral operational inputs and manages a
+deterministic clamonacc configuration file. It does not yet manage a
+clamonacc package, service, runtime directory, or quarantine action.
+Operational support is being added separately so package paths and service
+integration can be validated before the module claims clamonacc support.
 
 The public contract includes:
 
@@ -221,11 +221,19 @@ typed parameters take precedence over equivalent compatibility keys in
 `DaemonUsername`, `OnAccessIncludePath`, `OnAccessExcludePath`,
 `OnAccessExcludeUname`, and `TemporaryDirectory`.
 
-For example, this declares and validates the interface only:
+The configuration path is explicit because package layouts differ. Local
+socket mode uses an explicit `clamonacc_local_socket` or, when declared through
+the main class, the resolved clamd `LocalSocket`. TCP mode requires both
+`clamonacc_tcp_port` and `clamonacc_tcp_address`. The compatibility
+`ListenMode` and `DaemonUsername` inputs are translated to native ClamAV
+directives and are never rendered literally.
+
+For example, this renders and validates a local-socket configuration:
 
 ```puppet
 class { 'clamav':
   manage_clamonacc             => true,
+  clamonacc_config             => '/etc/clamav/clamonacc.conf',
   clamonacc_include_paths      => ['/srv/data'],
   clamonacc_exclude_paths      => ['/srv/data/quarantine'],
   clamonacc_exclude_usernames  => ['clamav'],
@@ -234,14 +242,24 @@ class { 'clamav':
 }
 ```
 
+Candidate files are validated before replacement with:
+
+```text
+/usr/bin/env clamonacc --config-file % --version
+```
+
+Use `clamonacc_config_validate_cmd` for another packaged binary path. The
+global `validate_configs => false` escape hatch also disables this check, but
+should be used only when the selected package has no safe parse interface.
+
 These paths are examples rather than module defaults. Package and binary
 locations are intentionally optional so later platform data can describe
 distribution-native layouts without assuming that Cisco/Talos installers
-provide equivalent integration. Do not treat this interface-only stage as
-operational clamonacc support. `clamav::clamonacc` can also be declared
-directly with the same child-class parameters. Resource ordering remains an
-internal module responsibility once later stages add resources; this
-foundation does not expose resource-reference relationship parameters.
+provide equivalent integration. Do not treat this configuration stage as
+operational clamonacc service support. `clamav::clamonacc` can also be
+declared directly with the same child-class parameters. Resource ordering
+remains an internal module responsibility once later stages add resources;
+this foundation does not expose resource-reference relationship parameters.
 
 ### Validate configuration before service refresh
 

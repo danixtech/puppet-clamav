@@ -33,6 +33,10 @@ class clamav (
   Optional[String[1]] $clamonacc_package_version = $clamav::params::clamonacc_package_version,
   Optional[Stdlib::Absolutepath] $clamonacc_binary = $clamav::params::clamonacc_binary,
   Optional[Stdlib::Absolutepath] $clamonacc_config = $clamav::params::clamonacc_config,
+  String[1] $clamonacc_config_owner = $clamav::params::clamonacc_config_owner,
+  String[1] $clamonacc_config_group = $clamav::params::clamonacc_config_group,
+  Stdlib::Filemode $clamonacc_config_mode = $clamav::params::clamonacc_config_mode,
+  String[1] $clamonacc_config_validate_cmd = $clamav::params::clamonacc_config_validate_cmd,
   Optional[String[1]] $clamonacc_service = $clamav::params::clamonacc_service,
   Clamav::Service_ensure $clamonacc_service_ensure = $clamav::params::clamonacc_service_ensure,
   Boolean $clamonacc_service_enable = $clamav::params::clamonacc_service_enable,
@@ -44,6 +48,10 @@ class clamav (
   Optional[Stdlib::Absolutepath] $clamonacc_quarantine_path = $clamav::params::clamonacc_quarantine_path,
   Optional[String[1]] $clamonacc_daemon_username = $clamav::params::clamonacc_daemon_username,
   Optional[Clamav::Clamonacc_listen_mode] $clamonacc_listen_mode = $clamav::params::clamonacc_listen_mode,
+  Optional[Stdlib::Absolutepath] $clamonacc_local_socket = $clamav::params::clamonacc_local_socket,
+  Optional[Integer[1, 65535]] $clamonacc_tcp_port = $clamav::params::clamonacc_tcp_port,
+  Optional[String[1]] $clamonacc_tcp_address = $clamav::params::clamonacc_tcp_address,
+  Boolean $clamonacc_sort_options = $clamav::params::clamonacc_sort_options,
 
   $freshclam_package            = $clamav::params::freshclam_package,
   $freshclam_version            = $clamav::params::freshclam_version,
@@ -110,12 +118,22 @@ class clamav (
   }
 
   if $manage_clamonacc {
+    $_clamonacc_local_socket = $clamonacc_local_socket ? {
+      undef   => $_clamd_options['LocalSocket'],
+      default => $clamonacc_local_socket,
+    }
+
     Class['clamav::install']
     -> class { 'clamav::clamonacc':
       package_name        => $clamonacc_package,
       package_version     => $clamonacc_package_version,
       binary_path         => $clamonacc_binary,
       config_path         => $clamonacc_config,
+      config_owner        => $clamonacc_config_owner,
+      config_group        => $clamonacc_config_group,
+      config_mode         => $clamonacc_config_mode,
+      config_validate_cmd => $clamonacc_config_validate_cmd,
+      validate_config     => $validate_configs,
       service_name        => $clamonacc_service,
       service_ensure      => $clamonacc_service_ensure,
       service_enable      => $clamonacc_service_enable,
@@ -127,6 +145,10 @@ class clamav (
       quarantine_path     => $clamonacc_quarantine_path,
       daemon_username     => $clamonacc_daemon_username,
       listen_mode         => $clamonacc_listen_mode,
+      local_socket        => $_clamonacc_local_socket,
+      tcp_port            => $clamonacc_tcp_port,
+      tcp_address         => $clamonacc_tcp_address,
+      sort_options        => $clamonacc_sort_options,
     }
     -> Anchor['clamav::end']
   }

@@ -23,6 +23,10 @@ class clamav::params {
   $clamonacc_package_version     = undef
   $clamonacc_binary              = undef
   $clamonacc_config              = undef
+  $clamonacc_config_owner        = 'root'
+  $clamonacc_config_group        = 'root'
+  $clamonacc_config_mode         = '0644'
+  $clamonacc_config_validate_cmd = '/usr/bin/env clamonacc --config-file % --version'
   $clamonacc_service             = undef
   $clamonacc_service_ensure      = 'running'
   $clamonacc_service_enable      = true
@@ -34,6 +38,10 @@ class clamav::params {
   $clamonacc_quarantine_path     = undef
   $clamonacc_daemon_username     = undef
   $clamonacc_listen_mode         = undef
+  $clamonacc_local_socket        = undef
+  $clamonacc_tcp_port            = undef
+  $clamonacc_tcp_address         = undef
+  $clamonacc_sort_options        = true
 
   if ($facts['os']['family'] == 'RedHat') and (versioncmp($facts['os']['release']['full'], '6.0') >= 0) {
     # ### init vars ####

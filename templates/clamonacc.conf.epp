@@ -1,0 +1,53 @@
+<%- |
+  Clamav::Clamonacc_listen_mode $listen_mode,
+  Optional[Stdlib::Absolutepath] $local_socket,
+  Optional[Integer[1, 65535]] $tcp_port,
+  Optional[String[1]] $tcp_address,
+  Optional[String[1]] $daemon_username,
+  Optional[Stdlib::Absolutepath] $temporary_directory,
+  Array[Stdlib::Absolutepath, 1] $include_paths,
+  Array[Stdlib::Absolutepath] $exclude_paths,
+  Array[String[1]] $exclude_usernames,
+  Clamav::Clamonacc_options $extra_options,
+  Boolean $sort_options,
+| -%>
+### File managed with puppet ###
+## Module:           'clamav'
+
+<% if $listen_mode == 'LocalSocket' { -%>
+LocalSocket <%= $local_socket %>
+<% } else { -%>
+TCPSocket <%= $tcp_port %>
+TCPAddr <%= $tcp_address %>
+<% } -%>
+<% if $daemon_username != undef { -%>
+User <%= $daemon_username %>
+<% } -%>
+<% if $temporary_directory != undef { -%>
+TemporaryDirectory <%= $temporary_directory %>
+<% } -%>
+<% $include_paths.each |Stdlib::Absolutepath $path| { -%>
+OnAccessIncludePath <%= $path %>
+<% } -%>
+<% $exclude_paths.each |Stdlib::Absolutepath $path| { -%>
+OnAccessExcludePath <%= $path %>
+<% } -%>
+<% $exclude_usernames.each |String[1] $username| { -%>
+OnAccessExcludeUname <%= $username %>
+<% } -%>
+<% $option_keys = $sort_options ? {
+     true    => keys($extra_options).sort,
+     default => keys($extra_options),
+   } -%>
+<% $option_keys.each |String[1] $key| { -%>
+<%   $value = $extra_options[$key] -%>
+<%   $values = $value ? {
+       Array   => $value,
+       default => [$value],
+     } -%>
+<%   $values.each |$item| { -%>
+<%     if $item != undef and $item != '' { -%>
+<%= $key %> <%= $item %>
+<%     } -%>
+<%   } -%>
+<% } -%>

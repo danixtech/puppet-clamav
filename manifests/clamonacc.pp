@@ -1,13 +1,18 @@
-# @summary Define the typed, package-neutral clamonacc public contract.
+# @summary Render and validate package-neutral clamonacc configuration.
 #
-# This class deliberately manages no package, configuration, service, runtime
-# directory, or quarantine resources. Those capabilities are staged in later
-# clamonacc issues.
+# This class deliberately manages no package, service, runtime directory, or
+# quarantine resources. Those capabilities are staged in later clamonacc
+# issues.
 class clamav::clamonacc (
   Optional[String[1]] $package_name = undef,
   Optional[String[1]] $package_version = undef,
   Optional[Stdlib::Absolutepath] $binary_path = undef,
   Optional[Stdlib::Absolutepath] $config_path = undef,
+  String[1] $config_owner = 'root',
+  String[1] $config_group = 'root',
+  Stdlib::Filemode $config_mode = '0644',
+  String[1] $config_validate_cmd = '/usr/bin/env clamonacc --config-file % --version',
+  Boolean $validate_config = true,
   Optional[String[1]] $service_name = undef,
   Clamav::Service_ensure $service_ensure = 'running',
   Boolean $service_enable = true,
@@ -19,7 +24,15 @@ class clamav::clamonacc (
   Optional[Stdlib::Absolutepath] $quarantine_path = undef,
   Optional[String[1]] $daemon_username = undef,
   Optional[Clamav::Clamonacc_listen_mode] $listen_mode = undef,
+  Optional[Stdlib::Absolutepath] $local_socket = undef,
+  Optional[Integer[1, 65535]] $tcp_port = undef,
+  Optional[String[1]] $tcp_address = undef,
+  Boolean $sort_options = true,
 ) {
+  if $config_path == undef {
+    fail('clamav::clamonacc requires config_path')
+  }
+
   if $include_paths != undef {
     $_include_paths = $include_paths
   } elsif $options['OnAccessIncludePath'] != undef {
@@ -68,6 +81,8 @@ class clamav::clamonacc (
     $_daemon_username = $daemon_username
   } elsif $options['DaemonUsername'] != undef {
     $_daemon_username = assert_type(String[1], $options['DaemonUsername'])
+  } elsif $options['User'] != undef {
+    $_daemon_username = assert_type(String[1], $options['User'])
   } else {
     $_daemon_username = undef
   }
@@ -83,14 +98,89 @@ class clamav::clamonacc (
     $_listen_mode = 'LocalSocket'
   }
 
-  # #16 will consume this normalized hash. Explicit typed parameters take
-  # precedence over compatibility values in clamonacc_options.
-  $_options = merge($options, {
-      'ListenMode'              => $_listen_mode,
-      'DaemonUsername'         => $_daemon_username,
-      'OnAccessIncludePath'    => $_include_paths,
-      'OnAccessExcludePath'    => $_exclude_paths,
-      'OnAccessExcludeUname'   => $_exclude_usernames,
-      'TemporaryDirectory'     => $_temporary_directory,
-  })
+  if $local_socket != undef {
+    $_local_socket = $local_socket
+  } elsif $options['LocalSocket'] != undef {
+    $_local_socket = assert_type(
+      Stdlib::Absolutepath,
+      $options['LocalSocket'],
+    )
+  } else {
+    $_local_socket = undef
+  }
+
+  if $tcp_port != undef {
+    $_tcp_port = $tcp_port
+  } elsif $options['TCPSocket'] != undef {
+    $_tcp_port = assert_type(
+      Integer[1, 65535],
+      $options['TCPSocket'],
+    )
+  } else {
+    $_tcp_port = undef
+  }
+
+  if $tcp_address != undef {
+    $_tcp_address = $tcp_address
+  } elsif $options['TCPAddr'] != undef {
+    $_tcp_address = assert_type(String[1], $options['TCPAddr'])
+  } else {
+    $_tcp_address = undef
+  }
+
+  if $_listen_mode == 'LocalSocket' and $_local_socket == undef {
+    fail('clamav::clamonacc LocalSocket mode requires local_socket')
+  }
+
+  if $_listen_mode == 'TCPSocket' and $_tcp_port == undef {
+    fail('clamav::clamonacc TCPSocket mode requires tcp_port')
+  }
+
+  if $_listen_mode == 'TCPSocket' and $_tcp_address == undef {
+    fail('clamav::clamonacc TCPSocket mode requires tcp_address')
+  }
+
+  $reserved_options = [
+    'ListenMode',
+    'DaemonUsername',
+    'LocalSocket',
+    'TCPSocket',
+    'TCPAddr',
+    'User',
+    'TemporaryDirectory',
+    'OnAccessIncludePath',
+    'OnAccessExcludePath',
+    'OnAccessExcludeUname',
+  ]
+
+  $_extra_options = $options.filter |String $key, Clamav::Config_value $value| {
+    ! ($key in $reserved_options) and $value != undef and $value != ''
+  }
+
+  $config_validate = $validate_config ? {
+    true    => $config_validate_cmd,
+    default => undef,
+  }
+
+  file { 'clamonacc.conf':
+    ensure       => file,
+    path         => $config_path,
+    owner        => $config_owner,
+    group        => $config_group,
+    mode         => $config_mode,
+    validate_cmd => $config_validate,
+    content      => epp('clamav/clamonacc.conf.epp', {
+        'listen_mode'        => $_listen_mode,
+        'local_socket'       => $_local_socket,
+        'tcp_port'           => $_tcp_port,
+        'tcp_address'        => $_tcp_address,
+        'daemon_username'    => $_daemon_username,
+        'temporary_directory' => $_temporary_directory,
+        'include_paths'      => $_include_paths,
+        'exclude_paths'      => $_exclude_paths,
+        'exclude_usernames'  => $_exclude_usernames,
+        'extra_options'      => $_extra_options,
+        'sort_options'       => $sort_options,
+    }),
+  }
 }
