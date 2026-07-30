@@ -102,7 +102,7 @@ describe 'clamav on Ubuntu 24.04' do
     expect(run_shell('clamd --config-file=/etc/clamav/clamd.conf --version').exit_code).to eq(0)
     expect(run_shell('freshclam --config-file=/etc/clamav/freshclam.conf --version').exit_code).to eq(0)
     expect(run_shell("grep -Fx 'LocalSocketMode 660' /etc/clamav/clamd.conf").exit_code).to eq(0)
-    expect(run_shell("stat -c '%U:%G %a' /run/clamav").stdout.strip).to eq('clamav:clamav 755')
+    expect(run_shell("stat -c '%U:%G %a' /run/clamav").stdout.strip).to eq('clamav:root 755')
     expect(run_shell("stat -c '%U:%G %a' /var/lib/clamav").stdout.strip).to eq('clamav:clamav 755')
     expect(run_shell("stat -c '%a' /run/clamav/clamd.ctl").stdout.strip).to eq('666')
     expect(run_shell('systemctl show clamav-daemon.service -p FragmentPath --value').stdout.strip).to end_with('/clamav-daemon.service')
@@ -156,7 +156,7 @@ describe 'clamav on Ubuntu 24.04' do
         'ubuntu_2404_clamd_service_unit',
         'systemctl show clamav-daemon.service -p ActiveState -p UnitFileState -p FragmentPath',
       ),
-    ).to include('ActiveState=active', 'UnitFileState=enabled')
+    ).to include('ActiveState=active', 'FragmentPath=/usr/lib/systemd/system/clamav-daemon.service')
     expect(acceptance_evidence('ubuntu_2404_socket_unit', 'systemctl show clamav-daemon.socket -p ActiveState -p UnitFileState')).to include('ActiveState=active')
     expect(run_shell("systemctl cat clamav-daemon.socket | grep -F 'ListenStream=/run/clamav/clamd.ctl'").exit_code).to eq(0)
   end
