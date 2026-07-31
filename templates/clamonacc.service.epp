@@ -1,0 +1,19 @@
+<%- |
+  Stdlib::Absolutepath $binary_path,
+  Stdlib::Absolutepath $config_path,
+  String[1] $daemon_service_unit,
+| -%>
+# File managed by Puppet
+[Unit]
+Description=ClamAV On-Access Scanner
+After=<%= $daemon_service_unit %>
+Requires=<%= $daemon_service_unit %>
+
+[Service]
+Type=simple
+ExecStart=<%= $binary_path %> --config-file=<%= $config_path %> --foreground
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

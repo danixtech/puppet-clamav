@@ -30,6 +30,8 @@ class clamav::params {
   $clamonacc_service             = undef
   $clamonacc_service_ensure      = 'running'
   $clamonacc_service_enable      = true
+  $clamonacc_manage_service_unit = false
+  $clamonacc_service_unit_path   = undef
   $clamonacc_options             = {}
   $clamonacc_include_paths       = undef
   $clamonacc_exclude_paths       = undef

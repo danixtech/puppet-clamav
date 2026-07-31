@@ -1,8 +1,8 @@
-# @summary Render and validate package-neutral clamonacc configuration.
+# @summary Configure clamonacc and optionally manage its package and service.
 #
-# This class deliberately manages no package, service, runtime directory, or
-# quarantine resources. Those capabilities are staged in later clamonacc
-# issues.
+# Package-native service units are preferred. A caller may explicitly opt in
+# to a module-rendered unit when its package does not provide one. Runtime
+# directories and quarantine behavior are staged separately.
 class clamav::clamonacc (
   Optional[String[1]] $package_name = undef,
   Optional[String[1]] $package_version = undef,
@@ -16,6 +16,9 @@ class clamav::clamonacc (
   Optional[String[1]] $service_name = undef,
   Clamav::Service_ensure $service_ensure = 'running',
   Boolean $service_enable = true,
+  Boolean $manage_service_unit = false,
+  Optional[Stdlib::Absolutepath] $service_unit_path = undef,
+  Optional[String[1]] $daemon_service_name = undef,
   Clamav::Clamonacc_options $options = {},
   Optional[Array[Stdlib::Absolutepath, 1]] $include_paths = undef,
   Optional[Array[Stdlib::Absolutepath]] $exclude_paths = undef,
@@ -140,6 +143,22 @@ class clamav::clamonacc (
     fail('clamav::clamonacc TCPSocket mode requires tcp_address')
   }
 
+  if $manage_service_unit and $service_name == undef {
+    fail('clamav::clamonacc managed service unit requires service_name')
+  }
+
+  if $manage_service_unit and $binary_path == undef {
+    fail('clamav::clamonacc managed service unit requires binary_path')
+  }
+
+  if $manage_service_unit and $service_unit_path == undef {
+    fail('clamav::clamonacc managed service unit requires service_unit_path')
+  }
+
+  if $manage_service_unit and $daemon_service_name == undef {
+    fail('clamav::clamonacc managed service unit requires daemon_service_name')
+  }
+
   $reserved_options = [
     'ListenMode',
     'DaemonUsername',
@@ -162,6 +181,19 @@ class clamav::clamonacc (
     default => undef,
   }
 
+  if $package_name != undef {
+    $resolved_package_version = $package_version ? {
+      undef   => 'installed',
+      default => $package_version,
+    }
+
+    package { 'clamonacc':
+      ensure => $resolved_package_version,
+      name   => $package_name,
+      before => File['clamonacc.conf'],
+    }
+  }
+
   file { 'clamonacc.conf':
     ensure       => file,
     path         => $config_path,
@@ -182,5 +214,52 @@ class clamav::clamonacc (
         'extra_options'      => $_extra_options,
         'sort_options'       => $sort_options,
     }),
+  }
+
+  if $manage_service_unit {
+    $daemon_service_unit = $daemon_service_name ? {
+      /[.]service$/ => $daemon_service_name,
+      default       => "${daemon_service_name}.service",
+    }
+
+    file { 'clamonacc.service':
+      ensure  => file,
+      path    => $service_unit_path,
+      owner   => 'root',
+      group   => 'root',
+      mode    => '0644',
+      content => epp('clamav/clamonacc.service.epp', {
+          'binary_path'         => $binary_path,
+          'config_path'         => $config_path,
+          'daemon_service_unit' => $daemon_service_unit,
+      }),
+      notify  => Exec['clamonacc-systemd-daemon-reload'],
+    }
+
+    exec { 'clamonacc-systemd-daemon-reload':
+      command     => '/usr/bin/systemctl daemon-reload',
+      refreshonly => true,
+      before      => Service['clamonacc'],
+    }
+  }
+
+  if $service_name != undef {
+    $service_subscriptions = $manage_service_unit ? {
+      true    => [File['clamonacc.conf'], File['clamonacc.service']],
+      default => File['clamonacc.conf'],
+    }
+
+    service { 'clamonacc':
+      ensure     => $service_ensure,
+      name       => $service_name,
+      enable     => $service_enable,
+      hasrestart => true,
+      hasstatus  => true,
+      subscribe  => $service_subscriptions,
+    }
+
+    if $package_name != undef {
+      Package['clamonacc'] ~> Service['clamonacc']
+    }
   }
 }

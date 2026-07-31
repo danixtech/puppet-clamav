@@ -52,7 +52,7 @@ describe 'clamav', type: :class do
     it { is_expected.to compile.with_all_deps }
     it { is_expected.to contain_class('clamav::clamonacc') }
 
-    it 'creates only the configuration resource at this stage' do
+    it 'creates configuration but no service without an explicit service name' do
       is_expected.not_to contain_package('clamonacc')
       is_expected.to contain_file('clamonacc.conf')
       is_expected.not_to contain_service('clamonacc')
@@ -166,7 +166,7 @@ describe 'clamav::clamonacc', type: :class do
 
   it { is_expected.to compile.with_all_deps }
 
-  it 'manages only configuration before the later Stage 2 issues' do
+  it 'manages only configuration without an explicit service name' do
     is_expected.not_to contain_package('clamonacc')
     is_expected.to contain_file('clamonacc.conf')
     is_expected.not_to contain_service('clamonacc')

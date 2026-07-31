@@ -197,17 +197,19 @@ class { 'clamav':
 }
 ```
 
-The Stage 2 component accepts package-neutral operational inputs and manages a
-deterministic clamonacc configuration file. It does not yet manage a
-clamonacc package, service, runtime directory, or quarantine action.
-Operational support is being added separately so package paths and service
-integration can be validated before the module claims clamonacc support.
+The Stage 2 component accepts package-neutral operational inputs, manages a
+deterministic clamonacc configuration file, and can manage an explicitly
+selected package and systemd service. It does not yet manage runtime
+directories or quarantine actions. Full on-access detection and fanotify
+evidence remains staged separately, so this service foundation is not yet a
+formal claim of operational clamonacc support.
 
 The public contract includes:
 
-* optional package name/version, binary path, configuration path, and service
-  name;
+* optional package name/version, binary path, configuration path, and
+  package-native service name;
 * typed service `ensure` (`running` or `stopped`) and enable policy;
+* explicit opt-in management of a custom systemd unit and its absolute path;
 * `LocalSocket` or `TCPSocket` listen mode;
 * daemon username;
 * one or more absolute include paths;
@@ -253,13 +255,48 @@ global `validate_configs => false` escape hatch also disables this check, but
 should be used only when the selected package has no safe parse interface.
 
 These paths are examples rather than module defaults. Package and binary
-locations are intentionally optional so later platform data can describe
+locations are intentionally optional so platform data or callers can describe
 distribution-native layouts without assuming that Cisco/Talos installers
-provide equivalent integration. Do not treat this configuration stage as
-operational clamonacc service support. `clamav::clamonacc` can also be
-declared directly with the same child-class parameters. Resource ordering
-remains an internal module responsibility once later stages add resources;
-this foundation does not expose resource-reference relationship parameters.
+provide equivalent integration.
+
+To manage a package-native service, provide its actual unit name:
+
+```puppet
+class { 'clamav':
+  manage_clamonacc        => true,
+  clamonacc_config        => '/etc/clamav/clamonacc.conf',
+  clamonacc_service       => 'clamav-clamonacc',
+  clamonacc_include_paths => ['/srv/data'],
+}
+```
+
+If the selected package provides no unit, a caller may explicitly request the
+small module-owned unit:
+
+```puppet
+class { 'clamav':
+  manage_clamonacc             => true,
+  clamonacc_binary             => '/usr/sbin/clamonacc',
+  clamonacc_config             => '/etc/clamav/clamonacc.conf',
+  clamonacc_service            => 'clamav-onaccess',
+  clamonacc_manage_service_unit => true,
+  clamonacc_service_unit_path  => '/etc/systemd/system/clamav-onaccess.service',
+  clamonacc_include_paths      => ['/srv/data'],
+}
+```
+
+The custom unit uses the resolved clamd service name, runs clamonacc in the
+foreground, reloads systemd when its unit changes, and restarts when its
+validated configuration, package, or unit changes. Package-native units are
+preferred. No service, package, or unit is declared unless its corresponding
+name or explicit unit-management policy is supplied. `manage_clamonacc =>
+false` remains the default and creates no clamonacc resources.
+
+`clamav::clamonacc` can also be declared directly. Direct callers using a
+module-managed unit must supply `binary_path`, `config_path`, `service_name`,
+`service_unit_path`, and `daemon_service_name`; they remain responsible for
+declaring the clamd component itself. Quarantine, runtime-directory ownership,
+fanotify behavior, SELinux, and AppArmor are outside this service issue.
 
 ### Validate configuration before service refresh
 

@@ -40,6 +40,8 @@ class clamav (
   Optional[String[1]] $clamonacc_service = $clamav::params::clamonacc_service,
   Clamav::Service_ensure $clamonacc_service_ensure = $clamav::params::clamonacc_service_ensure,
   Boolean $clamonacc_service_enable = $clamav::params::clamonacc_service_enable,
+  Boolean $clamonacc_manage_service_unit = $clamav::params::clamonacc_manage_service_unit,
+  Optional[Stdlib::Absolutepath] $clamonacc_service_unit_path = $clamav::params::clamonacc_service_unit_path,
   Clamav::Clamonacc_options $clamonacc_options = $clamav::params::clamonacc_options,
   Optional[Array[Stdlib::Absolutepath, 1]] $clamonacc_include_paths = $clamav::params::clamonacc_include_paths,
   Optional[Array[Stdlib::Absolutepath]] $clamonacc_exclude_paths = $clamav::params::clamonacc_exclude_paths,
@@ -137,6 +139,9 @@ class clamav (
       service_name        => $clamonacc_service,
       service_ensure      => $clamonacc_service_ensure,
       service_enable      => $clamonacc_service_enable,
+      manage_service_unit => $clamonacc_manage_service_unit,
+      service_unit_path   => $clamonacc_service_unit_path,
+      daemon_service_name => $clamd_service,
       options             => $clamonacc_options,
       include_paths       => $clamonacc_include_paths,
       exclude_paths       => $clamonacc_exclude_paths,
@@ -151,6 +156,10 @@ class clamav (
       sort_options        => $clamonacc_sort_options,
     }
     -> Anchor['clamav::end']
+
+    if $manage_clamd {
+      Class['clamav::clamd'] -> Class['clamav::clamonacc']
+    }
   }
 
   if $manage_freshclam {
