@@ -141,26 +141,27 @@ describe 'clamonacc on-access runtime' do
         ],
       }
 
-      Service['clamonacc-runtime-clamd']
-        -> class { 'clamav::clamonacc':
-          binary_path         => '/usr/sbin/clamonacc',
-          config_path         => '/etc/clamonacc-runtime.conf',
-          service_name        => 'clamonacc-runtime',
-          service_enable      => false,
-          manage_service_unit => true,
-          service_unit_path   => '/etc/systemd/system/clamonacc-runtime.service',
-          daemon_service_name => 'clamonacc-runtime-clamd',
-          daemon_username     => $runtime_daemon_user,
-          local_socket        => '/run/clamonacc-runtime/clamd.sock',
-          include_paths       => ['/tmp/clamonacc-runtime-watch'],
-          exclude_paths       => [#{rendered_excludes}],
-          exclude_usernames   => [$runtime_daemon_user],
-          manage_quarantine   => true,
-          quarantine_path     => '/tmp/clamonacc-runtime-quarantine',
-          quarantine_owner    => 'root',
-          quarantine_group    => 'root',
-          quarantine_mode     => '0700',
-        }
+      class { 'clamav::clamonacc':
+        binary_path         => '/usr/sbin/clamonacc',
+        config_path         => '/etc/clamonacc-runtime.conf',
+        service_name        => 'clamonacc-runtime',
+        service_enable      => false,
+        manage_service_unit => true,
+        service_unit_path   => '/etc/systemd/system/clamonacc-runtime.service',
+        daemon_service_name => 'clamonacc-runtime-clamd',
+        daemon_username     => $runtime_daemon_user,
+        local_socket        => '/run/clamonacc-runtime/clamd.sock',
+        include_paths       => ['/tmp/clamonacc-runtime-watch'],
+        exclude_paths       => [#{rendered_excludes}],
+        exclude_usernames   => [$runtime_daemon_user],
+        manage_quarantine   => true,
+        quarantine_path     => '/tmp/clamonacc-runtime-quarantine',
+        quarantine_owner    => 'root',
+        quarantine_group    => 'root',
+        quarantine_mode     => '0700',
+      }
+
+      Service['clamonacc-runtime-clamd'] -> Class['clamav::clamonacc']
     PUPPET
   end
 
