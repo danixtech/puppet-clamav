@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper_acceptance'
+require 'base64'
 
 describe 'clamonacc on-access runtime' do
   let(:eicar_content) do
@@ -62,7 +63,6 @@ describe 'clamonacc on-access runtime' do
         owner  => 'root',
         group  => 'root',
         mode   => '0777',
-        require => Package['clamonacc runtime daemon'],
       }
 
       file { '/tmp/clamonacc-runtime-db':
@@ -70,7 +70,6 @@ describe 'clamonacc on-access runtime' do
         owner   => $runtime_daemon_user,
         group   => $runtime_daemon_group,
         mode    => '0755',
-        require => Package['clamonacc runtime daemon'],
       }
 
       file { '/run/clamonacc-runtime':
@@ -78,7 +77,6 @@ describe 'clamonacc on-access runtime' do
         owner   => $runtime_daemon_user,
         group   => $runtime_daemon_group,
         mode    => '0755',
-        require => Package['clamonacc runtime daemon'],
       }
 
       file { '/tmp/clamonacc-runtime-db/local-test.hdb':
@@ -87,7 +85,6 @@ describe 'clamonacc on-access runtime' do
         group   => $runtime_daemon_group,
         mode    => '0644',
         content => "44d88612fea8a8f36de82e1278abb02f:68:Eicar-Test-Signature\n",
-        require => File['/tmp/clamonacc-runtime-db'],
       }
 
       file { '/etc/clamonacc-runtime-clamd.conf':
@@ -101,10 +98,6 @@ describe 'clamonacc on-access runtime' do
           Foreground true
           User ${runtime_daemon_user}
           | CONFIG
-        require => [
-          File['/tmp/clamonacc-runtime-db/local-test.hdb'],
-          File['/run/clamonacc-runtime'],
-        ],
         notify  => Exec['clamonacc-runtime-systemd-reload'],
       }
 
@@ -120,7 +113,6 @@ describe 'clamonacc on-access runtime' do
           Type=simple
           ExecStart=/usr/sbin/clamd --config-file=/etc/clamonacc-runtime-clamd.conf
           | UNIT
-        require => Package['clamonacc runtime daemon'],
         notify  => Exec['clamonacc-runtime-systemd-reload'],
       }
 
@@ -135,10 +127,6 @@ describe 'clamonacc on-access runtime' do
         enable     => false,
         hasrestart => true,
         hasstatus  => true,
-        require    => [
-          File['/etc/clamonacc-runtime-clamd.conf'],
-          File['/etc/systemd/system/clamonacc-runtime-clamd.service'],
-        ],
       }
 
       class { 'clamav::clamonacc':
@@ -169,6 +157,13 @@ describe 'clamonacc on-access runtime' do
     run_shell("for attempt in $(seq 1 20); do #{command} && exit 0; sleep 1; done; exit 1")
   end
 
+  def validate_runtime_manifest(manifest)
+    encoded = Base64.strict_encode64(manifest)
+    run_shell("printf '%s' '#{encoded}' | base64 -d > /tmp/clamonacc-runtime.pp")
+    result = run_shell('puppet parser validate /tmp/clamonacc-runtime.pp', expect_failures: true)
+    expect(result.exit_code).to eq(0), result.stdout
+  end
+
   before(:each) do
     skip 'real clamonacc coverage runs on Ubuntu 24.04, Debian 12, and AlmaLinux 9' unless supported_target?
   end
@@ -186,7 +181,9 @@ describe 'clamonacc on-access runtime' do
   end
 
   it 'detects, excludes, quarantines, refreshes, and converges with real fanotify' do
-    apply_manifest(runtime_manifest, catch_failures: true)
+    manifest = runtime_manifest
+    validate_runtime_manifest(manifest)
+    apply_manifest(manifest, catch_failures: true)
 
     expect(run_shell('test -x /usr/sbin/clamonacc').exit_code).to eq(0)
     expect(run_shell('systemctl is-active clamonacc-runtime-clamd').stdout.strip).to eq('active')
