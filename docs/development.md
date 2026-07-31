@@ -78,3 +78,11 @@ permissions, and two-run convergence.
 Catalog success is not runtime evidence. A platform or ClamAV version becomes
 a formal support claim only when its required runtime evidence is present and
 the support metadata and documentation are updated deliberately.
+# Incremental Hiera migration
+
+The configuration-validation command domain is the first Stage 3 migration
+from `clamav::params` inheritance. The public parameters and caller override
+precedence remain unchanged; the module data values provide the same defaults,
+with the historical literals retained as lookup fallbacks for direct child
+class declarations. Package, service, account, and option-hash policy remain
+in the existing resolution path until separately characterized.

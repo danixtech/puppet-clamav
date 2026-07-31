@@ -1,5 +1,11 @@
 # @summary Set up ClamAV parameters defaults etc.
 class clamav::params {
+  # Validation commands are a deliberately small first migration domain. The
+  # lookup retains the historical fallback for direct child-class callers.
+  $clamd_config_validate_cmd = lookup('clamav::clamd_config_validate_cmd', String, 'first', '/usr/bin/env clamd --config-file % --version')
+  $freshclam_config_validate_cmd = lookup('clamav::freshclam_config_validate_cmd', String, 'first', '/usr/bin/env freshclam --config-file % --version')
+  $milter_config_validate_cmd = lookup('clamav::milter_config_validate_cmd', String, 'first', '/usr/bin/env clamav-milter --config-file % --version')
+
   # ### init vars ####
   $manage_user                  = false
   $manage_clamd                 = false
@@ -13,9 +19,6 @@ class clamav::params {
   $freshclam_service_enable     = true
   $clamav_milter_service_ensure = 'running'
   $clamav_milter_service_enable = true
-  $clamd_config_validate_cmd     = '/usr/bin/env clamd --config-file % --version'
-  $freshclam_config_validate_cmd = '/usr/bin/env freshclam --config-file % --version'
-  $milter_config_validate_cmd    = '/usr/bin/env clamav-milter --config-file % --version'
 
   # clamonacc remains package-neutral and opt-in. Platform/package integration
   # is intentionally deferred until it has runtime evidence.
