@@ -92,12 +92,7 @@ describe 'clamonacc on-access runtime' do
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        content => @("CONFIG")
-          DatabaseDirectory /tmp/clamonacc-runtime-db
-          LocalSocket /run/clamonacc-runtime/clamd.sock
-          Foreground true
-          User ${runtime_daemon_user}
-          | CONFIG,
+        content => "DatabaseDirectory /tmp/clamonacc-runtime-db\nLocalSocket /run/clamonacc-runtime/clamd.sock\nForeground true\nUser ${runtime_daemon_user}\n",
         notify  => Exec['clamonacc-runtime-systemd-reload'],
       }
 
@@ -106,13 +101,7 @@ describe 'clamonacc on-access runtime' do
         owner   => 'root',
         group   => 'root',
         mode    => '0644',
-        content => @("UNIT")
-          [Unit]
-          Description=clamonacc runtime acceptance clamd
-          [Service]
-          Type=simple
-          ExecStart=/usr/sbin/clamd --config-file=/etc/clamonacc-runtime-clamd.conf
-          | UNIT,
+        content => "[Unit]\nDescription=clamonacc runtime acceptance clamd\n[Service]\nType=simple\nExecStart=/usr/sbin/clamd --config-file=/etc/clamonacc-runtime-clamd.conf\n",
         notify  => Exec['clamonacc-runtime-systemd-reload'],
       }
 
