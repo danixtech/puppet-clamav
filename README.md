@@ -182,6 +182,10 @@ separately documented migration. See
 for the staged migration plan and evidence required before a breaking default
 change.
 
+Systemd hardening is not imposed by default. The evaluation and runtime
+evidence requirements for any future optional profile are documented in
+[`docs/systemd-hardening.md`](docs/systemd-hardening.md).
+
 ### Understand freshclam service policy
 
 Debian-family systems manage the `clamav-freshclam` service directly.
