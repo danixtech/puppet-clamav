@@ -177,7 +177,10 @@ class { 'clamav':
 Ensure every local client that needs the socket belongs to the configured
 `LocalSocketGroup` before applying a restrictive mode. The module retains
 `666` as its compatibility default; changing that default requires a
-separately documented migration.
+separately documented migration. See
+[`docs/socket-permission-migration.md`](docs/socket-permission-migration.md)
+for the staged migration plan and evidence required before a breaking default
+change.
 
 ### Understand freshclam service policy
 
