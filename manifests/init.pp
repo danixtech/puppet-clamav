@@ -88,6 +88,9 @@ class clamav (
   Optional[Hash]                 $freshclam_default_options    = undef,
   Optional[Hash]                 $milter_default_options       = undef,
   Array[Clamav::Directory_definition] $managed_directories      = [],
+  Boolean                        $manage_selinux               = false,
+  Array[Clamav::Selinux_context] $selinux_file_contexts         = [],
+  Array[String[1]]               $selinux_booleans              = [],
 ) inherits clamav::params {
   # Directory ownership is explicit and bounded: no parents are inferred and
   # package-managed defaults remain untouched unless listed by the caller.
@@ -98,6 +101,13 @@ class clamav (
       owner  => $directory['owner'],
       group  => $directory['group'],
       mode   => $directory['mode'],
+    }
+  }
+
+  if $manage_selinux {
+    class { 'clamav::selinux':
+      file_contexts => $selinux_file_contexts,
+      booleans      => $selinux_booleans,
     }
   }
 
