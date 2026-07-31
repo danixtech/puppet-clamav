@@ -3,6 +3,8 @@
 The release-readiness snapshot with exact CI and runtime links is maintained in
 the [modernization release evidence matrix](release-evidence.md). This policy
 document remains the durable definition of evidence levels and claim rules.
+The operator migration and version recommendation are in
+[modernization-migration.md](modernization-migration.md).
 
 The module separates formal runtime support from source compatibility and
 catalog characterization. `metadata.json` lists only the operating systems
