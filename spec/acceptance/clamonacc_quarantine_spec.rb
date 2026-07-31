@@ -81,7 +81,8 @@ describe 'clamonacc native quarantine foundation' do
         expect_failures: true,
       )
       expect(scan.exit_code).to eq(1)
-      expect(scan.stdout).to include('Eicar-Test-Signature FOUND', 'moved to')
+      expect(scan.stdout).to match(%r{Eicar-Test-Signature(?:\.UNOFFICIAL)? FOUND})
+      expect(scan.stdout).to include('moved to')
     end
 
     expect(run_shell("test -f '/tmp/clamonacc-quarantine/infected ; sample.com'").exit_code).to eq(0)
