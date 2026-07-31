@@ -94,6 +94,7 @@ class clamav (
   Boolean                        $manage_apparmor              = false,
   Array[Clamav::Apparmor_profile] $apparmor_profiles            = [],
   Optional[Clamav::Freshclam_mirror_policy] $freshclam_mirror_policy = undef,
+  Array[Clamav::Scheduled_scan_definition] $scheduled_scans = [],
 ) inherits clamav::params {
   # Directory ownership is explicit and bounded: no parents are inferred and
   # package-managed defaults remain untouched unless listed by the caller.
@@ -117,6 +118,25 @@ class clamav (
   if $manage_apparmor {
     class { 'clamav::apparmor':
       profiles => $apparmor_profiles,
+    }
+  }
+
+  if $scheduled_scans != [] {
+    exec { 'clamav-systemd-daemon-reload':
+      command     => '/usr/bin/systemctl daemon-reload',
+      refreshonly => true,
+    }
+
+    $scheduled_scans.each |Clamav::Scheduled_scan_definition $scan| {
+      clamav::scheduled_scan { $scan['name']:
+        calendar        => $scan['schedule'],
+        paths           => $scan['paths'],
+        excludes        => $scan['excludes'],
+        scanner         => $scan['scanner'],
+        user            => $scan['user'],
+        log             => $scan['log'],
+        quarantine_path => $scan['quarantine_path'],
+      }
     }
   }
 
