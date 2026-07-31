@@ -1,5 +1,9 @@
 # Support policy and evidence matrix
 
+The release-readiness snapshot with exact CI and runtime links is maintained in
+the [modernization release evidence matrix](release-evidence.md). This policy
+document remains the durable definition of evidence levels and claim rules.
+
 The module separates formal runtime support from source compatibility and
 catalog characterization. `metadata.json` lists only the operating systems
 and Puppet major version that are maintained as formal support claims.
