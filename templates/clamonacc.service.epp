@@ -2,6 +2,7 @@
   Stdlib::Absolutepath $binary_path,
   Stdlib::Absolutepath $config_path,
   String[1] $daemon_service_unit,
+  Optional[Stdlib::Absolutepath] $quarantine_path = undef,
 | -%>
 # File managed by Puppet
 [Unit]
@@ -11,7 +12,7 @@ Requires=<%= $daemon_service_unit %>
 
 [Service]
 Type=simple
-ExecStart=<%= $binary_path %> --config-file=<%= $config_path %> --foreground
+ExecStart=<%= $binary_path %> --config-file=<%= $config_path %> --foreground<% if $quarantine_path != undef { %> --move=<%= $quarantine_path %><% } %>
 Restart=on-failure
 RestartSec=5
 

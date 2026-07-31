@@ -296,7 +296,24 @@ false` remains the default and creates no clamonacc resources.
 module-managed unit must supply `binary_path`, `config_path`, `service_name`,
 `service_unit_path`, and `daemon_service_name`; they remain responsible for
 declaring the clamd component itself. Quarantine, runtime-directory ownership,
-fanotify behavior, SELinux, and AppArmor are outside this service issue.
+and full fanotify behavior are separate opt-in capabilities; SELinux and
+AppArmor integration remain later platform work.
+
+Native quarantine is separately opt-in. Set
+`clamonacc_manage_quarantine => true`, provide an absolute
+`clamonacc_quarantine_path`, and repeat that path in
+`clamonacc_exclude_paths`. The module creates the directory with restrictive,
+caller-overridable ownership and permissions and adds ClamAV's native
+`--move` action to the explicitly managed unit. It never uses a log parser or
+shell watcher. Package-native units are not silently replaced, so this native
+action currently requires `clamonacc_manage_service_unit => true`.
+
+Management of `clamonacc_temporary_directory` is also separately enabled with
+`clamonacc_manage_temporary_directory`. This avoids taking ownership of
+package-created paths unless requested. See
+[the quarantine and runtime-directory design](docs/clamonacc-quarantine.md)
+for collision handling, failure behavior, audit boundaries, and metadata
+limitations.
 
 ### Validate configuration before service refresh
 

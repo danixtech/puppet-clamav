@@ -14,6 +14,8 @@ describe 'clamav', type: :class do
     it 'does not create clamonacc operational resources' do
       is_expected.not_to contain_package('clamonacc')
       is_expected.not_to contain_file('clamonacc.conf')
+      is_expected.not_to contain_file('clamonacc quarantine directory')
+      is_expected.not_to contain_file('clamonacc temporary directory')
       is_expected.not_to contain_service('clamonacc')
     end
   end

@@ -110,6 +110,68 @@ describe 'clamav', type: :class do
     it { is_expected.to contain_service('clamonacc').that_subscribes_to('File[clamonacc.service]') }
   end
 
+  context 'with native quarantine enabled' do
+    let(:params) do
+      {
+        manage_clamonacc: true,
+        clamonacc_binary: '/usr/sbin/clamonacc',
+        clamonacc_config: '/etc/clamav/clamonacc.conf',
+        clamonacc_service: 'clamav-onaccess',
+        clamonacc_manage_service_unit: true,
+        clamonacc_service_unit_path: '/etc/systemd/system/clamav-onaccess.service',
+        clamonacc_include_paths: ['/srv/data'],
+        clamonacc_exclude_paths: ['/srv/quarantine'],
+        clamonacc_manage_quarantine: true,
+        clamonacc_quarantine_path: '/srv/quarantine',
+        clamonacc_quarantine_owner: 'scanner',
+        clamonacc_quarantine_group: 'scanner',
+        clamonacc_quarantine_mode: '0750',
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    it do
+      is_expected.to contain_file('clamonacc quarantine directory').with(
+        ensure: 'directory',
+        path: '/srv/quarantine',
+        owner: 'scanner',
+        group: 'scanner',
+        mode: '0750',
+      )
+    end
+
+    it { is_expected.to contain_file('clamonacc quarantine directory').that_comes_before('Service[clamonacc]') }
+    it { is_expected.to contain_file('clamonacc.service').with_content(%r{ --move=/srv/quarantine$}m) }
+  end
+
+  context 'with optional temporary-directory management' do
+    let(:params) do
+      {
+        manage_clamonacc: true,
+        clamonacc_config: '/etc/clamav/clamonacc.conf',
+        clamonacc_include_paths: ['/srv/data'],
+        clamonacc_temporary_directory: '/var/tmp/clamonacc',
+        clamonacc_manage_temporary_directory: true,
+        clamonacc_temporary_directory_owner: 'clamav',
+        clamonacc_temporary_directory_group: 'clamav',
+        clamonacc_temporary_directory_mode: '0750',
+      }
+    end
+
+    it do
+      is_expected.to contain_file('clamonacc temporary directory').with(
+        ensure: 'directory',
+        path: '/var/tmp/clamonacc',
+        owner: 'clamav',
+        group: 'clamav',
+        mode: '0750',
+      )
+    end
+
+    it { is_expected.to contain_file('clamonacc temporary directory').that_comes_before('File[clamonacc.conf]') }
+  end
+
   context 'with clamonacc explicitly stopped and disabled' do
     let(:params) do
       {
@@ -209,6 +271,55 @@ describe 'clamav::clamonacc', type: :class do
     end
 
     it { is_expected.to compile.and_raise_error(%r{managed service unit requires service_name}) }
+  end
+
+  context 'when quarantine is requested without a path' do
+    let(:params) do
+      base_params.merge(
+        binary_path: '/usr/sbin/clamonacc',
+        service_name: 'clamav-onaccess',
+        manage_service_unit: true,
+        service_unit_path: '/etc/systemd/system/clamav-onaccess.service',
+        daemon_service_name: 'clamav-daemon',
+        manage_quarantine: true,
+      )
+    end
+
+    it { is_expected.to compile.and_raise_error(%r{quarantine management requires quarantine_path}) }
+  end
+
+  context 'when quarantine is requested for a package-native unit' do
+    let(:params) do
+      base_params.merge(
+        service_name: 'clamav-onaccess',
+        quarantine_path: '/srv/quarantine',
+        manage_quarantine: true,
+      )
+    end
+
+    it { is_expected.to compile.and_raise_error(%r{native quarantine requires manage_service_unit}) }
+  end
+
+  context 'when quarantine is not excluded from on-access scanning' do
+    let(:params) do
+      base_params.merge(
+        binary_path: '/usr/sbin/clamonacc',
+        service_name: 'clamav-onaccess',
+        manage_service_unit: true,
+        service_unit_path: '/etc/systemd/system/clamav-onaccess.service',
+        daemon_service_name: 'clamav-daemon',
+        quarantine_path: '/srv/quarantine',
+        manage_quarantine: true,
+      )
+    end
+
+    it { is_expected.to compile.and_raise_error(%r{quarantine_path must also be present in exclude_paths}) }
+  end
+
+  context 'when temporary-directory management lacks a path' do
+    let(:params) { base_params.merge(manage_temporary_directory: true) }
+
+    it { is_expected.to compile.and_raise_error(%r{temporary-directory management requires temporary_directory}) }
   end
 end
 

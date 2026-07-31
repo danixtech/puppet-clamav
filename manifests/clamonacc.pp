@@ -24,7 +24,15 @@ class clamav::clamonacc (
   Optional[Array[Stdlib::Absolutepath]] $exclude_paths = undef,
   Optional[Array[String[1]]] $exclude_usernames = undef,
   Optional[Stdlib::Absolutepath] $temporary_directory = undef,
+  Boolean $manage_temporary_directory = false,
+  String[1] $temporary_directory_owner = 'root',
+  String[1] $temporary_directory_group = 'root',
+  Stdlib::Filemode $temporary_directory_mode = '0750',
   Optional[Stdlib::Absolutepath] $quarantine_path = undef,
+  Boolean $manage_quarantine = false,
+  String[1] $quarantine_owner = 'root',
+  String[1] $quarantine_group = 'root',
+  Stdlib::Filemode $quarantine_mode = '0700',
   Optional[String[1]] $daemon_username = undef,
   Optional[Clamav::Clamonacc_listen_mode] $listen_mode = undef,
   Optional[Stdlib::Absolutepath] $local_socket = undef,
@@ -159,6 +167,22 @@ class clamav::clamonacc (
     fail('clamav::clamonacc managed service unit requires daemon_service_name')
   }
 
+  if $manage_temporary_directory and $_temporary_directory == undef {
+    fail('clamav::clamonacc temporary-directory management requires temporary_directory')
+  }
+
+  if $manage_quarantine and $quarantine_path == undef {
+    fail('clamav::clamonacc quarantine management requires quarantine_path')
+  }
+
+  if $manage_quarantine and ! $manage_service_unit {
+    fail('clamav::clamonacc native quarantine requires manage_service_unit')
+  }
+
+  if $manage_quarantine and ! ($quarantine_path in $_exclude_paths) {
+    fail('clamav::clamonacc quarantine_path must also be present in exclude_paths')
+  }
+
   $reserved_options = [
     'ListenMode',
     'DaemonUsername',
@@ -194,6 +218,28 @@ class clamav::clamonacc (
     }
   }
 
+  if $manage_temporary_directory {
+    file { 'clamonacc temporary directory':
+      ensure => directory,
+      path   => $_temporary_directory,
+      owner  => $temporary_directory_owner,
+      group  => $temporary_directory_group,
+      mode   => $temporary_directory_mode,
+      before => File['clamonacc.conf'],
+    }
+  }
+
+  if $manage_quarantine {
+    file { 'clamonacc quarantine directory':
+      ensure => directory,
+      path   => $quarantine_path,
+      owner  => $quarantine_owner,
+      group  => $quarantine_group,
+      mode   => $quarantine_mode,
+      before => Service['clamonacc'],
+    }
+  }
+
   file { 'clamonacc.conf':
     ensure       => file,
     path         => $config_path,
@@ -202,17 +248,17 @@ class clamav::clamonacc (
     mode         => $config_mode,
     validate_cmd => $config_validate,
     content      => epp('clamav/clamonacc.conf.epp', {
-        'listen_mode'        => $_listen_mode,
-        'local_socket'       => $_local_socket,
-        'tcp_port'           => $_tcp_port,
-        'tcp_address'        => $_tcp_address,
-        'daemon_username'    => $_daemon_username,
+        'listen_mode'         => $_listen_mode,
+        'local_socket'        => $_local_socket,
+        'tcp_port'            => $_tcp_port,
+        'tcp_address'         => $_tcp_address,
+        'daemon_username'     => $_daemon_username,
         'temporary_directory' => $_temporary_directory,
-        'include_paths'      => $_include_paths,
-        'exclude_paths'      => $_exclude_paths,
-        'exclude_usernames'  => $_exclude_usernames,
-        'extra_options'      => $_extra_options,
-        'sort_options'       => $sort_options,
+        'include_paths'       => $_include_paths,
+        'exclude_paths'       => $_exclude_paths,
+        'exclude_usernames'   => $_exclude_usernames,
+        'extra_options'       => $_extra_options,
+        'sort_options'        => $sort_options,
     }),
   }
 
@@ -220,6 +266,10 @@ class clamav::clamonacc (
     $daemon_service_unit = $daemon_service_name ? {
       /[.]service$/ => $daemon_service_name,
       default       => "${daemon_service_name}.service",
+    }
+    $unit_quarantine_path = $manage_quarantine ? {
+      true    => $quarantine_path,
+      default => undef,
     }
 
     file { 'clamonacc.service':
@@ -232,6 +282,7 @@ class clamav::clamonacc (
           'binary_path'         => $binary_path,
           'config_path'         => $config_path,
           'daemon_service_unit' => $daemon_service_unit,
+          'quarantine_path'     => $unit_quarantine_path,
       }),
       notify  => Exec['clamonacc-systemd-daemon-reload'],
     }

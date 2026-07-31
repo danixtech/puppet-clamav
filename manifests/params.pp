@@ -36,14 +36,22 @@ class clamav::params {
   $clamonacc_include_paths       = undef
   $clamonacc_exclude_paths       = undef
   $clamonacc_exclude_usernames   = undef
-  $clamonacc_temporary_directory = undef
-  $clamonacc_quarantine_path     = undef
-  $clamonacc_daemon_username     = undef
-  $clamonacc_listen_mode         = undef
-  $clamonacc_local_socket        = undef
-  $clamonacc_tcp_port            = undef
-  $clamonacc_tcp_address         = undef
-  $clamonacc_sort_options        = true
+  $clamonacc_temporary_directory        = undef
+  $clamonacc_manage_temporary_directory = false
+  $clamonacc_temporary_directory_owner = 'root'
+  $clamonacc_temporary_directory_group = 'root'
+  $clamonacc_temporary_directory_mode  = '0750'
+  $clamonacc_quarantine_path            = undef
+  $clamonacc_manage_quarantine          = false
+  $clamonacc_quarantine_owner           = 'root'
+  $clamonacc_quarantine_group           = 'root'
+  $clamonacc_quarantine_mode            = '0700'
+  $clamonacc_daemon_username            = undef
+  $clamonacc_listen_mode                = undef
+  $clamonacc_local_socket               = undef
+  $clamonacc_tcp_port                   = undef
+  $clamonacc_tcp_address                = undef
+  $clamonacc_sort_options               = true
 
   if ($facts['os']['family'] == 'RedHat') and (versioncmp($facts['os']['release']['full'], '6.0') >= 0) {
     # ### init vars ####
