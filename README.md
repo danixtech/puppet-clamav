@@ -199,10 +199,12 @@ class { 'clamav':
 
 The Stage 2 component accepts package-neutral operational inputs, manages a
 deterministic clamonacc configuration file, and can manage an explicitly
-selected package and systemd service. It does not yet manage runtime
-directories or quarantine actions. Full on-access detection and fanotify
-evidence remains staged separately, so this service foundation is not yet a
-formal claim of operational clamonacc support.
+selected package and systemd service. Runtime evidence exercises real
+fanotify-driven detection, include-path and exclude policy, native quarantine,
+service refresh, and idempotency on privileged disposable Ubuntu 24.04,
+Debian 12, and AlmaLinux 9 targets. This evidence validates the component
+mechanism; callers must still supply paths, accounts, service names, and
+package integration appropriate to their deployment.
 
 The public contract includes:
 
@@ -295,9 +297,9 @@ false` remains the default and creates no clamonacc resources.
 `clamav::clamonacc` can also be declared directly. Direct callers using a
 module-managed unit must supply `binary_path`, `config_path`, `service_name`,
 `service_unit_path`, and `daemon_service_name`; they remain responsible for
-declaring the clamd component itself. Quarantine, runtime-directory ownership,
-and full fanotify behavior are separate opt-in capabilities; SELinux and
-AppArmor integration remain later platform work.
+declaring the clamd component itself. Quarantine and runtime-directory
+ownership are separate opt-in capabilities. SELinux, AppArmor, and production
+container capability policy remain later platform work.
 
 Native quarantine is separately opt-in. Set
 `clamonacc_manage_quarantine => true`, provide an absolute
@@ -313,7 +315,8 @@ Management of `clamonacc_temporary_directory` is also separately enabled with
 package-created paths unless requested. See
 [the quarantine and runtime-directory design](docs/clamonacc-quarantine.md)
 for collision handling, failure behavior, audit boundaries, and metadata
-limitations.
+limitations. See [clamonacc runtime evidence](docs/clamonacc-runtime.md) for
+the tested platforms, capability boundary, and exact acceptance behavior.
 
 ### Validate configuration before service refresh
 

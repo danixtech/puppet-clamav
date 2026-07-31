@@ -84,12 +84,15 @@ log text is not a safe command channel, events can race with filesystem
 changes, duplicate basenames need explicit handling, and failures are
 difficult to audit reliably.
 
-## Evidence boundary
+## Runtime evidence
 
 Acceptance tests exercise the same native ClamAV action implementation using
 EICAR content. They cover unusual filenames, duplicate basenames, restrictive
 directory permissions, failure behavior, and idempotent Puppet directory
 management.
 
-Full fanotify-driven clamonacc detection, include/exclude behavior, and
-platform support claims remain gated by modernization issue #19.
+Separate privileged runtime tests start real clamd and clamonacc processes and
+exercise fanotify-driven detection, include-path and exclude policy, native
+quarantine, configuration-triggered service refresh, and idempotency. See
+[clamonacc runtime evidence](clamonacc-runtime.md) for the supported evidence
+matrix and capability boundary.
