@@ -7,15 +7,15 @@ describe 'clamav policy types' do
     is_expected.to compile.with_all_deps
   end
 
-  it 'rejects invalid service ensure values at catalog compilation' do
+  context 'with an invalid service ensure value' do
     let(:params) { { clamd_service_ensure: 'enabled' } }
 
-    is_expected.to compile.and_raise_error(%r{clamd_service_ensure})
+    it { is_expected.to compile.and_raise_error(%r{clamd_service_ensure}) }
   end
 
-  it 'rejects malformed package ensure values at catalog compilation' do
+  context 'with a malformed package ensure value' do
     let(:params) { { clamav_version: 'latest?' } }
 
-    is_expected.to compile.and_raise_error(%r{clamav_version})
+    it { is_expected.to compile.and_raise_error(%r{clamav_version}) }
   end
 end
