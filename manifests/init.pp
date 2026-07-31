@@ -87,7 +87,20 @@ class clamav (
   Optional[Hash]                 $clamd_default_options        = undef,
   Optional[Hash]                 $freshclam_default_options    = undef,
   Optional[Hash]                 $milter_default_options       = undef,
+  Array[Clamav::Directory_definition] $managed_directories      = [],
 ) inherits clamav::params {
+  # Directory ownership is explicit and bounded: no parents are inferred and
+  # package-managed defaults remain untouched unless listed by the caller.
+  $managed_directories.each |Clamav::Directory_definition $directory| {
+    file { "clamav managed directory ${directory['path']}":
+      ensure => directory,
+      path   => $directory['path'],
+      owner  => $directory['owner'],
+      group  => $directory['group'],
+      mode   => $directory['mode'],
+    }
+  }
+
   if $clamd_use_socket and $clamd_socket == undef {
     fail('clamav::clamd_use_socket requires clamav::clamd_socket')
   }
