@@ -93,6 +93,7 @@ class clamav (
   Array[String[1]]               $selinux_booleans              = [],
   Boolean                        $manage_apparmor              = false,
   Array[Clamav::Apparmor_profile] $apparmor_profiles            = [],
+  Optional[Clamav::Freshclam_mirror_policy] $freshclam_mirror_policy = undef,
 ) inherits clamav::params {
   # Directory ownership is explicit and bounded: no parents are inferred and
   # package-managed defaults remain untouched unless listed by the caller.
@@ -131,10 +132,22 @@ class clamav (
   }
 
   # freshclam
+  $_freshclam_mirror_options = $freshclam_mirror_policy ? {
+    undef   => {},
+    default => delete_undef_values({
+      'PrivateMirror'       => $freshclam_mirror_policy['private_mirrors'],
+      'DatabaseMirror'      => $freshclam_mirror_policy['database_mirrors'],
+      'HTTPProxyServer'     => $freshclam_mirror_policy['http_proxy_server'],
+      'HTTPProxyPort'       => $freshclam_mirror_policy['http_proxy_port'],
+      'HTTPProxyUsername'   => $freshclam_mirror_policy['http_proxy_username'],
+      'HTTPProxyPassword'   => $freshclam_mirror_policy['http_proxy_password'],
+      'TLSVerify'           => $freshclam_mirror_policy['tls_verify'],
+    }),
+  }
   if $freshclam_default_options {
-    $_freshclam_options = merge($freshclam_default_options, $freshclam_options)
+    $_freshclam_options = merge($freshclam_default_options, $_freshclam_mirror_options, $freshclam_options)
   } else {
-    $_freshclam_options = merge($clamav::params::freshclam_default_options, $freshclam_options)
+    $_freshclam_options = merge($clamav::params::freshclam_default_options, $_freshclam_mirror_options, $freshclam_options)
   }
 
   # clamav_milter
