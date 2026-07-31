@@ -95,6 +95,7 @@ class clamav (
   Array[Clamav::Apparmor_profile] $apparmor_profiles            = [],
   Optional[Clamav::Freshclam_mirror_policy] $freshclam_mirror_policy = undef,
   Array[Clamav::Scheduled_scan_definition] $scheduled_scans = [],
+  Array[Clamav::Operational_file] $managed_log_files = [],
 ) inherits clamav::params {
   # Directory ownership is explicit and bounded: no parents are inferred and
   # package-managed defaults remain untouched unless listed by the caller.
@@ -105,6 +106,18 @@ class clamav (
       owner  => $directory['owner'],
       group  => $directory['group'],
       mode   => $directory['mode'],
+    }
+  }
+
+  # Log files are managed only when explicitly listed. Parent directories,
+  # rotation, and retention remain caller/package policy.
+  $managed_log_files.each |Clamav::Operational_file $log_file| {
+    file { "clamav managed log ${log_file['path']}":
+      ensure => file,
+      path   => $log_file['path'],
+      owner  => $log_file['owner'],
+      group  => $log_file['group'],
+      mode   => $log_file['mode'],
     }
   }
 
