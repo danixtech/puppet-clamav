@@ -97,7 +97,7 @@ describe 'clamonacc on-access runtime' do
           LocalSocket /run/clamonacc-runtime/clamd.sock
           Foreground true
           User ${runtime_daemon_user}
-          | CONFIG
+          | CONFIG,
         notify  => Exec['clamonacc-runtime-systemd-reload'],
       }
 
@@ -112,7 +112,7 @@ describe 'clamonacc on-access runtime' do
           [Service]
           Type=simple
           ExecStart=/usr/sbin/clamd --config-file=/etc/clamonacc-runtime-clamd.conf
-          | UNIT
+          | UNIT,
         notify  => Exec['clamonacc-runtime-systemd-reload'],
       }
 
