@@ -160,7 +160,7 @@ describe 'clamonacc on-access runtime' do
   def validate_runtime_manifest(manifest)
     encoded = Base64.strict_encode64(manifest)
     run_shell("printf '%s' '#{encoded}' | base64 -d > /tmp/clamonacc-runtime.pp")
-    result = run_shell('puppet parser validate /tmp/clamonacc-runtime.pp', expect_failures: true)
+    result = run_shell('puppet parser validate /tmp/clamonacc-runtime.pp 2>&1', expect_failures: true)
     expect(result.exit_code).to eq(0), result.stdout
   end
 
