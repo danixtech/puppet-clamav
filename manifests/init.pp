@@ -91,6 +91,8 @@ class clamav (
   Boolean                        $manage_selinux               = false,
   Array[Clamav::Selinux_context] $selinux_file_contexts         = [],
   Array[String[1]]               $selinux_booleans              = [],
+  Boolean                        $manage_apparmor              = false,
+  Array[Clamav::Apparmor_profile] $apparmor_profiles            = [],
 ) inherits clamav::params {
   # Directory ownership is explicit and bounded: no parents are inferred and
   # package-managed defaults remain untouched unless listed by the caller.
@@ -108,6 +110,12 @@ class clamav (
     class { 'clamav::selinux':
       file_contexts => $selinux_file_contexts,
       booleans      => $selinux_booleans,
+    }
+  }
+
+  if $manage_apparmor {
+    class { 'clamav::apparmor':
+      profiles => $apparmor_profiles,
     }
   }
 
