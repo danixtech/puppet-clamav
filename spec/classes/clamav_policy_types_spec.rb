@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'clamav policy types' do
+describe 'clamav', type: :class do
   let(:facts) { on_supported_os['debian-12-x86_64'] }
 
   it 'accepts legacy package ensure values and service states' do
