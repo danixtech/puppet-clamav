@@ -1,4 +1,6 @@
 ---
+clamav::clamonacc_config: /etc/clamav/clamonacc.conf
+
 clamav::clamd_platform_options:
   LocalSocket: /var/run/clamav/clamd.ctl
   LocalSocketGroup: clamav

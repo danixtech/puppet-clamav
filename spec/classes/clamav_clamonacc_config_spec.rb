@@ -3,12 +3,46 @@ require 'spec_helper'
 # rubocop:disable RSpec/MultipleDescribes
 
 debian_12_facts = on_supported_os.fetch('debian-12-x86_64')
+ubuntu_2404_facts = formally_supported_os_facts.fetch('ubuntu-24.04-x86_64')
+almalinux_9_facts = on_supported_os.fetch('almalinux-9-x86_64')
 
 describe 'clamav', type: :class do
   let(:facts) { debian_12_facts }
 
   context 'with clamonacc disabled' do
     it { is_expected.not_to contain_file('clamonacc.conf') }
+  end
+
+  context 'on Ubuntu 24.04 with the distro-native configuration path omitted' do
+    let(:facts) { ubuntu_2404_facts }
+    let(:params) do
+      {
+        manage_clamonacc: true,
+        clamonacc_include_paths: ['/home'],
+      }
+    end
+
+    it { is_expected.to compile.with_all_deps }
+
+    it 'uses the Debian-family platform default' do
+      is_expected.to contain_class('clamav::clamonacc')
+        .with_config_path('/etc/clamav/clamonacc.conf')
+      is_expected.to contain_file('clamonacc.conf')
+        .with_path('/etc/clamav/clamonacc.conf')
+    end
+  end
+
+  context 'on AlmaLinux 9 with no evidenced configuration path' do
+    let(:facts) { almalinux_9_facts }
+    let(:params) do
+      {
+        manage_repo: false,
+        manage_clamonacc: true,
+        clamonacc_include_paths: ['/home'],
+      }
+    end
+
+    it { is_expected.to compile.and_raise_error(%r{requires config_path}) }
   end
 
   context 'with local-socket clamonacc configuration' do

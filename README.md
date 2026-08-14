@@ -232,10 +232,13 @@ typed parameters take precedence over equivalent compatibility keys in
 `DaemonUsername`, `OnAccessIncludePath`, `OnAccessExcludePath`,
 `OnAccessExcludeUname`, and `TemporaryDirectory`.
 
-The configuration path is explicit because package layouts differ. Local
-socket mode uses an explicit `clamonacc_local_socket` or, when declared through
-the main class, the resolved clamd `LocalSocket`. TCP mode requires both
-`clamonacc_tcp_port` and `clamonacc_tcp_address`. The compatibility
+Debian-family distribution packages default the configuration path to
+`/etc/clamav/clamonacc.conf`. An explicit `clamonacc_config` always wins.
+Red Hat/EPEL and externally integrated Cisco/Talos layouts still require an
+explicit path because the module has no authoritative common location for
+them. Local socket mode uses an explicit `clamonacc_local_socket` or, when
+declared through the main class, the resolved clamd `LocalSocket`. TCP mode
+requires both `clamonacc_tcp_port` and `clamonacc_tcp_address`. The compatibility
 `ListenMode` and `DaemonUsername` inputs are translated to native ClamAV
 directives and are never rendered literally.
 
@@ -244,7 +247,6 @@ For example, this renders and validates a local-socket configuration:
 ```puppet
 class { 'clamav':
   manage_clamonacc             => true,
-  clamonacc_config             => '/etc/clamav/clamonacc.conf',
   clamonacc_include_paths      => ['/srv/data'],
   clamonacc_exclude_paths      => ['/srv/data/quarantine'],
   clamonacc_exclude_usernames  => ['clamav'],
@@ -265,10 +267,10 @@ configuration exits zero, while an invalid directive exits nonzero. Use
 global `validate_configs => false` escape hatch also disables this check, but
 should be used only when the selected package has no safe parse interface.
 
-These paths are examples rather than module defaults. Package and binary
-locations are intentionally optional so platform data or callers can describe
-distribution-native layouts without assuming that Cisco/Talos installers
-provide equivalent integration.
+The remaining paths are examples rather than global module defaults. Package
+and binary locations stay optional so callers can describe package layouts
+without assuming that Cisco/Talos installers provide distro-native
+integration.
 
 To manage a package-native service, provide its actual unit name:
 
@@ -303,8 +305,10 @@ preferred. No service, package, or unit is declared unless its corresponding
 name or explicit unit-management policy is supplied. `manage_clamonacc =>
 false` remains the default and creates no clamonacc resources.
 
-`clamav::clamonacc` can also be declared directly. Direct callers using a
-module-managed unit must supply `binary_path`, `config_path`, `service_name`,
+`clamav::clamonacc` can also be declared directly. Direct child-class callers
+must continue to supply `config_path`; the parent class's platform data is not
+an implicit dependency. Direct callers using a module-managed unit must also
+supply `binary_path`, `service_name`,
 `service_unit_path`, and `daemon_service_name`; they remain responsible for
 declaring the clamd component itself. Quarantine and runtime-directory
 ownership are separate opt-in capabilities. SELinux, AppArmor, and production
