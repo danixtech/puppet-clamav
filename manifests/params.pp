@@ -5,6 +5,7 @@ class clamav::params {
   $clamd_config_validate_cmd = lookup('clamav::clamd_config_validate_cmd', String, 'first', '/usr/bin/env clamd --config-file % --version')
   $freshclam_config_validate_cmd = lookup('clamav::freshclam_config_validate_cmd', String, 'first', '/usr/bin/env freshclam --config-file % --version')
   $milter_config_validate_cmd = lookup('clamav::milter_config_validate_cmd', String, 'first', '/usr/bin/env clamav-milter --config-file % --version')
+  $clamonacc_config_validate_cmd = lookup('clamav::clamonacc_config_validate_cmd', String, 'first', '/usr/bin/env clamonacc --config-file % --help')
 
   # ### init vars ####
   $manage_user                  = false
@@ -29,7 +30,6 @@ class clamav::params {
   $clamonacc_config_owner        = 'root'
   $clamonacc_config_group        = 'root'
   $clamonacc_config_mode         = '0644'
-  $clamonacc_config_validate_cmd = '/usr/bin/env clamonacc --config-file % --version'
   $clamonacc_service             = undef
   $clamonacc_service_ensure      = 'running'
   $clamonacc_service_enable      = true

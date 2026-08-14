@@ -2,3 +2,4 @@
 clamav::clamd_config_validate_cmd: '/usr/bin/env clamd --config-file % --version'
 clamav::freshclam_config_validate_cmd: '/usr/bin/env freshclam --config-file % --version'
 clamav::milter_config_validate_cmd: '/usr/bin/env clamav-milter --config-file % --version'
+clamav::clamonacc_config_validate_cmd: '/usr/bin/env clamonacc --config-file % --help'

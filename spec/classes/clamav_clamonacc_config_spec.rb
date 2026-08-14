@@ -45,8 +45,15 @@ describe 'clamav', type: :class do
         owner: 'root',
         group: 'root',
         mode: '0644',
-        validate_cmd: '/usr/bin/env clamonacc --config-file % --version',
+        validate_cmd: '/usr/bin/env clamonacc --config-file % --help',
       )
+    end
+
+    it 'does not use the nonzero --version command as the default validator' do
+      validator = catalogue.resource('File[clamonacc.conf]')[:validate_cmd]
+
+      expect(validator).to include('--help')
+      expect(validator).not_to include('--version')
     end
 
     it 'renders native deterministic directives with typed values taking precedence' do

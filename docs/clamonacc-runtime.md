@@ -51,12 +51,11 @@ The acceptance suite uses isolated `/tmp` and `/run` paths, a local EICAR
 signature, and disposable services. It never scans production filesystems or
 downloads a virus database for the on-access test.
 
-## ClamAV 1.4 validation behavior
+## Configuration validation behavior
 
-ClamAV 1.4.x parses the supplied configuration before handling `--version`,
-then prints its version and exits with status 2. The runtime acceptance
-validator therefore accepts status 0 (the ClamAV 1.5 behavior) or status 2
-when the version output is present. This is a command-line compatibility
-difference in the 1.4 package, not a rejected clamonacc configuration
-directive. The acceptance test keeps the same configuration validation on
-both package generations and does not disable validation for older packages.
+Clamonacc parses the supplied configuration before handling `--help`. A valid
+configuration exits zero, while an unknown directive exits nonzero. Runtime
+acceptance tests this exit-status contract without depending on exact help or
+error text. The module therefore validates candidate files with `--help`
+instead of `--version`, which exits nonzero even after printing a version on
+some valid ClamAV installations.

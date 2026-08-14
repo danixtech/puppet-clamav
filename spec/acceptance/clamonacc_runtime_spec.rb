@@ -126,9 +126,6 @@ describe 'clamonacc on-access runtime' do
         manage_service_unit => true,
         service_unit_path   => '/etc/systemd/system/clamonacc-runtime.service',
         daemon_service_name => 'clamonacc-runtime-clamd',
-        # ClamOnAcc prints its version and exits with status 2 on ClamAV 1.4.x;
-        # retain config parsing while accepting that documented CLI behavior.
-        config_validate_cmd => "/bin/sh -c \\\"/usr/bin/env clamonacc --config-file % --version 2>&1 | grep -q '^ClamAV '\\\"",
         daemon_username     => $runtime_daemon_user,
         local_socket        => '/run/clamonacc-runtime/clamd.sock',
         include_paths       => ['/tmp/clamonacc-runtime-watch'],
@@ -169,6 +166,7 @@ describe 'clamonacc on-access runtime' do
     run_shell('rm -rf /tmp/clamonacc-runtime-watch /tmp/clamonacc-runtime-excluded')
     run_shell('rm -rf /tmp/clamonacc-runtime-excluded-refresh /tmp/clamonacc-runtime-quarantine')
     run_shell('rm -rf /tmp/clamonacc-runtime-db /run/clamonacc-runtime')
+    run_shell('rm -f /tmp/clamonacc-invalid.conf')
     run_shell('systemctl daemon-reload')
   end
 
@@ -181,6 +179,16 @@ describe 'clamonacc on-access runtime' do
     expect(run_shell('systemctl is-active clamonacc-runtime-clamd').stdout.strip).to eq('active')
     expect(run_shell('systemctl is-active clamonacc-runtime').stdout.strip).to eq('active')
     expect(run_shell('systemctl is-enabled clamonacc-runtime', expect_failures: true).stdout.strip).to eq('disabled')
+    expect(
+      run_shell('/usr/bin/env clamonacc --config-file=/etc/clamonacc-runtime.conf --help >/dev/null 2>&1').exit_code,
+    ).to eq(0)
+    run_shell("printf '%s\n' 'DefinitelyNotARealClamAVOption yes' > /tmp/clamonacc-invalid.conf")
+    expect(
+      run_shell(
+        '/usr/bin/env clamonacc --config-file=/tmp/clamonacc-invalid.conf --help >/dev/null 2>&1',
+        expect_failures: true,
+      ).exit_code,
+    ).not_to eq(0)
     expect(
       wait_for("journalctl -u clamonacc-runtime --no-pager | grep -F \"watching '/tmp/clamonacc-runtime-watch'\""),
     ).to have_attributes(exit_code: 0)

@@ -11,7 +11,7 @@ class clamav::clamonacc (
   String[1] $config_owner = 'root',
   String[1] $config_group = 'root',
   Stdlib::Filemode $config_mode = '0644',
-  String[1] $config_validate_cmd = '/usr/bin/env clamonacc --config-file % --version',
+  String[1] $config_validate_cmd = '/usr/bin/env clamonacc --config-file % --help',
   Boolean $validate_config = true,
   Optional[String[1]] $service_name = undef,
   Clamav::Service_ensure $service_ensure = 'running',

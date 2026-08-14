@@ -256,10 +256,12 @@ class { 'clamav':
 Candidate files are validated before replacement with:
 
 ```text
-/usr/bin/env clamonacc --config-file % --version
+/usr/bin/env clamonacc --config-file % --help
 ```
 
-Use `clamonacc_config_validate_cmd` for another packaged binary path. The
+Clamonacc parses the candidate configuration before printing help: valid
+configuration exits zero, while an invalid directive exits nonzero. Use
+`clamonacc_config_validate_cmd` for another packaged binary path. The
 global `validate_configs => false` escape hatch also disables this check, but
 should be used only when the selected package has no safe parse interface.
 
