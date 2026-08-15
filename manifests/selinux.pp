@@ -15,8 +15,8 @@ class clamav::selinux (
 
   $booleans.each |String[1] $boolean| {
     selinux::boolean { "clamav ${boolean}":
-      name  => $boolean,
-      value => true,
+      ensure => 'on',
+      name   => $boolean,
     }
   }
 }
