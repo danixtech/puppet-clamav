@@ -129,8 +129,15 @@ class clamav (
   }
 
   if $manage_apparmor {
+    $_apparmor_freshclam_config = if $manage_freshclam and $validate_configs and
+    $facts['os']['name'] == 'Ubuntu' and $facts['os']['release']['major'] == '24.04' {
+      $freshclam_config
+    } else {
+      undef
+    }
     class { 'clamav::apparmor':
-      profiles => $apparmor_profiles,
+      profiles         => $apparmor_profiles,
+      freshclam_config => $_apparmor_freshclam_config,
     }
   }
 

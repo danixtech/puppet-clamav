@@ -352,6 +352,10 @@ Callers using custom packages can replace the commands with
 platform whose package has no safe parse-only interface. Disabling validation
 permits invalid caller options to reach the live file and is not recommended.
 
+On Ubuntu 24.04, opt-in [AppArmor management](docs/apparmor.md#freshclam-validation-on-ubuntu-2404)
+loads a narrow local Freshclam allowance before Puppet validates temporary
+configuration siblings. Native configuration validation remains enabled.
+
 ### Add clamav-milter support and customize its config (RHEL7 and derivatives only)
 #### Please note that as of RHEL 7.2 only the TCP socket has been tested successfully
 

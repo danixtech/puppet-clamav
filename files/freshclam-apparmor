@@ -1,0 +1,42 @@
+#!/bin/sh
+# Internal Ubuntu package-profile loader and read probe. Never installs config.
+set -eu
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+[ "$#" -eq 2 ] || exit 2
+operation=$1
+config=$2
+profile=/etc/apparmor.d/usr.bin.freshclam
+pending=/etc/apparmor.d/local/.clamav-freshclam-reload-pending
+case "$operation" in check|reload) ;; *) exit 2 ;; esac
+umask 077
+if [ "$operation" = reload ]; then
+    # Remember failed refreshes even if the previous policy still permits the
+    # probe but omitted newly supplied caller rules. This is a retry flag,
+    # never evidence that kernel policy is current.
+    : > "$pending"
+elif [ -e "$pending" ]; then
+    exit 1
+fi
+
+# Fail clearly for a package layout that cannot consume our local fragment.
+if ! grep -Eq '^[[:space:]]*#?include[[:space:]]+(if[[:space:]]+exists[[:space:]]+)?<local/usr[.]bin[.]freshclam>' "$profile"; then
+    echo "Freshclam AppArmor profile must include <local/usr.bin.freshclam>" >&2
+    exit 1
+fi
+if [ "$operation" = reload ]; then
+    /usr/sbin/apparmor_parser --replace --skip-read-cache --write-cache "$profile"
+fi
+
+# The fixed valid probe is independent of live config syntax and contains no
+# secrets. mktemp creates exclusively; the trap removes only our own sibling.
+umask 077
+candidate=$(mktemp "${config}XXXXXX")
+trap 'rm -f -- "$candidate"' EXIT
+trap 'exit 1' HUP INT TERM
+printf '%s\n' 'DatabaseOwner root' > "$candidate"
+chmod 0644 "$candidate"
+/usr/bin/freshclam --config-file "$candidate" --version >/dev/null 2>&1
+if [ "$operation" = reload ]; then
+    rm -f -- "$pending"
+fi
