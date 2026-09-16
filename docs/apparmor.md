@@ -1,100 +1,158 @@
 # Optional AppArmor integration
 
-AppArmor integration is disabled by default. When enabled, the module manages
-caller-supplied local profile files or profile fragments, plus the Ubuntu 24.04
-Freshclam validation allowance described below:
+AppArmor management is **disabled by default**. `manage_apparmor => false`
+means policy remains outside module ownership: no fragments, loaders, cleanup,
+or automatic warnings are introduced. A caller may already supply equivalent
+policy externally, so the module does not reject this combination.
 
-```puppet
-class { 'clamav':
-  manage_apparmor   => true,
-  apparmor_profiles => [{
-    'path'    => '/etc/apparmor.d/local/usr.sbin.clamd',
-    'content' => "  /srv/clamav/** r,\n",
-    'ensure'  => 'present',
-  }],
-}
+On Ubuntu 24.04 with enforced package profiles, native Freshclam and clamd
+configuration validation requires read access to Puppet's temporary siblings.
+Enable module policy ownership explicitly when managing these components:
+
+```yaml
+clamav::manage_apparmor: true
+clamav::manage_freshclam: true
+clamav::manage_clamd: true
+clamav::validate_configs: true
 ```
 
-Outside the Freshclam exception below, the module does not replace distro
-profiles, enable AppArmor, or run a parser/reload command automatically. The caller or distribution must
-load/reload the profile using its supported local-override mechanism. Profile
-content and policy type compatibility remain caller responsibility.
+Enabling validation alone does not enable AppArmor management. Conversely,
+AppArmor management does not enable the host's AppArmor subsystem. The parser,
+securityfs interface, and package profiles must be available to root.
 
-This interface is intended for custom runtime, database, log, socket-parent,
-temporary, and quarantine paths. Default catalogs remain unchanged, and
-Debian/Ubuntu package profiles remain distro-owned unless a caller explicitly
-manages a local file.
+## Native validation on Ubuntu 24.04
 
-## Freshclam validation on Ubuntu 24.04
+Puppet's native `File` resource writes candidate content to a temporary sibling,
+validates it, and only then replaces the live configuration. The packaged
+profiles allow the final config filename but deny sibling candidates. Their
+validators report a generic “Can't open/parse” error even for valid content.
+Moving candidates to `/tmp` does not fix the Freshclam policy restriction.
 
-With `manage_apparmor => true`, `manage_freshclam => true`, and
-`validate_configs => true`, the module additionally manages
-`/etc/apparmor.d/local/usr.bin.freshclam`. It grants read access to the configured
-`freshclam_config` path plus a suffix wildcard, for example:
+When `manage_apparmor`, `validate_configs`, and the corresponding component's
+management switch are true on Ubuntu 24.04, the module generates:
+
+| Validator | Local fragment | Default generated rule |
+| --- | --- | --- |
+| `/usr/bin/freshclam` | `/etc/apparmor.d/local/usr.bin.freshclam` | `"/etc/clamav/freshclam.conf*" r,` |
+| `/usr/sbin/clamd` | `/etc/apparmor.d/local/usr.sbin.clamd` | `"/etc/clamav/clamd.conf*" r,` |
+
+The literal prefix follows `freshclam_config` or `clamd_config`. The suffix
+wildcard covers Puppet's undelimited temporary names and other same-prefix
+siblings; it cannot traverse directories and grants no write access. Config
+paths may contain ASCII letters, digits, spaces, `/`, `_`, `.`, and `-`.
+Policy metacharacters and `.`/`..` path components are rejected, not interpolated
+into policy. Parent directories must exist; module-managed parents are ordered
+before policy probing.
+
+For each validator the resource order is:
 
 ```text
-"/etc/clamav/freshclam.conf*" r,
+package and config-directory prerequisites
+  -> local profile fragment
+  ~> targeted parent-profile reload
+  -> policy readiness check/recovery
+  -> native File[<validator>.conf] validation and replacement
+  ~> existing service subscription
 ```
 
-Puppet validates a temporary sibling before replacing the live file. Ubuntu's
-exact-path package allowance does not cover that sibling. The suffix wildcard
-covers Puppet's undelimited temporary names and other same-prefix files, but
-never traverses directories or grants write access. Validation and atomic
-replacement remain Puppet File operations.
+The module reloads the complete corresponding parent under `/etc/apparmor.d/`,
+which must include its matching `local/` fragment. Package-owned profiles are
+not modified. Reload failure blocks configuration replacement. Precise resource
+edges avoid a dependency cycle through the component's package or service.
 
-The local fragment and package changes trigger a reload of the complete
-`/etc/apparmor.d/usr.bin.freshclam` profile before configuration validation,
-including the first apply. The package-owned file is not modified. A small
-read probe detects a stale loaded candidate allowance and retries loading it
-on later applies even if the local fragment has not changed. A root-only retry
-flag in `/etc/apparmor.d/local/.clamav-freshclam-reload-pending` also preserves
-failed refreshes involving caller rules; it is removed only after loading and
-probing succeed, and is never used as proof of current kernel policy. The probe uses a
-fixed valid configuration in an exclusively created sibling, removes it on
-exit, and never copies or installs the live configuration. Successful steady
-state applies do not reload policy. A failed read probe can itself produce an
-AppArmor denial when recovering stale policy.
+The shared `/usr/local/sbin/clamav-apparmor` helper accepts only the reviewed
+Freshclam and clamd mappings. It checks that the expected profile is loaded
+and that the native binary can parse a fixed, harmless `LogSyslog false` config
+in an exclusively created sibling. It removes that probe on exit, never copies
+live content, and does not replace Puppet's actual config validation. Loaded
+complain mode is recognized without asserting enforcement; enforcing runtime
+tests check enforce mode separately.
 
-This exception requires the Ubuntu package layout, the AppArmor parser, and
-the parent's `include <local/usr.bin.freshclam>` (optionally `if exists`).
-AppArmor enablement remains caller responsibility. The helper always probes
-`/usr/bin/freshclam`; overridden validators are preserved, but validators for
-other confined executables need their own policy. Other platforms retain the
-caller-supplied-file interface only. Users with `manage_apparmor => false`
-receive no automatic rule or reload and must arrange policy externally.
+Fragment, helper, and package changes trigger reload. A separate guarded check
+repairs missing or stale loaded policy without waiting for a file-change event.
+Per-validator root-only retry flags named
+`/etc/apparmor.d/local/.clamav-<validator>-reload-pending` preserve failed reloads
+(including caller-rule changes). A flag is removed only after loading and probing
+succeed; its absence is not proof of current kernel policy. Healthy repeat applies
+check readiness but do not reload. Recovery from stale policy can itself produce
+an audit denial on the helper's initial probe.
 
-The local file is fully managed. Preserve any existing local rules by supplying
-them through the existing API; the module appends its generated rule:
+On upgrade the obsolete module-owned
+`/usr/local/sbin/clamav-freshclam-apparmor` is removed when automatic validation
+support is active. Freshclam's existing retry flag is reused. No top-level
+public parameter changes are required; the original internal `freshclam_config`
+argument remains a compatibility alias. Turning management off does not remove
+previously installed policy or helpers; arrange deliberate cleanup externally.
+
+Overridden validation commands remain unchanged. The helper checks the packaged
+`/usr/bin/freshclam` and `/usr/sbin/clamd` binaries, not arbitrary overridden
+executables. Alternate packages or site profiles need their own policy review.
+Other platforms retain the caller-supplied-file API with no automatic loader.
+
+## Caller-supplied fragments
+
+`apparmor_profiles` still accepts `path`, `content`, and `ensure` entries.
+Unrelated entries retain the existing full-file management behavior; their
+loading remains caller responsibility. For either generated validation fragment,
+the module preserves caller content and appends its narrow generated rule in
+one File resource. For example:
 
 ```puppet
 class { 'clamav':
-  manage_apparmor   => true,
+  manage_apparmor => true,
+  manage_clamd    => true,
   apparmor_profiles => [{
-    'path'    => '/etc/apparmor.d/local/usr.bin.freshclam',
+    'path'    => '/etc/apparmor.d/local/usr.sbin.clamd',
     'content' => "  /srv/clamav/database/ r,\n",
     'ensure'  => 'present',
   }],
 }
 ```
 
-An `absent` entry for this file conflicts with enabled automatic validation
-support and is rejected. Do not declare a second resource for the same file.
-Custom config paths may contain ASCII letters, digits, spaces, `/`, `_`, `.`,
-and `-`; policy metacharacters are rejected rather than treated as patterns.
-The parent directory must exist before policy probing. Turning management off
-does not remove previously installed files or unload policy; manage any desired
-cleanup explicitly.
+The entire local file is managed: transfer any existing unmanaged rules into
+`apparmor_profiles` before opting in. Duplicate entries for an automatically
+managed profile and `ensure => absent` conflicts fail compilation. Do not declare
+a competing File resource. Unmanaged site policy and broader path permissions
+are not inferred from config values.
 
-### Enforcing acceptance
+## Complete native-validator inventory
 
-On a disposable Ubuntu 24.04 Litmus target with kernel audit access and
-permission to load AppArmor policy, run the dedicated
-`spec/acceptance/freshclam_apparmor_spec.rb` with
-`CLAMAV_APPARMOR_ACCEPTANCE=1` in the test runner environment. The test installs
-packages and replaces the target's Freshclam local fragment/configuration;
-never select a production target. It asserts enforcement and the original
-negative reproduction, then exercises a real Puppet content change, manual
-candidate reads, invalid configuration rejection, unchanged package profile,
-stale-policy recovery, and second-run convergence. Missing enforcement is a
-failure when opted in. The normal Docker matrix skips this test and does not
-provide enforcing-mode evidence.
+All four native validators remain enabled when the component is managed and
+`validate_configs` is true, on supported module platforms. Direct
+`clamav::clamonacc` declarations use its `validate_config` switch. The default
+commands below are all overridable.
+
+| Resource | Config path parameter / Ubuntu path | Default command | Ubuntu package policy and action |
+| --- | --- | --- | --- |
+| `File[clamd.conf]` | `clamd_config` / `/etc/clamav/clamd.conf` | `/usr/bin/env clamd --config-file % --version` | Confined; candidate denial confirmed; manage local rule |
+| `File[freshclam.conf]` | `freshclam_config` / `/etc/clamav/freshclam.conf` | `/usr/bin/env freshclam --config-file % --version` | Confined; candidate denial confirmed; manage local rule |
+| `File[clamav-milter.conf]` | `clamav_milter_config` / caller-supplied Ubuntu integration | `/usr/bin/env clamav-milter --config-file % --version` | No matching package profile; no speculative rule |
+| `File[clamonacc.conf]` | `clamonacc_config` / `/etc/clamav/clamonacc.conf` | `/usr/bin/env clamonacc --config-file % --help` | No matching package profile; no speculative rule |
+
+Inspected [Ubuntu Noble ClamAV packaging source](https://archive.ubuntu.com/ubuntu/pool/main/c/clamav/clamav_1.5.3+dfsg-0ubuntu0.24.04.1.debian.tar.xz),
+version `1.5.3+dfsg-0ubuntu0.24.04.1`, SHA256
+`e8b9c27371ad564b1a707c6a35d70be6c3944d8eadb0633e2e9c5757fdddc85d`.
+`debian/rules`, the package install manifests, `debian/usr.bin.freshclam`, and
+`debian/usr.sbin.clamd` establish both exact-path allowances and local includes.
+The same source installs `/usr/sbin/clamonacc` and `/usr/sbin/clamav-milter`
+without profiles for either binary. The Noble
+[apparmor-profiles](https://packages.ubuntu.com/noble/all/apparmor-profiles/filelist)
+and [apparmor-profiles-extra](https://packages.ubuntu.com/noble/all/apparmor-profiles-extra/filelist)
+inventories likewise supply neither attachment. These findings describe package
+policy, not arbitrary site-installed policy or confinement inherited from another
+program. Inspect loaded policy when using custom deployments.
+
+## Enforcing acceptance
+
+On a disposable Ubuntu 24.04 Litmus target with policy administration and kernel
+journal access, run `spec/acceptance/apparmor_validation_spec.rb` with
+`CLAMAV_APPARMOR_ACCEPTANCE=1` in the runner environment. This destructive test
+installs packages and replaces both local fragments and configurations; never
+select a production target. It verifies both original denials, then real Puppet
+content changes, candidate reads, invalid-config rejection, active services,
+unchanged package profiles, obsolete helper removal, stale-policy recovery, and
+second-run convergence. Opted-in runs fail if profiles are not enforced.
+
+The standard Docker acceptance matrix does not enable this test. Catalog and
+helper subprocess tests do not establish kernel enforcement. Report those
+results separately from an opted-in enforcing run or a production canary.

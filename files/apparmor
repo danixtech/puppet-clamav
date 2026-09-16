@@ -1,0 +1,57 @@
+#!/bin/sh
+# Internal Ubuntu package-profile loader and read probe. Never installs config.
+set -eu
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+[ "$#" -eq 3 ] || exit 2
+operation=$1
+validator=$2
+config=$3
+case "$operation" in check|reload) ;; *) exit 2 ;; esac
+# Fixed, reviewed package mappings, not arbitrary commands or profile paths.
+case "$validator" in
+    freshclam) binary=/usr/bin/freshclam; profile_name=usr.bin.freshclam ;;
+    clamd) binary=/usr/sbin/clamd; profile_name=usr.sbin.clamd ;;
+    *) exit 2 ;;
+esac
+profile=/etc/apparmor.d/$profile_name
+pending=/etc/apparmor.d/local/.clamav-$validator-reload-pending
+loaded_profiles=/sys/kernel/security/apparmor/profiles
+umask 077
+if [ "$operation" = reload ]; then
+    # A retry flag, never proof that kernel policy is current. Keep Freshclam's
+    # original flag path so a failed pre-upgrade reload is not forgotten.
+    : > "$pending"
+elif [ -e "$pending" ]; then
+    exit 1
+fi
+
+# Fail clearly for a package layout that cannot consume our local fragment.
+include_pattern=$(printf '%s' "$profile_name" | sed 's/\./[.]/g')
+if ! grep -Eq "^[[:space:]]*#?include[[:space:]]+(if[[:space:]]+exists[[:space:]]+)?<local/$include_pattern>" "$profile"; then
+    echo "$validator AppArmor profile must include <local/$profile_name>" >&2
+    exit 1
+fi
+if [ "$operation" = reload ]; then
+    /usr/sbin/apparmor_parser --replace --skip-read-cache --write-cache "$profile"
+fi
+
+# An unloaded profile allows the probe unconfined; that is not readiness.
+# Preserve the host's mode. Enforcing acceptance asserts enforce separately.
+if ! grep -Fxq "$binary (enforce)" "$loaded_profiles" &&
+   ! grep -Fxq "$binary (complain)" "$loaded_profiles"; then
+    echo "$validator AppArmor profile is not loaded (or kernel policy is unreadable)" >&2
+    exit 1
+fi
+
+# This fixed valid option is understood by both validators; --version parses
+# without starting a daemon. Never read/copy the live config or use /tmp.
+candidate=$(mktemp "${config}XXXXXX")
+trap 'rm -f -- "$candidate"' EXIT
+trap 'exit 1' HUP INT TERM
+printf '%s\n' 'LogSyslog false' > "$candidate"
+chmod 0644 "$candidate"
+"$binary" --config-file "$candidate" --version >/dev/null 2>&1
+if [ "$operation" = reload ]; then
+    rm -f -- "$pending"
+fi

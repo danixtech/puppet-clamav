@@ -129,15 +129,18 @@ class clamav (
   }
 
   if $manage_apparmor {
-    $_apparmor_freshclam_config = if $manage_freshclam and $validate_configs and
+    $_apparmor_validation_configs = if $validate_configs and
     $facts['os']['name'] == 'Ubuntu' and $facts['os']['release']['major'] == '24.04' {
-      $freshclam_config
+      {
+        'freshclam' => $manage_freshclam ? { true => $freshclam_config, default => undef },
+        'clamd'     => $manage_clamd ? { true => $clamd_config, default => undef },
+      }.filter |$validator, $config| { $config != undef }
     } else {
-      undef
+      {}
     }
     class { 'clamav::apparmor':
-      profiles         => $apparmor_profiles,
-      freshclam_config => $_apparmor_freshclam_config,
+      profiles           => $apparmor_profiles,
+      validation_configs => $_apparmor_validation_configs,
     }
   }
 
