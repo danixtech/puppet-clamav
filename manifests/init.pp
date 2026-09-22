@@ -130,7 +130,7 @@ class clamav (
 
   if $manage_apparmor {
     $_apparmor_validation_configs = if $validate_configs and
-    $facts['os']['name'] == 'Ubuntu' and $facts['os']['release']['major'] in ['24.04', '22.04'] {
+    $facts['os']['name'] == 'Ubuntu' and $facts['os']['release']['major'] in ['24.04', '22.04', '20.04'] {
       {
         'freshclam' => $manage_freshclam ? { true => $freshclam_config, default => undef },
         'clamd'     => $manage_clamd ? { true => $clamd_config, default => undef },
